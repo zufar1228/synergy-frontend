@@ -1,0 +1,171 @@
+// frontend/components/mobile-navigation.tsx
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  ChevronRight,
+  LayoutDashboard,
+  Settings,
+  Users,
+  Building,
+  HardDrive,
+  AreaChart,
+  AlertTriangle,
+} from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { useWarehouse } from "@/contexts/WarehouseContext";
+import { createClient } from "@/lib/supabase/client";
+import { getNavAreasBySystem, NavArea } from "@/lib/api";
+import { toast } from "sonner";
+
+// Define navigation data
+const mainLinks = [
+  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Profil", href: "/profile", icon: Settings },
+];
+
+const managementLinks = [
+  { title: "Gudang", href: "/management/warehouses", icon: Building },
+  { title: "Area", href: "/management/areas", icon: AreaChart },
+  { title: "Perangkat", href: "/management/devices", icon: HardDrive },
+  { title: "Pengguna", href: "/management/users", icon: Users },
+];
+
+export function MobileNavigation({
+  userRole,
+  onLinkClick,
+}: {
+  userRole: string;
+  onLinkClick?: () => void;
+}) {
+  const pathname = usePathname();
+  const { selectedWarehouse } = useWarehouse();
+  const [incidentAreas, setIncidentAreas] = useState<NavArea[]>([]);
+
+  useEffect(() => {
+    const fetchIncidentAreas = async () => {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) return;
+      try {
+        const data = await getNavAreasBySystem(
+          "gangguan",
+          session.access_token
+        );
+        setIncidentAreas(data);
+      } catch (error) {
+        toast.error("Gagal memuat navigasi insiden.");
+      }
+    };
+    fetchIncidentAreas();
+  }, []);
+
+  // Filter areas based on selected warehouse
+  const filteredIncidentAreas = incidentAreas.filter(
+    (area) =>
+      selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+  );
+
+  // Helper function to determine if a link is active
+  const isActive = (href: string) => {
+    if (href === "/dashboard" || href === "/profile") {
+      return pathname === href;
+    }
+    // For management pages, check if path starts with href and is followed by / or end of string
+    // This prevents false positives like /management matching /management-other
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
+  // Helper function to determine if Gangguan menu should be active
+  const isGangguanActive = () => {
+    return filteredIncidentAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/gangguan`
+    );
+  };
+
+  return (
+    <nav className="flex flex-col space-y-1 px-2">
+      {/* Platform Links */}
+      {mainLinks.map((link) => (
+        <Link
+          key={link.title}
+          href={link.href}
+          onClick={onLinkClick}
+          className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+            isActive(link.href)
+              ? "bg-main text-main-foreground"
+              : "hover:bg-accent hover:text-accent-foreground"
+          }`}
+        >
+          <link.icon className="h-5 w-5 flex-shrink-0" />
+          <span>{link.title}</span>
+        </Link>
+      ))}
+
+      {/* Collapsible Incident Menu */}
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <div
+            className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
+              isGangguanActive()
+                ? "bg-main text-main-foreground"
+                : "hover:bg-accent hover:text-accent-foreground"
+            }`}
+          >
+            <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+            <span className="flex-1">Gangguan</span>
+            <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pl-5 pt-1 space-y-1">
+          {filteredIncidentAreas.map((area) => (
+            <Link
+              key={area.id}
+              href={`/${area.warehouse_id}/${area.id}/gangguan`}
+              onClick={onLinkClick}
+              className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                pathname === `/${area.warehouse_id}/${area.id}/gangguan`
+                  ? "bg-main text-main-foreground"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              <span>{area.name}</span>
+            </Link>
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Management Links */}
+      {["admin", "super_admin"].includes(userRole) && (
+        <>
+          <div className="text-sm font-semibold text-muted-foreground mt-4 px-2">
+            Management
+          </div>
+          {managementLinks.map((link) => (
+            <Link
+              key={link.title}
+              href={link.href}
+              onClick={onLinkClick}
+              className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                isActive(link.href)
+                  ? "bg-main text-main-foreground"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              <link.icon className="h-5 w-5 flex-shrink-0" />
+              <span>{link.title}</span>
+            </Link>
+          ))}
+        </>
+      )}
+    </nav>
+  );
+}

@@ -1,0 +1,272 @@
+// frontend/components/app-navigation.tsx
+"use client";
+
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  ChevronRight,
+  LayoutDashboard,
+  Settings,
+  Users,
+  Building,
+  HardDrive,
+  AreaChart,
+  AlertTriangle,
+} from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar";
+import { useWarehouse } from "@/contexts/WarehouseContext";
+import { createClient } from "@/lib/supabase/client";
+import { getNavAreasBySystem, NavArea } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Define navigation data
+const mainLinks = [
+  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Profil", href: "/profile", icon: Settings },
+];
+
+const managementLinks = [
+  { title: "Gudang", href: "/management/warehouses", icon: Building },
+  { title: "Area", href: "/management/areas", icon: AreaChart },
+  { title: "Perangkat", href: "/management/devices", icon: HardDrive },
+  { title: "Pengguna", href: "/management/users", icon: Users },
+];
+
+const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
+  const pathname = usePathname();
+  const { selectedWarehouse } = useWarehouse();
+  const [incidentAreas, setIncidentAreas] = useState<NavArea[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchIncidentAreas = async () => {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const data = await getNavAreasBySystem(
+          "gangguan",
+          session.access_token
+        );
+        setIncidentAreas(data);
+      } catch (error) {
+        console.error("Failed to load incident areas:", error);
+        // Don't show toast on every render, just log the error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchIncidentAreas();
+  }, []); // Only fetch once on mount
+
+  // Memoize filtered incident areas to avoid recalculation on every render
+  const filteredIncidentAreas = useMemo(() => {
+    return incidentAreas.filter(
+      (area) =>
+        selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+    );
+  }, [incidentAreas, selectedWarehouse]);
+
+  // Memoize the isActive function to avoid recreation on every render
+  const isActive = useCallback(
+    (href: string) => {
+      if (href === "/dashboard" || href === "/profile") {
+        return pathname === href;
+      }
+      return pathname === href || pathname.startsWith(href + "/");
+    },
+    [pathname]
+  );
+
+  // Memoize management links filtering
+  const filteredManagementLinks = useMemo(() => {
+    return managementLinks.filter((link) => {
+      if (link.href === "/management/users") {
+        return userRole === "super_admin";
+      }
+      return true;
+    });
+  }, [userRole]);
+
+  const showManagement = ["admin", "super_admin"].includes(userRole);
+
+  return (
+    <>
+      <SidebarGroup className="mb-3">
+        <SidebarGroupLabel>Platform</SidebarGroupLabel>
+        <SidebarMenu>
+          {mainLinks.map((link) => (
+            <SidebarMenuItem key={link.title}>
+              <SidebarMenuButton asChild isActive={isActive(link.href)}>
+                <Link href={link.href}>
+                  <link.icon />
+                  <span>{link.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroup>
+
+      {/* Collapsible Incident Menu */}
+      <SidebarGroup className="mb-3">
+        <SidebarGroupLabel>Monitoring</SidebarGroupLabel>
+        <SidebarMenu>
+          <Collapsible asChild>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton suppressHydrationWarning>
+                  <AlertTriangle />
+                  <span>Gangguan</span>
+                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent suppressHydrationWarning>
+                <SidebarMenuSub>
+                  {isLoading
+                    ? // Show skeleton while loading
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <SidebarMenuSubItem key={i}>
+                          <SidebarMenuSubButton>
+                            <Skeleton className="h-4 w-24" />
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))
+                    : filteredIncidentAreas.map((area) => (
+                        <SidebarMenuSubItem key={area.id}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={
+                              pathname ===
+                              `/${area.warehouse_id}/${area.id}/gangguan`
+                            }
+                          >
+                            <Link
+                              href={`/${area.warehouse_id}/${area.id}/gangguan`}
+                            >
+                              <span>{area.name}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+        </SidebarMenu>
+      </SidebarGroup>
+
+      {showManagement && (
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel>Management</SidebarGroupLabel>
+          <SidebarMenu>
+            {filteredManagementLinks.map((link) => (
+              <SidebarMenuItem key={link.title}>
+                <SidebarMenuButton asChild isActive={isActive(link.href)}>
+                  <Link href={link.href}>
+                    <link.icon />
+                    <span>{link.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+      )}
+    </>
+  );
+};
+
+AppNavigationComponent.displayName = "AppNavigation";
+
+export const AppNavigation = React.memo(AppNavigationComponent);
+
+export function AppNavigationSkeleton({ userRole }: { userRole: string }) {
+  return (
+    <>
+      {/* Platform Section */}
+      <SidebarGroup className="mb-3">
+        <SidebarGroupLabel>
+          <Skeleton className="h-4 w-16" />
+        </SidebarGroupLabel>
+        <SidebarMenu>
+          {Array.from({ length: 2 }).map((_, i) => (
+            <SidebarMenuItem key={i}>
+              <SidebarMenuButton>
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-4 w-20" />
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroup>
+
+      {/* Monitoring Section */}
+      <SidebarGroup className="mb-3">
+        <SidebarGroupLabel>
+          <Skeleton className="h-4 w-20" />
+        </SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton>
+              <Skeleton className="h-4 w-4 rounded" />
+              <Skeleton className="h-4 w-16" />
+              <ChevronRight className="ml-auto h-4 w-4" />
+            </SidebarMenuButton>
+            <SidebarMenuSub>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SidebarMenuSubItem key={i}>
+                  <SidebarMenuSubButton>
+                    <Skeleton className="h-4 w-24" />
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              ))}
+            </SidebarMenuSub>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+
+      {/* Management Section - only for admin/super_admin */}
+      {["admin", "super_admin"].includes(userRole) && (
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel>
+            <Skeleton className="h-4 w-24" />
+          </SidebarGroupLabel>
+          <SidebarMenu>
+            {Array.from({ length: userRole === "super_admin" ? 4 : 3 }).map(
+              (_, i) => (
+                <SidebarMenuItem key={i}>
+                  <SidebarMenuButton>
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <Skeleton className="h-4 w-20" />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            )}
+          </SidebarMenu>
+        </SidebarGroup>
+      )}
+    </>
+  );
+}
