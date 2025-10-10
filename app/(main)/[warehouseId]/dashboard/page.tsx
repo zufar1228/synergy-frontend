@@ -29,7 +29,8 @@ async function getWarehouseDetails(
 ): Promise<WarehouseDetails | null> {
   try {
     const res = await fetch(
-      `http://localhost:5001/api/warehouses/${id}/areas-with-systems`,
+      process.env.NEXT_PUBLIC_API_URL +
+        `/api/warehouses/${id}/areas-with-systems`,
       {
         cache: "no-store",
         headers: {

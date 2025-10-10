@@ -36,12 +36,20 @@ export default function SetupAccountPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const supabase = createClient();
+  // Initialize Supabase client only on client side
+  const [supabase, setSupabase] = useState<any>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { password: "" },
   });
+
+  useEffect(() => {
+    // Initialize Supabase client only after component mounts
+    if (typeof window !== "undefined") {
+      setSupabase(createClient());
+    }
+  }, []);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -57,6 +65,11 @@ export default function SetupAccountPage() {
   }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!supabase) {
+      toast.error("Supabase client not initialized. Please refresh the page.");
+      return;
+    }
+
     // === PERBAIKAN UTAMA DI SINI ===
     // Ambil token dari URL hash secara manual
     const params = new URLSearchParams(window.location.hash.substring(1));

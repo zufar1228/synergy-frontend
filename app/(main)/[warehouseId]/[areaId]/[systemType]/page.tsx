@@ -14,7 +14,9 @@ async function getAnalytics(
 ) {
   try {
     // --- PERBAIKAN 2: Tambahkan parameter per_page ke URL fetch ---
-    const url = `http://localhost:5001/api/analytics/${systemType}?area_id=${areaId}&page=${page}&per_page=${perPage}`;
+    const url =
+      process.env.NEXT_PUBLIC_API_URL +
+      `/api/analytics/${systemType}?area_id=${areaId}&page=${page}&per_page=${perPage}`;
     const res = await fetch(url, {
       cache: "no-store",
       headers: { Authorization: `Bearer ${accessToken}` },
