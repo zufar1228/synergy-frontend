@@ -12,7 +12,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { enUS } from "date-fns/locale";
 // --- 1. IMPORT IKON BARU ---
 import {
   ChevronLeft,
@@ -45,13 +44,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Badge } from "@/components/ui/badge"; // <-- Import Badge
+import { ReviewIncidentAction } from "./IncidentActions"; // <-- Import komponen aksi baru
+
+// Komponen terpisah untuk kolom aksi
+const ActionsCell = ({ incident }: { incident: Incident }) => {
+  const router = useRouter();
+  return (
+    <ReviewIncidentAction
+      incident={incident}
+      onSuccess={() => router.refresh()}
+    />
+  );
+};
 
 // ... (Interface dan ColumnDef tidak berubah)
 interface Incident {
   id: string;
-  created_at: string;
+  area_id: string;
+  device_id: string;
   incident_type: string;
-  confidence: number | null;
+  system_type: string;
+  status: "unacknowledged" | "acknowledged" | "resolved" | "false_alarm";
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
   device: { name: string };
 }
 interface PaginationInfo {
@@ -60,7 +77,33 @@ interface PaginationInfo {
   per_page: number;
   total_pages: number;
 }
+// Perbarui definisi kolom
 export const columns: ColumnDef<Incident>[] = [
+  // Kolom "Status" BARU
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      const getBadgeClass = (status: string) => {
+        switch (status) {
+          case "resolved":
+            return "bg-green-600 text-white";
+          case "acknowledged":
+            return "bg-blue-600 text-white";
+          case "false_alarm":
+            return "bg-gray-600 text-white";
+          default:
+            return "bg-red-600 text-white";
+        }
+      };
+      return (
+        <Badge className={getBadgeClass(status)}>
+          {status.replace("_", " ")}
+        </Badge>
+      );
+    },
+  },
   { accessorKey: "incident_type", header: "Tipe Insiden" },
   {
     accessorKey: "device.name",
@@ -68,20 +111,17 @@ export const columns: ColumnDef<Incident>[] = [
     cell: ({ row }) => <span>{row.original.device?.name || "N/A"}</span>,
   },
   {
-    accessorKey: "confidence",
-    header: "Keyakinan",
-    cell: ({ row }) =>
-      row.original.confidence
-        ? `${(row.original.confidence * 100).toFixed(1)}%`
-        : "N/A",
-  },
-  {
     accessorKey: "created_at",
     header: "Waktu",
     cell: ({ row }) =>
-      format(new Date(row.original.created_at), "dd MMM yyyy, HH:mm:ss", {
-        locale: enUS,
-      }),
+      row.original.created_at
+        ? format(new Date(row.original.created_at), "dd MMM yyyy, HH:mm:ss")
+        : "N/A",
+  },
+  // Kolom "Aksi" BARU
+  {
+    id: "actions",
+    cell: ({ row }) => <ActionsCell incident={row.original} />,
   },
 ];
 

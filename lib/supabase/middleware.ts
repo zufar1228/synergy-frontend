@@ -9,10 +9,10 @@ export async function updateSession(request: NextRequest) {
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error('Missing Supabase environment variables in middleware');
+    console.error("Missing Supabase environment variables in middleware");
     // If environment variables are missing, redirect to login for all routes
     const requestedPath = request.nextUrl.pathname;
-    if (requestedPath !== '/login') {
+    if (requestedPath !== "/login") {
       return NextResponse.redirect(new URL("/login", request.url));
     }
     return NextResponse.next();
@@ -25,27 +25,26 @@ export async function updateSession(request: NextRequest) {
   });
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({ name, value, ...options });
-          response = NextResponse.next({
-            request: { headers: request.headers },
-          });
-          response.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({ name, value: "", ...options });
-          response = NextResponse.next({
-            request: { headers: request.headers },
-          });
-          response.cookies.set({ name, value: "", ...options });
-        },
+    cookies: {
+      get(name: string) {
+        return request.cookies.get(name)?.value;
       },
-    }
-  );
+      set(name: string, value: string, options: CookieOptions) {
+        request.cookies.set({ name, value, ...options });
+        response = NextResponse.next({
+          request: { headers: request.headers },
+        });
+        response.cookies.set({ name, value, ...options });
+      },
+      remove(name: string, options: CookieOptions) {
+        request.cookies.set({ name, value: "", ...options });
+        response = NextResponse.next({
+          request: { headers: request.headers },
+        });
+        response.cookies.set({ name, value: "", ...options });
+      },
+    },
+  });
 
   // Ambil sesi (yang berisi access_token)
   const {
@@ -71,12 +70,7 @@ export async function updateSession(request: NextRequest) {
       // Decode JWT untuk mendapatkan peran secara pasti
       const jwt = jwtDecode(session.access_token) as { role?: string };
       const userRole = jwt.role || "user";
-      console.log(
-        "[Middleware] Path:",
-        requestedPath,
-        "Role:",
-        userRole
-      );
+      console.log("[Middleware] Path:", requestedPath, "Role:", userRole);
 
       // Jika pengguna mencoba mengakses halaman manajemen tapi bukan admin
       if (

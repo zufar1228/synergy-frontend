@@ -43,11 +43,14 @@ export default async function AnalyticsPage({
   } = await supabase.auth.getSession();
   if (!session) return redirect("/login");
 
-  const { systemType, areaId } = params;
+  // --- PERBAIKAN: Await params sebelum mengakses properties ---
+  const awaitedParams = await params;
+  const { systemType, areaId } = awaitedParams;
 
-  // --- PERBAIKAN 3: Baca 'per_page' dari searchParams ---
-  const page = searchParams.page || "1";
-  const perPage = searchParams.per_page || "25";
+  // --- PERBAIKAN 3: Await searchParams sebelum mengakses properties ---
+  const awaitedSearchParams = await searchParams;
+  const page = awaitedSearchParams.page || "1";
+  const perPage = awaitedSearchParams.per_page || "25";
 
   // --- PERBAIKAN 4: Teruskan 'perPage' saat memanggil fungsi ---
   const data = await getAnalytics(

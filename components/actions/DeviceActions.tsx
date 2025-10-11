@@ -389,7 +389,7 @@ const EditDeviceButton = ({ device }: { device: Device }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="mr-2">
+        <Button variant="neutral" size="sm" className="mr-2">
           Edit
         </Button>
       </DialogTrigger>

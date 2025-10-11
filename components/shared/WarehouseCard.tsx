@@ -8,35 +8,49 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin } from "lucide-react";
+import { Building2, MapPin, Wifi } from "lucide-react"; // <-- Tambahkan ikon
 
-// Definisikan tipe data untuk props
-// Untuk saat ini, overall_status adalah string statis
-// Nanti kita akan membuatnya dinamis berdasarkan data real-time
+// Perbarui props
 interface WarehouseCardProps {
   id: string;
   name: string;
   location: string | null;
   areaCount: number;
   deviceCount: number;
-  overall_status: "Operational" | "Warning" | "Critical";
+  onlineDeviceCount: number;
 }
 
-// Logika untuk warna badge berdasarkan status
-const statusColors: { [key in WarehouseCardProps["overall_status"]]: string } =
-  {
-    Operational: "bg-green-500 hover:bg-green-600 text-white",
-    Warning: "bg-yellow-500 hover:bg-yellow-600 text-black",
-    Critical: "bg-red-500 hover:bg-red-600 text-white",
-  };
+// Tipe untuk status dinamis
+type Status = "Operational" | "Warning" | "Critical" | "Empty";
 
-export const WarehouseCard = ({
+const WarehouseCard = ({
   name,
   location,
   areaCount,
   deviceCount,
-  overall_status,
+  onlineDeviceCount,
 }: WarehouseCardProps) => {
+  let overall_status: Status = "Operational";
+  let statusText = "Semua perangkat online";
+
+  if (deviceCount === 0) {
+    overall_status = "Empty";
+    statusText = "Belum ada perangkat";
+  } else if (onlineDeviceCount < deviceCount) {
+    overall_status = "Warning";
+    statusText = `${deviceCount - onlineDeviceCount} perangkat offline`;
+  }
+
+  const statusConfig: { [key in Status]: { color: string; text: string } } = {
+    Operational: {
+      color: "bg-green-500 hover:bg-green-600",
+      text: "Operational",
+    },
+    Warning: { color: "bg-yellow-500 hover:bg-yellow-600", text: "Warning" },
+    Critical: { color: "bg-red-500 hover:bg-red-600", text: "Critical" },
+    Empty: { color: "bg-gray-400 hover:bg-gray-500", text: "Empty" },
+  };
+
   return (
     <Card className="border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none transition-all h-full flex flex-col">
       <CardHeader>
@@ -53,21 +67,33 @@ export const WarehouseCard = ({
               </CardDescription>
             )}
           </div>
-          <Badge className={statusColors[overall_status]}>
-            {overall_status}
+          <Badge className={statusConfig[overall_status].color}>
+            {statusConfig[overall_status].text}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="flex justify-between text-sm">
-          <div className="text-muted-foreground">Total Area</div>
-          <div className="font-medium">{areaCount}</div>
-        </div>
-        <div className="flex justify-between text-sm mt-2">
-          <div className="text-muted-foreground">Total Perangkat</div>
-          <div className="font-medium">{deviceCount}</div>
+      <CardContent className="flex-grow flex flex-col justify-end">
+        <div className="text-sm text-muted-foreground mb-2">{statusText}</div>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Total Area</span>
+            <span className="font-medium">{areaCount}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Total Perangkat</span>
+            <span className="font-medium">{deviceCount}</span>
+          </div>
+          <div className="flex justify-between text-sm font-semibold">
+            <span>Perangkat Online</span>
+            <div className="flex items-center gap-1">
+              <Wifi className="h-4 w-4 text-green-600" />
+              <span>{onlineDeviceCount}</span>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 };
+
+export default WarehouseCard; // Pastikan ada default export jika belum

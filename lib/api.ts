@@ -567,3 +567,88 @@ export const getIncidentSummaryByType = async (
   if (!res.ok) throw new Error("Gagal mengambil data ringkasan insiden");
   return res.json();
 };
+
+export interface Incident {
+  id: string;
+  area_id: string;
+  device_id: string;
+  incident_type: string;
+  system_type: string;
+  status: "unacknowledged" | "acknowledged" | "resolved" | "false_alarm";
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Tipe BARU untuk payload update status
+export interface UpdateIncidentStatusPayload {
+  status: "unacknowledged" | "acknowledged" | "resolved" | "false_alarm";
+  notes?: string;
+}
+
+// Fungsi BARU
+export const updateIncidentStatus = async (
+  incidentId: string,
+  data: UpdateIncidentStatusPayload,
+  token: string
+): Promise<Incident> => {
+  const res = await fetch(`${API_BASE_URL}/incidents/${incidentId}/status`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Gagal memperbarui status insiden");
+  return res.json();
+};
+
+// Tipe BARU untuk data chart tren
+export interface IncidentTrendPoint {
+  date: string;
+  total: number;
+}
+
+// Fungsi BARU
+export const getIncidentTrendByWarehouse = async (
+  token: string,
+  filters: { warehouse_id: string; from?: string; to?: string }
+): Promise<IncidentTrendPoint[]> => {
+  const query = new URLSearchParams();
+  query.append("warehouse_id", filters.warehouse_id);
+  if (filters.from) query.append("from", filters.from);
+  if (filters.to) query.append("to", filters.to);
+
+  const res = await fetch(
+    `${API_BASE_URL}/analytics/gangguan/trend-by-warehouse?${query.toString()}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) throw new Error("Gagal mengambil data tren insiden");
+  return res.json();
+};
+
+// Tipe BARU untuk data peringatan aktif
+export interface ActiveAlert {
+  area_id: string;
+  system_type: string;
+}
+
+// Fungsi BARU
+export const getActiveAlerts = async (
+  warehouseId: string,
+  token: string
+): Promise<ActiveAlert[]> => {
+  const res = await fetch(
+    `${API_BASE_URL}/alerts/active?warehouse_id=${warehouseId}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) throw new Error("Gagal mengambil data peringatan aktif");
+  return res.json();
+};

@@ -187,7 +187,7 @@ const EditWarehouseButton = ({ warehouse }: { warehouse: Warehouse }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="mr-2">
+        <Button variant="neutral" size="sm" className="mr-2">
           Edit
         </Button>
       </DialogTrigger>
