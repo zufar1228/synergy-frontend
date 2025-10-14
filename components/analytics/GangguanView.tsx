@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { IncidentTypeChart } from "./IncidentTypeChart";
 import { IncidentDataTable } from "./IncidentDataTable";
+import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- 1. IMPORT
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 
@@ -106,6 +107,11 @@ export const GangguanView = ({
 
   return (
     <div className="space-y-8">
+      {/* 2. ADD DATE RANGE PICKER HERE */}
+      <div className="flex justify-end">
+        <DateRangePicker />
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>

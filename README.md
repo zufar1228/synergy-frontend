@@ -34,3 +34,18 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Progressive Web App
+
+This project ships with basic Progressive Web App (PWA) support so it can be installed on desktop or mobile browsers:
+
+- Web App Manifest served from `/manifest.webmanifest` with start URL `/dashboard`
+- Client-side service worker registered from `public/sw.js` for simple offline caching
+- Works over HTTPS (required for service workers); local development can use `pnpm dev --experimental-https`
+
+### Testing the PWA
+
+1. Run `pnpm run build && pnpm start` or `pnpm dev --experimental-https`
+2. Open the app in Chrome/Edge/Safari
+3. Use the browser's install prompt (or Add to Home Screen) to install the app
+4. Launch the installed app to verify it opens directly to `/dashboard`

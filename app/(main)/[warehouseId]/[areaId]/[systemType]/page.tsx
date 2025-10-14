@@ -4,19 +4,29 @@ import { redirect } from "next/navigation";
 import { LingkunganView } from "@/components/analytics/LingkunganView";
 import { GangguanView } from "@/components/analytics/GangguanView";
 
-// --- PERBAIKAN 1: Update definisi fungsi untuk menerima 'perPage' ---
+// Update getAnalytics function definition
 async function getAnalytics(
   accessToken: string,
-  systemType: string,
-  areaId: string,
-  page: string = "1",
-  perPage: string = "25" // Tambahkan parameter perPage
+  params: {
+    systemType: string;
+    areaId: string;
+    page?: string;
+    perPage?: string;
+    from?: string;
+    to?: string;
+  }
 ) {
   try {
-    // --- PERBAIKAN 2: Tambahkan parameter per_page ke URL fetch ---
+    const query = new URLSearchParams();
+    query.append("area_id", params.areaId);
+    if (params.page) query.append("page", params.page);
+    if (params.perPage) query.append("per_page", params.perPage);
+    if (params.from) query.append("from", params.from);
+    if (params.to) query.append("to", params.to);
+
     const url =
       process.env.NEXT_PUBLIC_API_URL +
-      `/api/analytics/${systemType}?area_id=${areaId}&page=${page}&per_page=${perPage}`;
+      `/api/analytics/${params.systemType}?${query.toString()}`;
     const res = await fetch(url, {
       cache: "no-store",
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -35,7 +45,12 @@ export default async function AnalyticsPage({
   searchParams,
 }: {
   params: { warehouseId: string; areaId: string; systemType: string };
-  searchParams: { page?: string; per_page?: string }; // <-- Tambahkan per_page di sini
+  searchParams: {
+    page?: string;
+    per_page?: string;
+    from?: string;
+    to?: string;
+  }; // <-- Add from/to
 }) {
   const supabase = await createClient();
   const {
@@ -52,14 +67,15 @@ export default async function AnalyticsPage({
   const page = awaitedSearchParams.page || "1";
   const perPage = awaitedSearchParams.per_page || "25";
 
-  // --- PERBAIKAN 4: Teruskan 'perPage' saat memanggil fungsi ---
-  const data = await getAnalytics(
-    session.access_token,
+  // Pass all relevant searchParams to the fetch function
+  const data = await getAnalytics(session.access_token, {
     systemType,
     areaId,
-    page,
-    perPage
-  );
+    page: page,
+    perPage: perPage,
+    from: awaitedSearchParams.from,
+    to: awaitedSearchParams.to,
+  });
 
   if (!data) {
     return <div className="text-center">Gagal memuat data analitik.</div>;

@@ -1,7 +1,8 @@
 // frontend/components/analytics/IncidentTypeChart.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   Card,
@@ -16,18 +17,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { getIncidentSummaryByType, IncidentSummary } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
-import { subDays, formatISO } from "date-fns";
 
 const chartConfig = {
   total: {
@@ -38,8 +31,8 @@ const chartConfig = {
 
 export function IncidentTypeChart({ areaId }: { areaId: string }) {
   const [data, setData] = useState<IncidentSummary[]>([]);
-  const [timeRange, setTimeRange] = useState("7d");
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams(); // <-- Get searchParams
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,26 +43,15 @@ export function IncidentTypeChart({ areaId }: { areaId: string }) {
       } = await supabase.auth.getSession();
       if (!session) return;
 
-      const to = new Date();
-      let from;
-      switch (timeRange) {
-        case "30d":
-          from = subDays(to, 30);
-          break;
-        case "90d":
-          from = subDays(to, 90);
-          break;
-        case "7d":
-        default:
-          from = subDays(to, 7);
-          break;
-      }
+      // Get 'from' and 'to' from URL
+      const from = searchParams.get("from");
+      const to = searchParams.get("to");
 
       try {
         const result = await getIncidentSummaryByType(session.access_token, {
           area_id: areaId,
-          from: from.toISOString(),
-          to: to.toISOString(),
+          from: from || undefined, // Send undefined if null
+          to: to || undefined,
         });
         setData(result);
       } catch (error) {
@@ -79,27 +61,15 @@ export function IncidentTypeChart({ areaId }: { areaId: string }) {
       }
     };
     fetchData();
-  }, [timeRange, areaId]);
+  }, [searchParams, areaId]); // <-- Re-run effect if searchParams changes
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Distribusi Tipe Insiden</CardTitle>
-          <CardDescription>
-            Berdasarkan tipe yang paling sering terjadi
-          </CardDescription>
-        </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7d">7 Hari Terakhir</SelectItem>
-            <SelectItem value="30d">30 Hari Terakhir</SelectItem>
-            <SelectItem value="90d">90 Hari Terakhir</SelectItem>
-          </SelectContent>
-        </Select>
+      <CardHeader>
+        <CardTitle>Incident Type Distribution</CardTitle>
+        <CardDescription>
+          Based on most frequently occurring type
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {loading ? (
