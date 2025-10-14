@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { getMyProfile, Profile } from "@/lib/api";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/site-header";
+import { redirect } from "next/navigation";
 export default async function MainAppLayout({
   children,
 }: {
@@ -71,11 +72,19 @@ export default async function MainAppLayout({
       }
     } catch (error) {
       console.error("Gagal mengambil profil pengguna:", error);
+      const status =
+        typeof error === "object" && error && "status" in error
+          ? (error as { status?: number }).status
+          : undefined;
+      if (status === 401 || status === 403) {
+        await supabase.auth.signOut();
+        redirect("/login");
+      }
     }
   }
 
   const userData = {
-    username: userProfile.username || "User",
+    username: userProfile.username || userEmail,
     email: userEmail,
     avatar: userAvatar,
   };

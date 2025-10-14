@@ -371,7 +371,14 @@ export const getMyProfile = async (token: string): Promise<Profile> => {
   const res = await fetch(`${API_BASE_URL}/users/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!res.ok) throw new Error("Gagal mengambil data profil");
+  if (!res.ok) {
+    const errorBody = await res
+      .json()
+      .catch(() => ({ message: "Gagal mengambil data profil" }));
+    const apiError = new Error(errorBody.message);
+    (apiError as Error & { status?: number }).status = res.status;
+    throw apiError;
+  }
   return res.json();
 };
 
