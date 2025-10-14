@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useWarehouse } from "@/contexts/WarehouseContext";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import {
   getWarehouses,
   getWarehouseDetails,
@@ -84,6 +85,7 @@ export default function DashboardPage() {
   const [data, setData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const router = useRouter();
 
   // Fungsi fetch data sekarang bisa dipanggil ulang
   const fetchData = React.useCallback(async () => {
@@ -114,6 +116,24 @@ export default function DashboardPage() {
     } catch (error: any) {
       console.error("Dashboard fetch error:", error);
 
+      const status =
+        typeof error?.status === "number"
+          ? (error.status as number)
+          : undefined;
+
+      if (status === 401 || status === 403) {
+        try {
+          const { error: signOutError } = await supabase.auth.signOut();
+          if (signOutError) {
+            console.warn("Supabase signOut error:", signOutError.message);
+          }
+        } catch (signOutException) {
+          console.warn("Supabase signOut threw:", signOutException);
+        }
+        router.replace("/login");
+        return;
+      }
+
       // Handle different error types
       let errorMessage = "Gagal memuat data dashboard.";
 
@@ -142,7 +162,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedWarehouse]);
+  }, [router, selectedWarehouse]);
 
   // Efek untuk fetch data awal
   React.useEffect(() => {

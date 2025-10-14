@@ -15,6 +15,21 @@ export default async function MainAppLayout({
 }) {
   const supabase = await createClient();
 
+  const signOutAndRedirect = async () => {
+    try {
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        console.warn(
+          "Supabase signOut error:",
+          signOutError.message ?? signOutError
+        );
+      }
+    } catch (signOutException) {
+      console.warn("Supabase signOut threw:", signOutException);
+    }
+    redirect("/login");
+  };
+
   const [
     {
       data: { user },
@@ -23,6 +38,10 @@ export default async function MainAppLayout({
       data: { session },
     },
   ] = await Promise.all([supabase.auth.getUser(), supabase.auth.getSession()]);
+
+  if (!user || !session) {
+    await signOutAndRedirect();
+  }
 
   let userRole = "user";
   let userEmail = "";
@@ -76,10 +95,10 @@ export default async function MainAppLayout({
         typeof error === "object" && error && "status" in error
           ? (error as { status?: number }).status
           : undefined;
-      if (status === 401 || status === 403) {
-        await supabase.auth.signOut();
-        redirect("/login");
+      if (status && status >= 500) {
+        console.warn("Profile API returned server error status:", status);
       }
+      await signOutAndRedirect();
     }
   }
 

@@ -50,6 +50,24 @@ export interface CreateDeviceResponse {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL + "/api";
 
+type ApiError = Error & { status?: number };
+
+const buildApiError = async (
+  res: Response,
+  fallbackMessage: string
+): Promise<ApiError> => {
+  const errorBody = await res
+    .json()
+    .catch(() => ({ message: fallbackMessage }));
+  const message =
+    typeof errorBody?.message === "string" && errorBody.message.trim() !== ""
+      ? errorBody.message
+      : fallbackMessage;
+  const apiError = new Error(message) as ApiError;
+  apiError.status = res.status;
+  return apiError;
+};
+
 // --- WAREHOUSE API FUNCTIONS ---
 
 export const getWarehouses = async (token: string): Promise<Warehouse[]> => {
@@ -59,11 +77,7 @@ export const getWarehouses = async (token: string): Promise<Warehouse[]> => {
     },
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal mengambil data gudang" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal mengambil data gudang");
   }
   return res.json();
 };
@@ -81,11 +95,7 @@ export const createWarehouse = async (
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal membuat gudang" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal membuat gudang");
   }
   return res.json();
 };
@@ -104,11 +114,7 @@ export const updateWarehouse = async (
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal memperbarui gudang" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal memperbarui gudang");
   }
   return res.json();
 };
@@ -124,11 +130,7 @@ export const deleteWarehouse = async (
     },
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal menghapus gudang" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal menghapus gudang");
   }
 };
 
@@ -141,11 +143,7 @@ export const getAreas = async (token: string): Promise<Area[]> => {
     },
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal mengambil data area" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal mengambil data area");
   }
   return res.json();
 };
@@ -163,11 +161,7 @@ export const createArea = async (
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal membuat area" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal membuat area");
   }
   return res.json();
 };
@@ -186,11 +180,7 @@ export const updateArea = async (
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal memperbarui area" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal memperbarui area");
   }
   return res.json();
 };
@@ -203,11 +193,7 @@ export const deleteArea = async (id: string, token: string): Promise<void> => {
     },
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal menghapus area" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal menghapus area");
   }
 };
 
@@ -220,11 +206,7 @@ export const getDevices = async (token: string): Promise<Device[]> => {
     },
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal mengambil data perangkat" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal mengambil data perangkat");
   }
   return res.json();
 };
@@ -242,8 +224,7 @@ export const createDevice = async (
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.message || "Gagal membuat perangkat");
+    throw await buildApiError(res, "Gagal membuat perangkat");
   }
   return res.json();
 };
@@ -262,11 +243,7 @@ export const updateDevice = async (
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal memperbarui perangkat" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal memperbarui perangkat");
   }
   return res.json();
 };
@@ -282,11 +259,7 @@ export const deleteDevice = async (
     },
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal menghapus perangkat" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal menghapus perangkat");
   }
 };
 
@@ -302,11 +275,7 @@ export const getAreasByWarehouse = async (
     },
   });
   if (!res.ok) {
-    // <-- PERUBAHAN: Penanganan error yang lebih detail
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal mengambil data area" }));
-    throw new Error(errorBody.message);
+    throw await buildApiError(res, "Gagal mengambil data area");
   }
   return res.json();
 };
@@ -328,7 +297,9 @@ export const getUsers = async (token: string): Promise<User[]> => {
   const res = await fetch(`${API_BASE_URL}/users`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!res.ok) throw new Error("Gagal mengambil data pengguna");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengambil data pengguna");
+  }
   return res.json();
 };
 
@@ -345,8 +316,7 @@ export const inviteUser = async (
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.message || "Gagal mengundang pengguna");
+    throw await buildApiError(res, "Gagal mengundang pengguna");
   }
   return res.json();
 };
@@ -356,7 +326,9 @@ export const deleteUser = async (id: string, token: string): Promise<void> => {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!res.ok) throw new Error("Gagal menghapus pengguna");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal menghapus pengguna");
+  }
 };
 
 // Definisikan tipe untuk Profile
@@ -372,12 +344,7 @@ export const getMyProfile = async (token: string): Promise<Profile> => {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) {
-    const errorBody = await res
-      .json()
-      .catch(() => ({ message: "Gagal mengambil data profil" }));
-    const apiError = new Error(errorBody.message);
-    (apiError as Error & { status?: number }).status = res.status;
-    throw apiError;
+    throw await buildApiError(res, "Gagal mengambil data profil");
   }
   return res.json();
 };
@@ -394,7 +361,9 @@ export const updateMyProfile = async (
     },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Gagal memperbarui profil");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal memperbarui profil");
+  }
   return res.json();
 };
 
@@ -411,7 +380,9 @@ export const updateUserRole = async (
     },
     body: JSON.stringify({ role }),
   });
-  if (!res.ok) throw new Error("Gagal mengubah peran pengguna");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengubah peran pengguna");
+  }
   return res.json();
 };
 
@@ -431,10 +402,7 @@ export const updateUserStatus = async (
 
   // === PERBAIKI BLOK INI ===
   if (!res.ok) {
-    // Ambil body error dari respons backend
-    const errorBody = await res.json();
-    // Lemparkan pesan error yang spesifik
-    throw new Error(errorBody.message || "Gagal mengubah status pengguna");
+    throw await buildApiError(res, "Gagal mengubah status pengguna");
   }
   // ==========================
 
@@ -468,7 +436,9 @@ export const getWarehouseDetails = async (
       cache: "no-store",
     }
   );
-  if (!res.ok) throw new Error("Gagal mengambil detail gudang");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengambil detail gudang");
+  }
   return res.json();
 };
 
@@ -490,7 +460,9 @@ export const getNavAreasBySystem = async (
       headers: { Authorization: `Bearer ${token}` },
     }
   );
-  if (!res.ok) throw new Error("Gagal mengambil data navigasi");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengambil data navigasi");
+  }
   return res.json();
 };
 
@@ -571,7 +543,9 @@ export const getIncidentSummaryByType = async (
       cache: "no-store",
     }
   );
-  if (!res.ok) throw new Error("Gagal mengambil data ringkasan insiden");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengambil data ringkasan insiden");
+  }
   return res.json();
 };
 
@@ -607,7 +581,9 @@ export const updateIncidentStatus = async (
     },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Gagal memperbarui status insiden");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal memperbarui status insiden");
+  }
   return res.json();
 };
 
@@ -634,7 +610,9 @@ export const getIncidentTrendByWarehouse = async (
       cache: "no-store",
     }
   );
-  if (!res.ok) throw new Error("Gagal mengambil data tren insiden");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengambil data tren insiden");
+  }
   return res.json();
 };
 
@@ -656,6 +634,8 @@ export const getActiveAlerts = async (
       cache: "no-store",
     }
   );
-  if (!res.ok) throw new Error("Gagal mengambil data peringatan aktif");
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengambil data peringatan aktif");
+  }
   return res.json();
 };
