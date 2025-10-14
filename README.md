@@ -41,6 +41,7 @@ This project ships with basic Progressive Web App (PWA) support so it can be ins
 
 - Web App Manifest served from `/manifest.webmanifest` with start URL `/dashboard`
 - Client-side service worker registered from `public/sw.js` for simple offline caching
+- Offline fallback screen (`public/offline.html`) shown when no connection is available
 - Works over HTTPS (required for service workers); local development can use `pnpm dev --experimental-https`
 
 ### Testing the PWA

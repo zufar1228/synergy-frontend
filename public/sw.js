@@ -1,5 +1,7 @@
-const CACHE_NAME = "warehouse-monitoring-cache-v2";
+const CACHE_NAME = "warehouse-monitoring-cache-v3";
+const OFFLINE_URL = "/offline.html";
 const PRECACHE_URLS = [
+  OFFLINE_URL,
   "/favicon.ico",
   "/window.svg",
   "/file.svg",
@@ -68,6 +70,18 @@ self.addEventListener("fetch", (event) => {
 
   const requestUrl = new URL(event.request.url);
   if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  // Network-first strategy for navigations with offline fallback
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const cachedOffline = await cache.match(OFFLINE_URL);
+        return cachedOffline || Response.error();
+      })
+    );
     return;
   }
 

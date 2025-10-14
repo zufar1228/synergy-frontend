@@ -57,6 +57,12 @@ export async function updateSession(request: NextRequest) {
     "/setup-account",
     "/auth/confirm",
     "/auth/callback",
+    "/manifest.webmanifest",
+    "/sw.js",
+    "/offline.html",
+    "/favicon.ico",
+    "/window.svg",
+    "/file.svg",
   ];
 
   // 1. Jika tidak ada sesi/pengguna dan mencoba mengakses halaman selain login
