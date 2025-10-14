@@ -15,9 +15,9 @@ import { AppNavigation } from "./app-navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface UserData {
-  username: string;
+  username?: string;
   email: string;
-  avatar: string | null;
+  avatar?: string | null;
 }
 
 const AppSidebarComponent = ({

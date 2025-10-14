@@ -8,9 +8,9 @@ import { MobileSidebar } from "./mobile-sidebar";
 import { ThemeToggle } from "./theme-toggle";
 
 interface UserData {
-  username: string;
+  username?: string;
   email: string;
-  avatar: string | null;
+  avatar?: string | null;
 }
 
 export function SiteHeader({

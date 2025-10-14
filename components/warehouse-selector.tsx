@@ -6,7 +6,6 @@ import { ChevronsUpDown, Building2, Globe } from "lucide-react";
 import { useWarehouse } from "@/contexts/WarehouseContext";
 import { getWarehouses, Warehouse } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,8 +26,6 @@ export function WarehouseSelector() {
   const { selectedWarehouse, setSelectedWarehouse } = useWarehouse();
   const { isMobile } = useSidebar();
   const [warehouses, setWarehouses] = React.useState<Warehouse[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const router = useRouter();
 
   React.useEffect(() => {
     const fetchWarehouses = async () => {
@@ -36,39 +33,17 @@ export function WarehouseSelector() {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (!session) {
-        return;
-      }
+      if (!session) return;
 
       try {
         const data = await getWarehouses(session.access_token);
         setWarehouses(data);
-      } catch (error: any) {
-        const status =
-          typeof error?.status === "number"
-            ? (error.status as number)
-            : undefined;
-
-        if (status === 401 || status === 403) {
-          try {
-            const { error: signOutError } = await supabase.auth.signOut();
-            if (signOutError) {
-              console.warn("Supabase signOut error:", signOutError.message);
-            }
-          } catch (signOutException) {
-            console.warn("Supabase signOut threw:", signOutException);
-          }
-          router.replace("/login");
-          return;
-        }
-
+      } catch {
         toast.error("Gagal memuat daftar gudang.");
-      } finally {
-        setIsLoading(false);
       }
     };
     fetchWarehouses();
-  }, [router]);
+  }, []);
 
   const currentWarehouse =
     selectedWarehouse === "all"

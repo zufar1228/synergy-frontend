@@ -50,6 +50,12 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
+
+  // Ambil user untuk verifikasi
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const requestedPath = request.nextUrl.pathname;
 
   const publicPaths = [
@@ -65,13 +71,13 @@ export async function updateSession(request: NextRequest) {
     "/file.svg",
   ];
 
-  // 1. Jika tidak ada sesi/pengguna dan mencoba mengakses halaman selain login
-  if (!session && !publicPaths.some((path) => requestedPath.startsWith(path))) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  // 2. Jika ada sesi, lakukan pengecekan otorisasi
-  if (session) {
+  // 1. Jika tidak ada user atau sesi dan mencoba mengakses halaman selain login
+  if (!user || !session) {
+    if (!publicPaths.some((path) => requestedPath.startsWith(path))) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  } else {
+    // 2. Jika ada user dan sesi, lakukan pengecekan otorisasi
     try {
       // Decode JWT untuk mendapatkan peran secara pasti
       const jwt = jwtDecode(session.access_token) as { role?: string };

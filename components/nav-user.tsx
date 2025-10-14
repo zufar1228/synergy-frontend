@@ -22,9 +22,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+import { UserProfileDisplay } from "@/components/user-profile-display";
+
 interface NavUserProps {
   user: {
-    username: string;
     email: string;
     avatar?: string | null;
   };
@@ -33,7 +34,6 @@ interface NavUserProps {
 export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
   const router = useRouter();
-  const fallback = user.username?.substring(0, 2).toUpperCase() || "U";
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
@@ -98,17 +98,19 @@ export function NavUser({ user }: NavUserProps) {
                 {user.avatar && !imageError && !imageLoading ? (
                   <AvatarImage
                     src={user.avatar}
-                    alt={user.username}
+                    alt="User"
                     onError={() => setImageError(true)}
                     onLoad={() => setImageError(false)}
                   />
                 ) : null}
                 <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
-                  {imageLoading && user.avatar ? "..." : fallback}
+                  {imageLoading && user.avatar ? "..." : "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.username}</span>
+                <span className="truncate font-semibold">
+                  <UserProfileDisplay fallbackName="Loading..." />
+                </span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -126,18 +128,18 @@ export function NavUser({ user }: NavUserProps) {
                   {user.avatar && !imageError && !imageLoading ? (
                     <AvatarImage
                       src={user.avatar}
-                      alt={user.username}
+                      alt="User"
                       onError={() => setImageError(true)}
                       onLoad={() => setImageError(false)}
                     />
                   ) : null}
                   <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
-                    {imageLoading && user.avatar ? "..." : fallback}
+                    {imageLoading && user.avatar ? "..." : "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {user.username}
+                    <UserProfileDisplay fallbackName="Loading..." />
                   </span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>

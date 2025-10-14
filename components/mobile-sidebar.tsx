@@ -16,9 +16,9 @@ import { NavUser } from "./nav-user";
 import { MobileNavigation } from "./mobile-navigation";
 
 interface UserData {
-  username: string;
+  username?: string;
   email: string;
-  avatar: string | null;
+  avatar?: string | null;
 }
 
 export const MobileSidebar = ({

@@ -15,21 +15,6 @@ export default async function MainAppLayout({
 }) {
   const supabase = await createClient();
 
-  const signOutAndRedirect = async () => {
-    try {
-      const { error: signOutError } = await supabase.auth.signOut();
-      if (signOutError) {
-        console.warn(
-          "Supabase signOut error:",
-          signOutError.message ?? signOutError
-        );
-      }
-    } catch (signOutException) {
-      console.warn("Supabase signOut threw:", signOutException);
-    }
-    redirect("/login");
-  };
-
   const [
     {
       data: { user },
@@ -40,72 +25,21 @@ export default async function MainAppLayout({
   ] = await Promise.all([supabase.auth.getUser(), supabase.auth.getSession()]);
 
   if (!user || !session) {
-    await signOutAndRedirect();
+    redirect("/login");
   }
 
   let userRole = "user";
   let userEmail = "";
-  let userProfile: Profile = { id: "", username: "" };
-  let userAvatar: string | null = null;
 
   if (user && session) {
     // Decode JWT for role
     const jwt = jwtDecode(session.access_token) as { role: string };
     userRole = jwt.role || "user";
     userEmail = user.email || "";
-
-    // Establish a meaningful default username from Supabase metadata in case API lookup fails
-    const metadataUsername =
-      (typeof user.user_metadata?.username === "string"
-        ? user.user_metadata?.username
-        : undefined) ||
-      (typeof user.user_metadata?.full_name === "string"
-        ? user.user_metadata?.full_name
-        : undefined) ||
-      user.email?.split("@")[0] ||
-      "User";
-    userProfile = { id: user.id, username: metadataUsername };
-
-    // Get avatar URL - try multiple fields and ensure HTTPS
-    const avatarFromMeta =
-      user.user_metadata?.picture ||
-      user.user_metadata?.avatar_url ||
-      user.user_metadata?.avatar ||
-      null;
-
-    if (avatarFromMeta) {
-      // Ensure the URL uses HTTPS
-      userAvatar = avatarFromMeta.startsWith("http://")
-        ? avatarFromMeta.replace(/^http:/, "https:")
-        : avatarFromMeta;
-    }
-
-    try {
-      const profileFromApi = await getMyProfile(session.access_token);
-      if (profileFromApi && profileFromApi.username) {
-        userProfile = profileFromApi;
-      } else {
-        console.warn(
-          "Profile API returned without username, using metadata fallback."
-        );
-      }
-    } catch (error) {
-      console.error("Gagal mengambil profil pengguna:", error);
-      const status =
-        typeof error === "object" && error && "status" in error
-          ? (error as { status?: number }).status
-          : undefined;
-      if (status && status >= 500) {
-        console.warn("Profile API returned server error status:", status);
-      }
-      await signOutAndRedirect();
-    }
   }
 
   const userData = {
-    username: userProfile.username || userEmail,
     email: userEmail,
-    avatar: userAvatar,
   };
 
   return (
