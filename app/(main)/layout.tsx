@@ -40,6 +40,8 @@ export default async function MainAppLayout({
 
   const userData = {
     email: userEmail,
+    avatar:
+      user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
   };
 
   return (

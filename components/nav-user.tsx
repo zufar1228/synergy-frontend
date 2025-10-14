@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { UserProfileDisplay } from "@/components/user-profile-display";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
 interface NavUserProps {
   user: {
@@ -36,6 +37,21 @@ export function NavUser({ user }: NavUserProps) {
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const { profile } = useUserProfile();
+
+  const getAvatarFallback = () => {
+    // Show loading dots only when avatar is loading
+    if (imageLoading && user.avatar) return "...";
+
+    // Show first letter when avatar failed to load or no avatar exists
+    if (imageError || !user.avatar) {
+      if (profile?.username) return profile.username.charAt(0).toUpperCase();
+      return "U";
+    }
+
+    // Default fallback
+    return "U";
+  };
 
   useEffect(() => {
     // Reset states when avatar changes
@@ -104,7 +120,7 @@ export function NavUser({ user }: NavUserProps) {
                   />
                 ) : null}
                 <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
-                  {imageLoading && user.avatar ? "..." : "U"}
+                  {getAvatarFallback()}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -134,7 +150,7 @@ export function NavUser({ user }: NavUserProps) {
                     />
                   ) : null}
                   <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
-                    {imageLoading && user.avatar ? "..." : "U"}
+                    {getAvatarFallback()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
