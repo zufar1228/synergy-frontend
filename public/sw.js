@@ -1,12 +1,36 @@
-const CACHE_NAME = "warehouse-monitoring-cache-v1";
+const CACHE_NAME = "warehouse-monitoring-cache-v2";
 const PRECACHE_URLS = [
-  "/",
-  "/dashboard",
   "/favicon.ico",
   "/window.svg",
   "/file.svg",
   "/manifest.webmanifest",
 ];
+
+const STATIC_ASSET_EXTENSIONS = [
+  ".js",
+  ".css",
+  ".ico",
+  ".svg",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".webp",
+  ".avif",
+  ".json",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".otf",
+];
+
+const isStaticAsset = (url) => {
+  const { pathname } = new URL(url);
+  return (
+    pathname.startsWith("/_next/") ||
+    STATIC_ASSET_EXTENSIONS.some((ext) => pathname.endsWith(ext))
+  );
+};
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -47,6 +71,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Always go to the network for API, auth, and other dynamic routes
+  if (
+    requestUrl.pathname.startsWith("/api/") ||
+    requestUrl.pathname.startsWith("/auth/") ||
+    requestUrl.pathname.startsWith("/supabase") ||
+    !isStaticAsset(event.request.url)
+  ) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -55,6 +90,10 @@ self.addEventListener("fetch", (event) => {
 
       return fetch(event.request)
         .then((networkResponse) => {
+          if (!networkResponse || !networkResponse.ok) {
+            return networkResponse;
+          }
+
           const clonedResponse = networkResponse.clone();
 
           caches.open(CACHE_NAME).then((cache) => {

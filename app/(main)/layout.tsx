@@ -7,45 +7,25 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { getMyProfile, Profile } from "@/lib/api";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/site-header";
-import { cache } from "react";
-
-// Cache user authentication data to avoid repeated calls
-const getCachedUserData = cache(async () => {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  return { user, session };
-});
-
-// Cache profile data with a shorter TTL for dynamic updates
-const getCachedUserProfile = cache(async (token: string) => {
-  try {
-    const profile = await getMyProfile(token);
-    return profile;
-  } catch (error) {
-    console.error("Gagal mengambil profil pengguna:", error);
-    return { id: "", username: "Unknown" };
-  }
-});
-
 export default async function MainAppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Use cached user data instead of direct calls
-  const { user, session } = await getCachedUserData();
+  const supabase = await createClient();
+
+  const [
+    {
+      data: { user },
+    },
+    {
+      data: { session },
+    },
+  ] = await Promise.all([supabase.auth.getUser(), supabase.auth.getSession()]);
 
   let userRole = "user";
   let userEmail = "";
-  let userProfile: Profile = { id: "", username: "Guest" };
+  let userProfile: Profile = { id: "", username: "" };
   let userAvatar: string | null = null;
 
   if (user && session) {
@@ -53,6 +33,18 @@ export default async function MainAppLayout({
     const jwt = jwtDecode(session.access_token) as { role: string };
     userRole = jwt.role || "user";
     userEmail = user.email || "";
+
+    // Establish a meaningful default username from Supabase metadata in case API lookup fails
+    const metadataUsername =
+      (typeof user.user_metadata?.username === "string"
+        ? user.user_metadata?.username
+        : undefined) ||
+      (typeof user.user_metadata?.full_name === "string"
+        ? user.user_metadata?.full_name
+        : undefined) ||
+      user.email?.split("@")[0] ||
+      "User";
+    userProfile = { id: user.id, username: metadataUsername };
 
     // Get avatar URL - try multiple fields and ensure HTTPS
     const avatarFromMeta =
@@ -68,12 +60,22 @@ export default async function MainAppLayout({
         : avatarFromMeta;
     }
 
-    // Use cached profile data
-    userProfile = await getCachedUserProfile(session.access_token);
+    try {
+      const profileFromApi = await getMyProfile(session.access_token);
+      if (profileFromApi && profileFromApi.username) {
+        userProfile = profileFromApi;
+      } else {
+        console.warn(
+          "Profile API returned without username, using metadata fallback."
+        );
+      }
+    } catch (error) {
+      console.error("Gagal mengambil profil pengguna:", error);
+    }
   }
 
   const userData = {
-    username: userProfile.username,
+    username: userProfile.username || "User",
     email: userEmail,
     avatar: userAvatar,
   };
