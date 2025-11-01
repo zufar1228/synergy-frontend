@@ -100,7 +100,7 @@ export default async function AnalyticsPage({
   };
 
   return (
-    <div>
+    <div className="w-full">
       <h1 className="text-3xl font-bold mb-6 capitalize">
         Analitik Sistem: {systemType.replace("_", " ")}
       </h1>

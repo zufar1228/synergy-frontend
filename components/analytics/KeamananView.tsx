@@ -126,7 +126,7 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pr-2 md:pr-4">
       {/* 2. TAMBAHKAN DATE RANGE PICKER DI SINI */}
       <div className="flex justify-end">
         <DateRangePicker />
@@ -154,7 +154,11 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
           </CardContent>
         </Card>
       </div>
-      <KeamananDataTable data={logs} pagination={pagination} />
+      <KeamananDataTable
+        data={logs}
+        pagination={pagination}
+        onLogUpdate={updateLogLocally}
+      />
     </div>
   );
 };

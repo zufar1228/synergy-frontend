@@ -143,16 +143,16 @@ const ExpandableReviewForm = ({
 
   // Render form secara langsung, tanpa Dialog/DialogTrigger
   return (
-    // Tambahkan padding dan background untuk membedakannya
-    <div className="p-4 sm:p-6 bg-gray-900/50 rounded-md">
-      {/* Kita bisa tetap gunakan komponen DialogHeader/Footer untuk styling yg konsisten */}
-      <DialogHeader>
-        <DialogTitle>Review Deteksi Keamanan</DialogTitle>
-        <DialogDescription>
+    // Tambahkan padding dan background untuk membedakannya, dengan max-width constraint
+    <div className="p-4 sm:p-6 bg-gray-900/50 rounded-md max-w-full overflow-hidden animate-in fade-in-0 slide-in-from-top-2 duration-300">
+      {/* Ganti DialogHeader dengan div biasa */}
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Review Deteksi Keamanan</h3>
+        <p className="text-sm text-muted-foreground">
           Lihat gambar dan perbarui status deteksi ini.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        </p>
+      </div>
+      <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-full">
         <div className="py-2">
           <a href={log.image_url} target="_blank" rel="noopener noreferrer">
             <img
@@ -202,9 +202,10 @@ const ExpandableReviewForm = ({
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            {/* Ganti DialogFooter dengan div biasa */}
+            <div className="flex justify-end">
               <Button type="submit">Simpan</Button>
-            </DialogFooter>
+            </div>
           </form>
         </Form>
       </div>
@@ -226,10 +227,6 @@ const AttributeDetails = ({ data }: { data: any[] | null }) => {
       <DialogTrigger asChild>
         <Button className="px-2 py-0 h-auto text-black flex items-center gap-2">
           <ListTree className="h-4 w-4" />
-          <span>
-            {data.length}{" "}
-            {data.length > 1 ? "Orang Terdeteksi" : "Orang Terdeteksi"}
-          </span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
@@ -291,6 +288,7 @@ export function KeamananDataTable({
     {
       accessorKey: "status",
       header: "Status",
+      size: 100, // Fixed width for status column
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
         const getBadgeClass = (status: string) => {
@@ -315,16 +313,16 @@ export function KeamananDataTable({
     {
       accessorKey: "image_url",
       header: "Gambar",
+      size: 120, // Fixed width for image column
       cell: ({ row }) => {
         const imageUrl = row.getValue("image_url") as string;
-        const deviceName = row.original.device.name;
+        const deviceName = row.original.device?.name || "Unknown Device";
 
         return (
           <Dialog>
             <DialogTrigger asChild>
               <Button className="px-2 py-0 h-auto text-black flex items-center gap-2">
                 <Camera className="h-4 w-4" />
-                <span>Lihat Gambar</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
@@ -354,6 +352,7 @@ export function KeamananDataTable({
     {
       accessorKey: "detected",
       header: "Terdeteksi?",
+      size: 100, // Fixed width for detected column
       cell: ({ row }) => {
         const isDetected = row.getValue("detected");
 
@@ -395,16 +394,19 @@ export function KeamananDataTable({
     {
       accessorKey: "attributes",
       header: "Atribut",
+      size: 150,
       cell: ({ row }) => <AttributeDetails data={row.getValue("attributes")} />,
     },
     {
       accessorKey: "created_at",
       header: "Waktu",
+      size: 120,
       cell: ({ row }) =>
         format(new Date(row.getValue("created_at")), "dd MMM, HH:mm:ss"),
     },
     {
       id: "actions",
+      size: 100,
       // --- 4. Ubah 'cell' untuk tombol 'actions' ---
       cell: ({ row }) => (
         <Button size="sm" onClick={() => row.toggleExpanded()}>
@@ -444,7 +446,7 @@ export function KeamananDataTable({
   };
 
   return (
-    <div className="w-full space-y-4 overflow-x-auto">
+    <div className="w-full space-y-4 pr-2 md:pr-4">
       {/* Toolbar: Filter dan Column Toggle */}
       <div className="flex items-center py-4">
         <Input
@@ -457,14 +459,17 @@ export function KeamananDataTable({
         />
       </div>
 
-      <div className="rounded-md border overflow-x-auto">
-        <Table>
+      <div className="rounded-md overflow-x-auto pr-4 min-w-0">
+        <Table className="min-w-full table-fixed w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="whitespace-nowrap">
+                    <TableHead
+                      key={header.id}
+                      className="min-w-0 sm:whitespace-nowrap"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -485,7 +490,10 @@ export function KeamananDataTable({
                   {/* Baris data asli */}
                   <TableRow data-state={row.getIsSelected() && "selected"}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="whitespace-nowrap">
+                      <TableCell
+                        key={cell.id}
+                        className="min-w-0 max-w-xs overflow-hidden text-ellipsis sm:whitespace-nowrap"
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -496,8 +504,11 @@ export function KeamananDataTable({
 
                   {/* Baris 'expanded' yang kondisional */}
                   {row.getIsExpanded() && (
-                    <TableRow>
-                      <TableCell colSpan={row.getVisibleCells().length}>
+                    <TableRow className="transition-all duration-300 ease-in-out">
+                      <TableCell
+                        colSpan={row.getVisibleCells().length}
+                        className="max-w-full overflow-hidden"
+                      >
                         {/* Render komponen form di sini */}
                         <ExpandableReviewForm
                           log={row.original}
@@ -526,7 +537,7 @@ export function KeamananDataTable({
       </div>
 
       {/* Footer Paginasi */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2 pr-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {pagination?.total || 0} total entries
         </div>
