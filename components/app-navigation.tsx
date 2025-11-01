@@ -127,22 +127,22 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
 
   // Check if any environment sub-menu is active
   const isEnvironmentActive = useMemo(() => {
-    return filteredEnvironmentAreas.some(area =>
-      pathname === `/${area.warehouse_id}/${area.id}/lingkungan`
+    return filteredEnvironmentAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/lingkungan`
     );
   }, [filteredEnvironmentAreas, pathname]);
 
   // Check if any security sub-menu is active
   const isSecurityActive = useMemo(() => {
-    return filteredSecurityAreas.some(area =>
-      pathname === `/${area.warehouse_id}/${area.id}/keamanan`
+    return filteredSecurityAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/keamanan`
     );
   }, [filteredSecurityAreas, pathname]);
 
   // Check if any incident sub-menu is active
   const isIncidentActive = useMemo(() => {
-    return filteredIncidentAreas.some(area =>
-      pathname === `/${area.warehouse_id}/${area.id}/gangguan`
+    return filteredIncidentAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/gangguan`
     );
   }, [filteredIncidentAreas, pathname]);
 
@@ -184,7 +184,10 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
           <Collapsible asChild>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton suppressHydrationWarning isActive={isEnvironmentActive}>
+                <SidebarMenuButton
+                  suppressHydrationWarning
+                  isActive={isEnvironmentActive}
+                >
                   <Thermometer />
                   <span>Lingkungan</span>
                   <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
@@ -227,7 +230,10 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
           <Collapsible asChild>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton suppressHydrationWarning isActive={isSecurityActive}>
+                <SidebarMenuButton
+                  suppressHydrationWarning
+                  isActive={isSecurityActive}
+                >
                   <Camera />
                   <span>Keamanan</span>
                   <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
@@ -269,7 +275,10 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
           <Collapsible asChild>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton suppressHydrationWarning isActive={isIncidentActive}>
+                <SidebarMenuButton
+                  suppressHydrationWarning
+                  isActive={isIncidentActive}
+                >
                   <AlertTriangle />
                   <span>Gangguan</span>
                   <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />

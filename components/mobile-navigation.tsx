@@ -13,6 +13,8 @@ import {
   HardDrive,
   AreaChart,
   AlertTriangle,
+  Thermometer,
+  Camera,
 } from "lucide-react";
 import {
   Collapsible,
@@ -47,29 +49,47 @@ export function MobileNavigation({
   const pathname = usePathname();
   const { selectedWarehouse } = useWarehouse();
   const [incidentAreas, setIncidentAreas] = useState<NavArea[]>([]);
+  const [environmentAreas, setEnvironmentAreas] = useState<NavArea[]>([]);
+  const [securityAreas, setSecurityAreas] = useState<NavArea[]>([]);
 
   useEffect(() => {
-    const fetchIncidentAreas = async () => {
+    const fetchNavData = async () => {
       const supabase = createClient();
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (!session) return;
       try {
-        const data = await getNavAreasBySystem(
-          "gangguan",
-          session.access_token
+        // Fetch data for both systems simultaneously
+        const [incidentData, environmentData, securityData] = await Promise.all(
+          [
+            getNavAreasBySystem("gangguan", session.access_token),
+            getNavAreasBySystem("lingkungan", session.access_token),
+            getNavAreasBySystem("keamanan", session.access_token),
+          ]
         );
-        setIncidentAreas(data);
+        setIncidentAreas(incidentData);
+        setEnvironmentAreas(environmentData);
+        setSecurityAreas(securityData);
       } catch (error) {
-        toast.error("Gagal memuat navigasi insiden.");
+        toast.error("Gagal memuat navigasi.");
       }
     };
-    fetchIncidentAreas();
+    fetchNavData();
   }, []);
 
   // Filter areas based on selected warehouse
   const filteredIncidentAreas = incidentAreas.filter(
+    (area) =>
+      selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+  );
+
+  const filteredEnvironmentAreas = environmentAreas.filter(
+    (area) =>
+      selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+  );
+
+  const filteredSecurityAreas = securityAreas.filter(
     (area) =>
       selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
   );
@@ -84,7 +104,19 @@ export function MobileNavigation({
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-  // Helper function to determine if Gangguan menu should be active
+  // Helper functions to determine if monitoring menus should be active
+  const isEnvironmentActive = () => {
+    return filteredEnvironmentAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/lingkungan`
+    );
+  };
+
+  const isSecurityActive = () => {
+    return filteredSecurityAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/keamanan`
+    );
+  };
+
   const isGangguanActive = () => {
     return filteredIncidentAreas.some(
       (area) => pathname === `/${area.warehouse_id}/${area.id}/gangguan`
@@ -109,6 +141,77 @@ export function MobileNavigation({
           <span>{link.title}</span>
         </Link>
       ))}
+
+      {/* Monitoring Section */}
+      <div className="text-sm font-semibold text-muted-foreground mt-4 px-2">
+        Monitoring
+      </div>
+
+      {/* Collapsible Environment Menu */}
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <div
+            className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
+              isEnvironmentActive()
+                ? "bg-main text-main-foreground"
+                : "hover:bg-accent hover:text-accent-foreground"
+            }`}
+          >
+            <Thermometer className="h-5 w-5 flex-shrink-0" />
+            <span className="flex-1">Lingkungan</span>
+            <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pl-5 pt-1 space-y-1">
+          {filteredEnvironmentAreas.map((area) => (
+            <Link
+              key={area.id}
+              href={`/${area.warehouse_id}/${area.id}/lingkungan`}
+              onClick={onLinkClick}
+              className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                pathname === `/${area.warehouse_id}/${area.id}/lingkungan`
+                  ? "bg-main text-main-foreground"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              <span>{area.name}</span>
+            </Link>
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Collapsible Security Menu */}
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <div
+            className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
+              isSecurityActive()
+                ? "bg-main text-main-foreground"
+                : "hover:bg-accent hover:text-accent-foreground"
+            }`}
+          >
+            <Camera className="h-5 w-5 flex-shrink-0" />
+            <span className="flex-1">Keamanan</span>
+            <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pl-5 pt-1 space-y-1">
+          {filteredSecurityAreas.map((area) => (
+            <Link
+              key={area.id}
+              href={`/${area.warehouse_id}/${area.id}/keamanan`}
+              onClick={onLinkClick}
+              className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                pathname === `/${area.warehouse_id}/${area.id}/keamanan`
+                  ? "bg-main text-main-foreground"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              <span>{area.name}</span>
+            </Link>
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Collapsible Incident Menu */}
       <Collapsible>
