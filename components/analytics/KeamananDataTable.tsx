@@ -439,7 +439,7 @@ export function KeamananDataTable({
   };
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 overflow-x-auto">
       {/* Toolbar: Filter dan Column Toggle */}
       <div className="flex items-center py-4">
         <Input
@@ -452,14 +452,14 @@ export function KeamananDataTable({
         />
       </div>
 
-      <div className="rounded-md">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="whitespace-nowrap">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -480,7 +480,7 @@ export function KeamananDataTable({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="whitespace-nowrap">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -504,13 +504,13 @@ export function KeamananDataTable({
       </div>
 
       {/* Footer Paginasi */}
-      <div className="flex items-center justify-between px-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
         <div className="flex-1 text-sm text-muted-foreground">
           {pagination?.total || 0} total entries
         </div>
-        <div className="flex items-center space-x-6 lg:space-x-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
           <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
+            <p className="text-sm font-medium whitespace-nowrap">Rows per page</p>
             <Select
               value={`${pagination?.per_page || 25}`}
               onValueChange={(value) => handleRowsPerPageChange(Number(value))}
@@ -527,13 +527,13 @@ export function KeamananDataTable({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+          <div className="flex items-center justify-center text-sm font-medium min-w-0">
             Page {pagination?.current_page || 1} of{" "}
             {pagination?.total_pages || 1}
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             <Button
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 hidden sm:flex"
               onClick={() => handlePageChange(1)}
               disabled={pagination?.current_page === 1}
             >
@@ -561,7 +561,7 @@ export function KeamananDataTable({
               <ChevronRight className="h-4 w-4" />
             </Button>
             <Button
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 hidden sm:flex"
               onClick={() => handlePageChange(pagination?.total_pages || 1)}
               disabled={pagination?.current_page === pagination?.total_pages}
             >

@@ -173,7 +173,7 @@ export function IncidentDataTable({
   };
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 overflow-x-auto">
       {/* Toolbar: Filter dan Column Toggle */}
       <div className="flex items-center justify-between">
         <Input
@@ -208,13 +208,13 @@ export function IncidentDataTable({
         </DropdownMenu>
       </div>
 
-      <div className="rounded-md">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="whitespace-nowrap">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -231,7 +231,7 @@ export function IncidentDataTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="whitespace-nowrap">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -255,15 +255,15 @@ export function IncidentDataTable({
       </div>
 
       {/* === 2. GANTI SELURUH BAGIAN PAGINASI LAMA DENGAN INI === */}
-      <div className="flex items-center justify-between flex-wrap gap-x-6 gap-y-4 px-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
         <div className="text-sm text-muted-foreground">
           Total {pagination.total} insiden.
         </div>
-        <div className="flex items-center flex-wrap justify-end gap-x-6 gap-y-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
           <div className="flex items-center space-x-4">
             {/* Kontrol Baris per Halaman */}
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-medium">Rows</p>
+              <p className="text-sm font-medium whitespace-nowrap">Rows</p>
               <Select
                 value={`${pagination.per_page}`}
                 onValueChange={handleRowsPerPageChange}
