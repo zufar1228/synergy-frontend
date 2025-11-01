@@ -448,7 +448,7 @@ export function KeamananDataTable({
   };
 
   return (
-    <div className="w-full space-y-4 pr-2 md:pr-4">
+    <div className="w-full space-y-4">
       {/* Toolbar: Filter dan Column Toggle */}
       <div className="flex items-center py-4">
         <Input
@@ -461,7 +461,7 @@ export function KeamananDataTable({
         />
       </div>
 
-      <div className="rounded-md overflow-x-auto pr-4 min-w-0">
+      <div className="rounded-md overflow-x-auto">
         <Table className="min-w-full table-fixed w-full">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -470,7 +470,7 @@ export function KeamananDataTable({
                   return (
                     <TableHead
                       key={header.id}
-                      className="min-w-0 sm:whitespace-nowrap"
+                      className="whitespace-nowrap"
                     >
                       {header.isPlaceholder
                         ? null
@@ -494,7 +494,7 @@ export function KeamananDataTable({
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="min-w-0 max-w-xs overflow-hidden text-ellipsis sm:whitespace-nowrap"
+                        className="whitespace-nowrap"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -539,7 +539,7 @@ export function KeamananDataTable({
       </div>
 
       {/* Footer Paginasi */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2 pr-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {pagination?.total || 0} total entries
         </div>
