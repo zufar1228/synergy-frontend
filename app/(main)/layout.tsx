@@ -57,7 +57,9 @@ export default async function MainAppLayout({
           <SidebarInset>
             {/* Mobile Header with Sidebar */}
             <SiteHeader userRole={userRole} user={userData} />
-            <main className="flex-1 overflow-y-auto p-8">{children}</main>
+            <main className="flex-1 overflow-y-auto p-8 max-w-full">
+              <div className="mx-auto max-w-7xl">{children}</div>
+            </main>
           </SidebarInset>
         </div>
       </SidebarProvider>
