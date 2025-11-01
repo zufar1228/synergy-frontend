@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client"; // <-- TAMBAHKAN INI
 import {
   createDevice,
   updateDevice,
@@ -18,6 +17,7 @@ import {
   Device,
   MqttCredentials,
 } from "@/lib/api";
+import { createClient } from "@/lib/supabase/client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -57,9 +57,12 @@ import {
 } from "@/components/ui/select";
 import { PlusCircle, Copy } from "lucide-react";
 
+// --- 1. Perbarui Skema Zod ---
 const formSchema = z.object({
   name: z.string().min(3, { message: "Nama minimal 3 karakter." }),
-  system_type: z.string().min(1, { message: "Tipe sistem wajib diisi." }),
+  system_type: z.enum(["lingkungan", "gangguan", "keamanan", "medis_air"], {
+    message: "Tipe sistem wajib dipilih.",
+  }),
   warehouse_id: z.string().min(1, "Gudang harus dipilih."),
   area_id: z.string().min(1, { message: "Area harus dipilih." }),
 });
@@ -122,15 +125,15 @@ const CredentialsDisplay = ({
   );
 };
 
+// --- 2. Perbarui DeviceForm ---
 const DeviceForm = ({
   onSuccess,
   initialData,
 }: {
-  onSuccess: (credentials?: MqttCredentials) => void;
-  initialData?: Device;
+  onSuccess: (credentials?: MqttCredentials | null) => void; // Update tipe prop
+  initialData?: Device & { warehouse_id?: string };
 }) => {
-  // --- PERBAIKAN TIPE DATA DI SINI ---
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([]); // Diubah dari Area[] ke Warehouse[]
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [isLoadingAreas, setIsLoadingAreas] = useState(false);
 
@@ -138,8 +141,8 @@ const DeviceForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || "",
-      system_type: initialData?.system_type || "",
-      warehouse_id: initialData?.area?.warehouse.id || undefined,
+      system_type: (initialData?.system_type as any) || undefined,
+      warehouse_id: initialData?.warehouse_id || undefined,
       area_id: initialData?.area_id || undefined,
     },
   });
@@ -201,7 +204,6 @@ const DeviceForm = ({
     form.setValue("area_id", "");
   }, [selectedWarehouseId, form]);
 
-  // --- FUNGSI ONSUBMIT (DIMODIFIKASI) ---
   async function onSubmit(values: DeviceFormData) {
     const supabase = createClient();
     const {
@@ -211,12 +213,23 @@ const DeviceForm = ({
 
     try {
       if (initialData) {
-        await updateDevice(initialData.id, values, session.access_token);
+        // Saat update, kita hanya kirim 'name' dan 'area_id'
+        await updateDevice(
+          initialData.id,
+          {
+            name: values.name,
+            area_id: values.area_id,
+          },
+          session.access_token
+        );
+
         toast.success("Perangkat berhasil diperbarui.");
-        onSuccess();
+        onSuccess(); // Panggil tanpa kredensial
       } else {
+        // Saat create, kirim semua data
         const response = await createDevice(values, session.access_token);
         toast.success("Perangkat baru berhasil dibuat.");
+        // Kirim kredensial (bisa jadi null) ke komponen induk
         onSuccess(response.mqttCredentials);
       }
     } catch (error) {
@@ -227,7 +240,6 @@ const DeviceForm = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* ... field nama ... */}
         <FormField
           control={form.control}
           name="name"
@@ -241,21 +253,41 @@ const DeviceForm = ({
             </FormItem>
           )}
         />
-        {/* ... field tipe sistem ... */}
+
+        {/* === 3. Ganti Input 'system_type' menjadi Select === */}
         <FormField
           control={form.control}
           name="system_type"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipe Sistem</FormLabel>
-              <FormControl>
-                <Input placeholder="lingkungan" {...field} />
-              </FormControl>
-              <FormMessage />
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={!!initialData} // Nonaktifkan saat mengedit
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih tipe sistem..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="lingkungan">Lingkungan (MQTT)</SelectItem>
+                  <SelectItem value="gangguan">Gangguan (MQTT)</SelectItem>
+                  <SelectItem value="medis_air">Air Medis (MQTT)</SelectItem>
+                  <SelectItem value="keamanan">Keamanan (Kamera)</SelectItem>
+                </SelectContent>
+              </Select>
+              {!!initialData && (
+                <FormMessage>
+                  Tipe sistem tidak dapat diubah setelah dibuat.
+                </FormMessage>
+              )}
+              {!initialData && <FormMessage />}
             </FormItem>
           )}
         />
-        {/* ... field gudang ... */}
+
         <FormField
           control={form.control}
           name="warehouse_id"
@@ -280,7 +312,6 @@ const DeviceForm = ({
             </FormItem>
           )}
         />
-        {/* ... field area ... */}
         <FormField
           control={form.control}
           name="area_id"
@@ -313,6 +344,7 @@ const DeviceForm = ({
             </FormItem>
           )}
         />
+
         <DialogFooter>
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? "Menyimpan..." : "Simpan"}
@@ -323,6 +355,7 @@ const DeviceForm = ({
   );
 };
 
+// --- 4. Perbarui Logika 'AddDeviceButton' ---
 export const AddDeviceButton = () => {
   const [open, setOpen] = useState(false);
   const [newCredentials, setNewCredentials] = useState<MqttCredentials | null>(
@@ -330,12 +363,10 @@ export const AddDeviceButton = () => {
   );
   const router = useRouter();
 
-  const handleDone = () => {
+  const handleCloseAndRefresh = () => {
     setOpen(false);
-    setTimeout(() => {
-      setNewCredentials(null);
-      router.refresh();
-    }, 200);
+    setNewCredentials(null);
+    router.refresh();
   };
 
   return (
@@ -363,17 +394,19 @@ export const AddDeviceButton = () => {
         {!newCredentials ? (
           <DeviceForm
             onSuccess={(credentials) => {
+              // Jika 'credentials' ada (bukan null atau undefined), tampilkan
               if (credentials) {
                 setNewCredentials(credentials);
               } else {
-                handleDone();
+                // Jika null (kasus perangkat 'keamanan'), langsung tutup
+                handleCloseAndRefresh();
               }
             }}
           />
         ) : (
           <CredentialsDisplay
             credentials={newCredentials}
-            onDone={handleDone}
+            onDone={handleCloseAndRefresh}
           />
         )}
       </DialogContent>
@@ -381,10 +414,16 @@ export const AddDeviceButton = () => {
   );
 };
 
+// --- 5. Perbarui 'EditDeviceButton' agar pass data awal dengan benar ---
 const EditDeviceButton = ({ device }: { device: Device }) => {
   const [open, setOpen] = useState(false);
-
   const router = useRouter();
+
+  // Siapkan data awal untuk form, termasuk warehouse_id
+  const initialDataForForm = {
+    ...device,
+    warehouse_id: device.area?.warehouse.id,
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -393,17 +432,14 @@ const EditDeviceButton = ({ device }: { device: Device }) => {
           Edit
         </Button>
       </DialogTrigger>
-
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Perangkat</DialogTitle>
         </DialogHeader>
-
         <DeviceForm
-          initialData={device}
+          initialData={initialDataForForm as any}
           onSuccess={() => {
             setOpen(false);
-
             router.refresh();
           }}
         />

@@ -59,21 +59,6 @@ export function NavUser({ user }: NavUserProps) {
     setImageLoading(true);
 
     if (user.avatar) {
-      // Check if this is the problematic Google avatar URL
-      const isProblematicGoogleAvatar =
-        user.avatar.includes("lh3.googleusercontent.com") &&
-        user.avatar.includes(
-          "ACg8ocKzWc32AfRX6xfFXUSJfIPtiJ9nodixED5-eo7GwKmkC6wsns1I"
-        );
-
-      if (isProblematicGoogleAvatar) {
-        // Force fallback for this specific problematic avatar
-        console.log("Detected problematic Google avatar, using fallback");
-        setImageError(true);
-        setImageLoading(false);
-        return;
-      }
-
       // Pre-load image to check if it's accessible
       const img = new Image();
       const timeout = setTimeout(() => {

@@ -45,7 +45,7 @@ export interface MqttCredentials {
 // Tipe BARU untuk respons pembuatan perangkat
 export interface CreateDeviceResponse {
   device: Device;
-  mqttCredentials: MqttCredentials;
+  mqttCredentials: MqttCredentials | null; // <-- Jadikan nullable
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL + "/api";
@@ -231,7 +231,7 @@ export const createDevice = async (
 
 export const updateDevice = async (
   id: string,
-  data: { name: string; area_id: string; system_type: string },
+  data: { name: string; area_id: string; system_type?: string },
   token: string
 ): Promise<Device> => {
   const res = await fetch(`${API_BASE_URL}/devices/${id}`, {
@@ -637,5 +637,72 @@ export const getActiveAlerts = async (
   if (!res.ok) {
     throw await buildApiError(res, "Gagal mengambil data peringatan aktif");
   }
+  return res.json();
+};
+
+// Tipe BARU untuk preferensi
+export interface NotificationPreference {
+  system_type: string;
+  is_enabled: boolean;
+}
+
+// Fungsi BARU
+export const getMyPreferences = async (
+  token: string
+): Promise<NotificationPreference[]> => {
+  const res = await fetch(`${API_BASE_URL}/users/me/preferences`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Gagal mengambil data preferensi");
+  return res.json();
+};
+
+// Fungsi BARU
+export const updateMyPreferences = async (
+  data: NotificationPreference[],
+  token: string
+): Promise<NotificationPreference[]> => {
+  const res = await fetch(`${API_BASE_URL}/users/me/preferences`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Gagal memperbarui preferensi");
+  return res.json();
+};
+
+// Tipe BARU untuk log keamanan (sesuai model backend)
+export interface KeamananLog {
+  id: string;
+  device_id: string;
+  created_at: string;
+  image_url: string;
+  detected: boolean;
+  box: object | null;
+  confidence: number | null;
+  attributes: object | null;
+  status: "unacknowledged" | "acknowledged" | "resolved" | "false_alarm";
+  notes: string | null;
+  device: { name: string };
+}
+
+// Fungsi BARU untuk update status log keamanan
+export const updateKeamananLogStatus = async (
+  logId: string,
+  data: UpdateIncidentStatusPayload, // Kita bisa gunakan tipe yang sama dari insiden
+  token: string
+): Promise<KeamananLog> => {
+  const res = await fetch(`${API_BASE_URL}/security-logs/${logId}/status`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Gagal memperbarui status log keamanan");
   return res.json();
 };

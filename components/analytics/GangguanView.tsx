@@ -45,7 +45,6 @@ export const GangguanView = ({
 
   const [logs, setLogs] = useState(initialData.logs);
   const [summary, setSummary] = useState(initialData.summary);
-  const { pagination } = initialData;
 
   // Sync logs state when initialData changes (e.g., due to pagination)
   useEffect(() => {
@@ -107,10 +106,14 @@ export const GangguanView = ({
 
   return (
     <div className="space-y-8">
-      {/* 2. ADD DATE RANGE PICKER HERE */}
+      {/* DateRangePicker sekarang akan selalu tampil */}
       <div className="flex justify-end">
         <DateRangePicker />
       </div>
+
+      {/* Tampilkan komponen chart dan tabel, biarkan mereka
+          menangani data kosong secara internal */}
+      <IncidentTypeChart areaId={areaId} />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
@@ -134,9 +137,8 @@ export const GangguanView = ({
           </Card>
         )}
       </div>
-      <IncidentTypeChart areaId={areaId} />
 
-      <IncidentDataTable data={logs} pagination={pagination} />
+      <IncidentDataTable data={logs} pagination={initialData.pagination} />
     </div>
   );
 };

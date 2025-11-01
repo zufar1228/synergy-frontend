@@ -62,6 +62,15 @@ export const LingkunganView = ({
   // Kita tetap ambil pagination dari initialData karena tidak berubah secara real-time
   const { pagination } = initialData;
 
+  // === TAMBAHKAN BLOK INI ===
+  // Efek ini akan menyinkronkan state dengan prop
+  // setiap kali data dari server (initialData) berubah.
+  useEffect(() => {
+    setLogs(initialData.logs);
+    setSummary(initialData.summary);
+  }, [initialData]);
+  // ==========================
+
   // 2. Efek untuk berlangganan (subscribe) ke perubahan data di Supabase
   useEffect(() => {
     // Membuat channel komunikasi real-time

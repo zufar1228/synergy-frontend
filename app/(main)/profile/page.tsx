@@ -3,18 +3,34 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { getMyProfile, Profile } from "@/lib/api";
+import {
+  getMyProfile,
+  Profile,
+  getMyPreferences,
+  NotificationPreference,
+} from "@/lib/api";
 import { UpdateProfileForm } from "@/components/profile/UpdateProfileForm";
 import { UpdatePasswordForm } from "@/components/profile/UpdatePasswordForm";
+import { UpdatePreferencesForm } from "@/components/profile/UpdatePreferencesForm"; // <-- IMPORT
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [preferences, setPreferences] = useState<
+    NotificationPreference[] | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    const fetchProfileData = async () => {
       const supabase = createClient();
       const {
         data: { session },
@@ -22,24 +38,46 @@ export default function ProfilePage() {
 
       if (session) {
         try {
-          const profileData = await getMyProfile(session.access_token);
+          // Ambil profil dan preferensi secara bersamaan
+          const [profileData, preferenceData] = await Promise.all([
+            getMyProfile(session.access_token),
+            getMyPreferences(session.access_token),
+          ]);
           setProfile(profileData);
+          setPreferences(preferenceData);
         } catch (err) {
-          setError("Gagal memuat profil.");
+          setError("Gagal memuat data profil.");
         }
       }
       setLoading(false);
     };
 
-    fetchProfile();
-  }, []);
+    fetchProfileData();
+  }, [mounted]);
+
+  // Don't render anything until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold mb-6">Profil Saya</h1>
+        <div className="space-y-6">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Profil Saya</h1>
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-48 w-full" />
+      <div>
+        <h1 className="text-3xl font-bold mb-6">Profil Saya</h1>
+        <div className="space-y-6">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
       </div>
     );
   }
@@ -54,6 +92,7 @@ export default function ProfilePage() {
       <div className="space-y-6">
         {profile && <UpdateProfileForm profile={profile} />}
         <UpdatePasswordForm />
+        {preferences && <UpdatePreferencesForm initialData={preferences} />}
       </div>
     </div>
   );

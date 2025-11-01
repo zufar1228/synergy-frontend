@@ -13,6 +13,8 @@ import {
   HardDrive,
   AreaChart,
   AlertTriangle,
+  Thermometer,
+  Camera,
 } from "lucide-react";
 import {
   Collapsible,
@@ -51,10 +53,12 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   const pathname = usePathname();
   const { selectedWarehouse } = useWarehouse();
   const [incidentAreas, setIncidentAreas] = useState<NavArea[]>([]);
+  const [environmentAreas, setEnvironmentAreas] = useState<NavArea[]>([]);
+  const [securityAreas, setSecurityAreas] = useState<NavArea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchIncidentAreas = async () => {
+    const fetchNavData = async () => {
       const supabase = createClient();
       const {
         data: { session },
@@ -64,20 +68,26 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
         return;
       }
       try {
-        const data = await getNavAreasBySystem(
-          "gangguan",
-          session.access_token
+        // Fetch data for both systems simultaneously
+        const [incidentData, environmentData, securityData] = await Promise.all(
+          [
+            getNavAreasBySystem("gangguan", session.access_token),
+            getNavAreasBySystem("lingkungan", session.access_token),
+            getNavAreasBySystem("keamanan", session.access_token),
+          ]
         );
-        setIncidentAreas(data);
+        setIncidentAreas(incidentData);
+        setEnvironmentAreas(environmentData);
+        setSecurityAreas(securityData);
       } catch (error) {
-        console.error("Failed to load incident areas:", error);
+        console.error("Failed to load navigation areas:", error);
         // Don't show toast on every render, just log the error
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchIncidentAreas();
+    fetchNavData();
   }, []); // Only fetch once on mount
 
   // Memoize filtered incident areas to avoid recalculation on every render
@@ -87,6 +97,22 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
         selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
     );
   }, [incidentAreas, selectedWarehouse]);
+
+  // Memoize filtered environment areas to avoid recalculation on every render
+  const filteredEnvironmentAreas = useMemo(() => {
+    return environmentAreas.filter(
+      (area) =>
+        selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+    );
+  }, [environmentAreas, selectedWarehouse]);
+
+  // Memoize filtered security areas to avoid recalculation on every render
+  const filteredSecurityAreas = useMemo(() => {
+    return securityAreas.filter(
+      (area) =>
+        selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+    );
+  }, [securityAreas, selectedWarehouse]);
 
   // Memoize the isActive function to avoid recreation on every render
   const isActive = useCallback(
@@ -133,6 +159,92 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
       <SidebarGroup className="mb-3">
         <SidebarGroupLabel>Monitoring</SidebarGroupLabel>
         <SidebarMenu>
+          {/* Collapsible Environment Menu */}
+          <Collapsible asChild>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton suppressHydrationWarning>
+                  <Thermometer />
+                  <span>Lingkungan</span>
+                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent suppressHydrationWarning>
+                <SidebarMenuSub>
+                  {isLoading
+                    ? // Show skeleton while loading
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <SidebarMenuSubItem key={i}>
+                          <SidebarMenuSubButton>
+                            <Skeleton className="h-4 w-24" />
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))
+                    : filteredEnvironmentAreas.map((area) => (
+                        <SidebarMenuSubItem key={area.id}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={
+                              pathname ===
+                              `/${area.warehouse_id}/${area.id}/lingkungan`
+                            }
+                          >
+                            <Link
+                              href={`/${area.warehouse_id}/${area.id}/lingkungan`}
+                            >
+                              <span>{area.name}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+
+          {/* Collapsible Security Menu */}
+          <Collapsible asChild>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton suppressHydrationWarning>
+                  <Camera />
+                  <span>Keamanan</span>
+                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent suppressHydrationWarning>
+                <SidebarMenuSub>
+                  {isLoading
+                    ? // Show skeleton while loading
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <SidebarMenuSubItem key={i}>
+                          <SidebarMenuSubButton>
+                            <Skeleton className="h-4 w-24" />
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))
+                    : filteredSecurityAreas.map((area) => (
+                        <SidebarMenuSubItem key={area.id}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={
+                              pathname ===
+                              `/${area.warehouse_id}/${area.id}/keamanan`
+                            }
+                          >
+                            <Link
+                              href={`/${area.warehouse_id}/${area.id}/keamanan`}
+                            >
+                              <span>{area.name}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+
           <Collapsible asChild>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
@@ -228,6 +340,41 @@ export function AppNavigationSkeleton({ userRole }: { userRole: string }) {
           <Skeleton className="h-4 w-20" />
         </SidebarGroupLabel>
         <SidebarMenu>
+          {/* Environment Menu Skeleton */}
+          <SidebarMenuItem>
+            <SidebarMenuButton>
+              <Skeleton className="h-4 w-4 rounded" />
+              <Skeleton className="h-4 w-16" />
+              <ChevronRight className="ml-auto h-4 w-4" />
+            </SidebarMenuButton>
+            <SidebarMenuSub>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SidebarMenuSubItem key={i}>
+                  <SidebarMenuSubButton>
+                    <Skeleton className="h-4 w-24" />
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              ))}
+            </SidebarMenuSub>
+          </SidebarMenuItem>
+          {/* Security Menu Skeleton */}
+          <SidebarMenuItem>
+            <SidebarMenuButton>
+              <Skeleton className="h-4 w-4 rounded" />
+              <Skeleton className="h-4 w-16" />
+              <ChevronRight className="ml-auto h-4 w-4" />
+            </SidebarMenuButton>
+            <SidebarMenuSub>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SidebarMenuSubItem key={i}>
+                  <SidebarMenuSubButton>
+                    <Skeleton className="h-4 w-24" />
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              ))}
+            </SidebarMenuSub>
+          </SidebarMenuItem>
+          {/* Incident Menu Skeleton */}
           <SidebarMenuItem>
             <SidebarMenuButton>
               <Skeleton className="h-4 w-4 rounded" />

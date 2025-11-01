@@ -101,6 +101,7 @@
 @layer base {
   body {
     @apply text-foreground font-base bg-background;
+    overflow: hidden;
   }
 
   h1,

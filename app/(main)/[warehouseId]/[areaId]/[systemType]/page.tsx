@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { LingkunganView } from "@/components/analytics/LingkunganView";
 import { GangguanView } from "@/components/analytics/GangguanView";
+import { KeamananView } from "@/components/analytics/KeamananView";
 
 // Update getAnalytics function definition
 async function getAnalytics(
@@ -81,16 +82,14 @@ export default async function AnalyticsPage({
     return <div className="text-center">Gagal memuat data analitik.</div>;
   }
 
-  if (data.logs.length === 0) {
-    return <div className="text-center">Tidak ada data untuk sistem ini.</div>;
-  }
-
   const renderAnalyticsView = () => {
     switch (systemType) {
       case "lingkungan":
         return <LingkunganView initialData={data} />;
       case "gangguan":
         return <GangguanView initialData={data} />;
+      case "keamanan":
+        return <KeamananView initialData={data} />;
       default:
         return (
           <div className="text-center">
