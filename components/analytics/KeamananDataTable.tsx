@@ -164,36 +164,42 @@ const ExpandableReviewForm = ({
             />
           </a>
           {/* Show attributes under the image */}
-          {log.attributes && Array.isArray(log.attributes) && log.attributes.length > 0 && (
-            <div className="mt-4 p-3 bg-gray-800/50 rounded-md">
-              <h4 className="text-sm font-medium text-white mb-2">
-                Atribut Terdeteksi ({log.attributes.length} orang)
-              </h4>
-              <div className="space-y-3 max-h-40 overflow-y-auto">
-                {log.attributes.map((person: any, index: number) => (
-                  <div key={index} className="border-b border-gray-700 pb-2 last:border-b-0 last:pb-0">
-                    <h5 className="text-xs font-medium text-gray-300 mb-1">
-                      Orang {index + 1} (Keyakinan: {(person.confidence * 100).toFixed(0)}%)
-                    </h5>
-                    <ul className="list-disc list-inside space-y-1 text-xs text-gray-400">
-                      {person.attributes.map((attr: any, i: number) => (
-                        <li key={i}>
-                          <span className="capitalize">
-                            {attr.attribute
-                              .replace("person wearing a ", "")
-                              .replace("person not wearing a ", "")}
-                          </span>
-                          <span className="text-gray-500 ml-1">
-                            ({(attr.confidence * 100).toFixed(0)}%)
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+          {log.attributes &&
+            Array.isArray(log.attributes) &&
+            log.attributes.length > 0 && (
+              <div className="mt-4 p-3 bg-gray-800/50 rounded-md">
+                <h4 className="text-sm font-medium text-white mb-2">
+                  Atribut Terdeteksi ({log.attributes.length} orang)
+                </h4>
+                <div className="space-y-3 max-h-40 overflow-y-auto">
+                  {log.attributes.map((person: any, index: number) => (
+                    <div
+                      key={index}
+                      className="border-b border-gray-700 pb-2 last:border-b-0 last:pb-0"
+                    >
+                      <h5 className="text-xs font-medium text-gray-200 mb-1">
+                        Orang {index + 1} (Keyakinan:{" "}
+                        {(person.confidence * 100).toFixed(0)}%)
+                      </h5>
+                      <ul className="list-disc list-inside space-y-1 text-xs text-gray-200">
+                        {person.attributes.map((attr: any, i: number) => (
+                          <li key={i}>
+                            <span className="capitalize">
+                              {attr.attribute
+                                .replace("person wearing a ", "")
+                                .replace("person not wearing a ", "")}
+                            </span>
+                            <span className="text-gray-200 ml-1">
+                              ({(attr.confidence * 100).toFixed(0)}%)
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
