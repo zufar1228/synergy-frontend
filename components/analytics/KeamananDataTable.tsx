@@ -9,6 +9,9 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
+  // --- 1. Impor ExpandedState ---
+  getExpandedRowModel,
+  ExpandedState,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
 import {
@@ -71,14 +74,16 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// --- Dialog Review (diletakkan di file yang sama) ---
+// --- Form Review (sebelumnya Dialog, sekarang untuk baris 'expand') ---
 const formSchema = z.object({
   status: z.enum(["acknowledged", "resolved", "false_alarm"]),
   notes: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
-const ReviewSecurityLogAction = ({
+// --- 2. GANTI NAMA dan HAPUS LOGIKA DIALOG ---
+// Komponen ini sekarang hanya me-render form, bukan dialog
+const ExpandableReviewForm = ({
   log,
   onSuccess,
   onLogUpdate,
@@ -87,7 +92,8 @@ const ReviewSecurityLogAction = ({
   onSuccess: () => void;
   onLogUpdate?: (logId: string, updates: Partial<KeamananLog>) => void;
 }) => {
-  const [open, setOpen] = React.useState(false);
+  // Hapus state [open, setOpen]
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -96,15 +102,13 @@ const ReviewSecurityLogAction = ({
     },
   });
 
-  // Reset form when dialog opens with current log values
+  // Reset form jika log berubah (misalnya data di-refresh)
   React.useEffect(() => {
-    if (open) {
-      form.reset({
-        status: log.status as "acknowledged" | "resolved" | "false_alarm",
-        notes: log.notes || "",
-      });
-    }
-  }, [open, log.status, log.notes, form]);
+    form.reset({
+      status: log.status as "acknowledged" | "resolved" | "false_alarm",
+      notes: log.notes || "",
+    });
+  }, [log.status, log.notes, form]);
 
   async function onSubmit(values: FormData) {
     const supabase = createClient();
@@ -121,7 +125,6 @@ const ReviewSecurityLogAction = ({
       );
       console.log("Log status updated successfully");
 
-      // Update local state immediately for instant UI feedback
       if (onLogUpdate) {
         onLogUpdate(log.id, {
           status: values.status,
@@ -130,26 +133,26 @@ const ReviewSecurityLogAction = ({
       }
 
       toast.success("Status log berhasil diperbarui.");
-      setOpen(false);
-      onSuccess();
+      // Hapus setOpen(false)
+      onSuccess(); // Panggil onSuccess untuk menutup baris expand
     } catch (error) {
       console.error("Error updating log status:", error);
       toast.error((error as Error).message);
     }
   }
 
+  // Render form secara langsung, tanpa Dialog/DialogTrigger
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm">Review</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Review Deteksi Keamanan</DialogTitle>
-          <DialogDescription>
-            Lihat gambar dan perbarui status deteksi ini.
-          </DialogDescription>
-        </DialogHeader>
+    // Tambahkan padding dan background untuk membedakannya
+    <div className="p-4 sm:p-6 bg-gray-900/50 rounded-md">
+      {/* Kita bisa tetap gunakan komponen DialogHeader/Footer untuk styling yg konsisten */}
+      <DialogHeader>
+        <DialogTitle>Review Deteksi Keamanan</DialogTitle>
+        <DialogDescription>
+          Lihat gambar dan perbarui status deteksi ini.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="py-2">
           <a href={log.image_url} target="_blank" rel="noopener noreferrer">
             <img
@@ -204,8 +207,8 @@ const ReviewSecurityLogAction = ({
             </DialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 
@@ -280,6 +283,8 @@ export function KeamananDataTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  // --- 3. Tambah state untuk 'expanded' ---
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
   // Definisikan kolom di sini
   const columns: ColumnDef<KeamananLog>[] = [
@@ -400,15 +405,11 @@ export function KeamananDataTable({
     },
     {
       id: "actions",
+      // --- 4. Ubah 'cell' untuk tombol 'actions' ---
       cell: ({ row }) => (
-        <ReviewSecurityLogAction
-          log={row.original}
-          onLogUpdate={onLogUpdate}
-          onSuccess={() => {
-            // Real-time updates will handle the UI refresh automatically
-            // No need for router.refresh() here
-          }}
-        />
+        <Button size="sm" onClick={() => row.toggleExpanded()}>
+          {row.getIsExpanded() ? "Tutup" : "Review"}
+        </Button>
       ),
     },
   ];
@@ -420,8 +421,12 @@ export function KeamananDataTable({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
+    // --- 5. Tambahkan konfigurasi 'expanded' ---
+    getExpandedRowModel: getExpandedRowModel(),
+    onExpandedChange: setExpanded,
     state: {
       columnFilters,
+      expanded, // Tambahkan state expanded di sini
     },
   });
 
@@ -474,20 +479,37 @@ export function KeamananDataTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
+              // --- 6. Modifikasi rendering TableBody ---
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="whitespace-nowrap">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                <React.Fragment key={row.id}>
+                  {/* Baris data asli */}
+                  <TableRow data-state={row.getIsSelected() && "selected"}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="whitespace-nowrap">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+
+                  {/* Baris 'expanded' yang kondisional */}
+                  {row.getIsExpanded() && (
+                    <TableRow>
+                      <TableCell colSpan={row.getVisibleCells().length}>
+                        {/* Render komponen form di sini */}
+                        <ExpandableReviewForm
+                          log={row.original}
+                          onLogUpdate={onLogUpdate}
+                          onSuccess={() => {
+                            row.toggleExpanded(false); // Tutup baris setelah sukses
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
               ))
             ) : (
               <TableRow>
@@ -510,7 +532,9 @@ export function KeamananDataTable({
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
           <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium whitespace-nowrap">Rows per page</p>
+            <p className="text-sm font-medium whitespace-nowrap">
+              Rows per page
+            </p>
             <Select
               value={`${pagination?.per_page || 25}`}
               onValueChange={(value) => handleRowsPerPageChange(Number(value))}
