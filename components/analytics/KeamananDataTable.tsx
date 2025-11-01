@@ -147,8 +147,10 @@ const ExpandableReviewForm = ({
     <div className="p-4 sm:p-6 bg-gray-900/50 rounded-md max-w-full overflow-hidden animate-in fade-in-0 slide-in-from-top-2 duration-300">
       {/* Ganti DialogHeader dengan div biasa */}
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Review Deteksi Keamanan</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-lg font-semibold text-white">
+          Review Deteksi Keamanan
+        </h3>
+        <p className="text-sm text-gray-300">
           Lihat gambar dan perbarui status deteksi ini.
         </p>
       </div>
@@ -169,7 +171,7 @@ const ExpandableReviewForm = ({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Status</FormLabel>
+                  <FormLabel className="text-white">Status</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -194,7 +196,7 @@ const ExpandableReviewForm = ({
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes</FormLabel>
+                  <FormLabel className="text-white">Notes</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Tambahkan catatan..." {...field} />
                   </FormControl>

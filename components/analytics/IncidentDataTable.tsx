@@ -173,7 +173,7 @@ export function IncidentDataTable({
   };
 
   return (
-    <div className="w-full space-y-4 px-4">
+    <div className="w-full space-y-4">
       {/* Toolbar: Filter dan Column Toggle */}
       <div className="flex items-center justify-between">
         <Input
@@ -208,7 +208,7 @@ export function IncidentDataTable({
         </DropdownMenu>
       </div>
 
-      <div className="rounded-md overflow-x-auto pr-4">
+      <div className="rounded-md overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
