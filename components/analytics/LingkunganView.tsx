@@ -125,12 +125,16 @@ export const LingkunganView = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{summary.max_humidity}%</div>
+                <div className="text-2xl font-bold">
+                  {summary.max_humidity}%
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium">CO2 Rata-rata</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  CO2 Rata-rata
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
@@ -140,7 +144,9 @@ export const LingkunganView = ({
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium">Suhu Minimum</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Suhu Minimum
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{summary.min_temp}°C</div>
@@ -178,7 +184,11 @@ export const LingkunganView = ({
                     yAxisId="right"
                     orientation="right"
                     stroke="#22c55e"
-                    label={{ value: "ppm", angle: -90, position: "insideRight" }}
+                    label={{
+                      value: "ppm",
+                      angle: -90,
+                      position: "insideRight",
+                    }}
                   />
                   <Tooltip />
                   <Legend />

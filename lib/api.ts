@@ -706,3 +706,46 @@ export const updateKeamananLogStatus = async (
   if (!res.ok) throw new Error("Gagal memperbarui status log keamanan");
   return res.json();
 };
+
+// Tipe BARU untuk status perangkat lingkungan
+export interface EnvironmentDeviceStatus {
+  id: string;
+  name: string;
+  status: "Online" | "Offline";
+  fan_status: "On" | "Off";
+}
+
+// Fungsi BARU untuk mengambil status kipas
+export const getDeviceDetailsByArea = async (
+  token: string,
+  areaId: string,
+  systemType: string
+): Promise<EnvironmentDeviceStatus> => {
+  const res = await fetch(
+    `${API_BASE_URL}/devices/details?area_id=${areaId}&system_type=${systemType}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) throw new Error("Gagal mengambil status perangkat");
+  return res.json();
+};
+
+// Fungsi BARU untuk mengirim perintah manual
+export const sendManualFanCommand = async (
+  token: string,
+  deviceId: string,
+  action: "On" | "Off"
+): Promise<any> => {
+  const res = await fetch(`${API_BASE_URL}/devices/${deviceId}/command`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ action }),
+  });
+  if (!res.ok) throw new Error("Gagal mengirim perintah");
+  return res.json();
+};
