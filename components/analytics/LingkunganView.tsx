@@ -60,11 +60,16 @@ export const LingkunganView = ({
 
   const [logs, setLogs] = useState(initialData.logs);
   const [summary, setSummary] = useState(initialData.summary);
+  const [lastDataTimestamp, setLastDataTimestamp] = useState<Date | null>(null);
   const { pagination } = initialData;
 
   useEffect(() => {
     setLogs(initialData.logs);
     setSummary(initialData.summary);
+    // Set initial timestamp if we have data
+    if (initialData.logs.length > 0) {
+      setLastDataTimestamp(new Date(initialData.logs[0].timestamp));
+    }
   }, [initialData]);
 
   useEffect(() => {
@@ -76,6 +81,7 @@ export const LingkunganView = ({
         { event: "INSERT", schema: "public", table: "lingkungan_logs" },
         (payload: any) => {
           setLogs((currentLogs) => [payload.new as Log, ...currentLogs]);
+          setLastDataTimestamp(new Date(payload.new.timestamp));
           // TODO: Update summary secara real-time (opsional)
         }
       )
@@ -100,6 +106,11 @@ export const LingkunganView = ({
     params.set("page", newPage.toString());
     router.push(`?${params.toString()}`);
   };
+
+  // Determine device status based on recent data activity
+  const isDeviceOnline = lastDataTimestamp 
+    ? (Date.now() - lastDataTimestamp.getTime()) < (5 * 60 * 1000) // 5 minutes
+    : logs.length > 0; // If we have any data, assume device was recently active
 
   return (
     <div className="space-y-8">
@@ -221,7 +232,7 @@ export const LingkunganView = ({
 
         {/* Kolom baru untuk FanControl */}
         <div className="md:col-span-1">
-          <FanControl areaId={areaId} />
+          <FanControl areaId={areaId} isDeviceOnline={isDeviceOnline} />
         </div>
       </div>
 

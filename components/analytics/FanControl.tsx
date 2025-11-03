@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Fan, Power, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const FanControl = ({ areaId }: { areaId: string }) => {
+export const FanControl = ({ areaId, isDeviceOnline }: { areaId: string; isDeviceOnline?: boolean }) => {
   const [device, setDevice] = useState<EnvironmentDeviceStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSendingCmd, setIsSendingCmd] = useState(false);
@@ -83,7 +83,7 @@ export const FanControl = ({ areaId }: { areaId: string }) => {
 
   // Handler untuk tombol manual
   const handleCommand = async (action: "On" | "Off") => {
-    if (!device) return;
+    if (!device || !isDeviceOnline) return;
     setIsSendingCmd(true);
 
     const {
@@ -120,8 +120,8 @@ export const FanControl = ({ areaId }: { areaId: string }) => {
     );
   }
 
-  const isFanOn = device.fan_status === "On";
-  const isDeviceOffline = device.status === "Offline";
+  const isFanOn = device?.fan_status === "On";
+  const isDeviceOffline = !isDeviceOnline;
 
   return (
     <Card>
@@ -151,7 +151,7 @@ export const FanControl = ({ areaId }: { areaId: string }) => {
               className="w-full"
               variant={isFanOn ? "default" : "reverse"}
               onClick={() => handleCommand("On")}
-              disabled={isSendingCmd || isFanOn}
+              disabled={isSendingCmd || !isDeviceOnline || isFanOn}
             >
               <Power className="mr-2 h-4 w-4" /> NYALAKAN
             </Button>
@@ -159,7 +159,7 @@ export const FanControl = ({ areaId }: { areaId: string }) => {
               className="w-full"
               variant={!isFanOn ? "reverse" : "default"}
               onClick={() => handleCommand("Off")}
-              disabled={isSendingCmd || !isFanOn}
+              disabled={isSendingCmd || !isDeviceOnline || !isFanOn}
             >
               <Power className="mr-2 h-4 w-4" /> MATIKAN
             </Button>
