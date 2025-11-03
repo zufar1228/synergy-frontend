@@ -23,8 +23,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { format } from "date-fns";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { FanControl } from "./FanControl";
 
 // 1. Perbarui tipe data
 interface Log {
@@ -54,6 +55,8 @@ export const LingkunganView = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
+  const areaId = params.areaId as string;
 
   const [logs, setLogs] = useState(initialData.logs);
   const [summary, setSummary] = useState(initialData.summary);
@@ -100,109 +103,117 @@ export const LingkunganView = ({
 
   return (
     <div className="space-y-8">
-      {/* 3. Perbarui Kartu Ringkasan */}
-      <div className="grid gap-4 md:grid-cols-4">
-        {" "}
-        {/* <-- Ubah jadi 4 kolom */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">
-              Suhu Rata-rata
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.avg_temp}°C</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">
-              Kelembapan Maks
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.max_humidity}%</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">CO2 Rata-rata</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {summary.avg_co2} <span className="text-lg">ppm</span>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Suhu Minimum</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.min_temp}°C</div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* 3. Tambahkan komponen FanControl di sini */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 space-y-8">
+          {/* Kartu Ringkasan (yang sudah ada) */}
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  Suhu Rata-rata
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{summary.avg_temp}°C</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  Kelembapan Maks
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{summary.max_humidity}%</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">CO2 Rata-rata</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {summary.avg_co2} <span className="text-lg">ppm</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">Suhu Minimum</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{summary.min_temp}°C</div>
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* 4. Perbarui Grafik (menjadi 3 sumbu) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Grafik Sensor</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis
-                yAxisId="left"
-                stroke="#ef4444"
-                label={{ value: "°C", angle: -90, position: "insideLeft" }}
-              />
-              <YAxis
-                yAxisId="center"
-                orientation="right"
-                stroke="#3b82f6"
-                label={{
-                  value: "%",
-                  angle: -90,
-                  position: "insideRight",
-                  offset: 40,
-                }}
-              />
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                stroke="#22c55e"
-                label={{ value: "ppm", angle: -90, position: "insideRight" }}
-              />
-              <Tooltip />
-              <Legend />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="Suhu"
-                stroke="#ef4444"
-                dot={false}
-              />
-              <Line
-                yAxisId="center"
-                type="monotone"
-                dataKey="Kelembapan"
-                stroke="#3b82f6"
-                dot={false}
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="CO2"
-                stroke="#22c55e"
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+          {/* Grafik Garis (yang sudah ada) */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Grafik Sensor</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis
+                    yAxisId="left"
+                    stroke="#ef4444"
+                    label={{ value: "°C", angle: -90, position: "insideLeft" }}
+                  />
+                  <YAxis
+                    yAxisId="center"
+                    orientation="right"
+                    stroke="#3b82f6"
+                    label={{
+                      value: "%",
+                      angle: -90,
+                      position: "insideRight",
+                      offset: 40,
+                    }}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    stroke="#22c55e"
+                    label={{ value: "ppm", angle: -90, position: "insideRight" }}
+                  />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="Suhu"
+                    stroke="#ef4444"
+                    dot={false}
+                  />
+                  <Line
+                    yAxisId="center"
+                    type="monotone"
+                    dataKey="Kelembapan"
+                    stroke="#3b82f6"
+                    dot={false}
+                  />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="CO2"
+                    stroke="#22c55e"
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Kolom baru untuk FanControl */}
+        <div className="md:col-span-1">
+          <FanControl areaId={areaId} />
+        </div>
+      </div>
 
       {/* 5. Perbarui Tabel Log */}
       <Card>
@@ -216,7 +227,7 @@ export const LingkunganView = ({
                 <TableHead>Waktu</TableHead>
                 <TableHead>Suhu (°C)</TableHead>
                 <TableHead>Kelembapan (%)</TableHead>
-                <TableHead>CO2 (ppm)</TableHead> {/* <-- TAMBAHKAN */}
+                <TableHead>CO2 (ppm)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -227,8 +238,7 @@ export const LingkunganView = ({
                   </TableCell>
                   <TableCell>{log.temperature ?? "N/A"}</TableCell>
                   <TableCell>{log.humidity ?? "N/A"}</TableCell>
-                  <TableCell>{log.co2_ppm ?? "N/A"}</TableCell>{" "}
-                  {/* <-- TAMBAHKAN */}
+                  <TableCell>{log.co2_ppm ?? "N/A"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
