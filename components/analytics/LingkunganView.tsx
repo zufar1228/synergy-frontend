@@ -26,6 +26,7 @@ import { format } from "date-fns";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { FanControl } from "./FanControl";
+import { useDeviceStatus } from "@/contexts/DeviceStatusContext";
 
 // 1. Perbarui tipe data
 interface Log {
@@ -57,6 +58,7 @@ export const LingkunganView = ({
   const searchParams = useSearchParams();
   const params = useParams();
   const areaId = params.areaId as string;
+  const { updateDeviceStatus } = useDeviceStatus();
 
   const [logs, setLogs] = useState(initialData.logs);
   const [summary, setSummary] = useState(initialData.summary);
@@ -82,6 +84,8 @@ export const LingkunganView = ({
         (payload: any) => {
           setLogs((currentLogs) => [payload.new as Log, ...currentLogs]);
           setLastDataTimestamp(new Date(payload.new.timestamp));
+          // Update device status context - device is online since it's sending data
+          updateDeviceStatus(areaId, "lingkungan", true);
           // TODO: Update summary secara real-time (opsional)
         }
       )
@@ -89,7 +93,7 @@ export const LingkunganView = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [areaId, updateDeviceStatus]);
 
   // 2. Perbarui data untuk chart
   const chartData = logs
@@ -108,8 +112,8 @@ export const LingkunganView = ({
   };
 
   // Determine device status based on recent data activity
-  const isDeviceOnline = lastDataTimestamp 
-    ? (Date.now() - lastDataTimestamp.getTime()) < (5 * 60 * 1000) // 5 minutes
+  const isDeviceOnline = lastDataTimestamp
+    ? Date.now() - lastDataTimestamp.getTime() < 5 * 60 * 1000 // 5 minutes
     : logs.length > 0; // If we have any data, assume device was recently active
 
   return (

@@ -4,6 +4,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useWarehouse } from "@/contexts/WarehouseContext";
+import { useDeviceStatus } from "@/contexts/DeviceStatusContext";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import {
@@ -25,10 +26,14 @@ const AreaCard = ({
   area,
   warehouseId,
   alerts,
+  deviceStatus,
 }: {
   area: any;
   warehouseId: string;
   alerts: Set<string>;
+  deviceStatus: {
+    isDeviceOnline: (areaId: string, systemType: string) => boolean;
+  };
 }) => (
   <Card className="border-2 border-border shadow-shadow transition-all h-full flex flex-col">
     <CardHeader>
@@ -40,7 +45,12 @@ const AreaCard = ({
         area.active_systems.map((system: any) => {
           // Cek apakah sistem ini memiliki peringatan aktif
           const hasAlert = alerts.has(`${area.id}-${system.system_type}`);
-          const isOffline = system.status === "Offline";
+          // Use device status context instead of API status
+          const isOnline = deviceStatus.isDeviceOnline(
+            area.id,
+            system.system_type
+          );
+          const isOffline = !isOnline;
 
           return (
             <Button
@@ -81,6 +91,7 @@ const AreaCard = ({
 
 export default function DashboardPage() {
   const { selectedWarehouse, setSelectedWarehouse } = useWarehouse();
+  const { isDeviceOnline } = useDeviceStatus();
   const [data, setData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -270,6 +281,7 @@ export default function DashboardPage() {
                 area={area}
                 warehouseId={data.details.id}
                 alerts={alertSet}
+                deviceStatus={{ isDeviceOnline }}
               />
             ))}
           </div>

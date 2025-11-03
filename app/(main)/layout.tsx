@@ -3,6 +3,7 @@ import React from "react";
 import { createClient } from "@/lib/supabase/server";
 import { jwtDecode } from "jwt-decode";
 import { WarehouseProvider } from "@/contexts/WarehouseContext";
+import { DeviceStatusProvider } from "@/contexts/DeviceStatusContext";
 import { AppSidebar } from "@/components/app-sidebar";
 import { getMyProfile, Profile } from "@/lib/api";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -46,23 +47,27 @@ export default async function MainAppLayout({
 
   return (
     <WarehouseProvider>
-      <SidebarProvider>
-        <div className="flex h-screen w-full bg-secondary">
-          {/* Desktop Sidebar - hidden on mobile */}
-          <div className="hidden lg:block">
-            <AppSidebar userRole={userRole} user={userData} />
-          </div>
+      <DeviceStatusProvider>
+        <SidebarProvider>
+          <div className="flex h-screen w-full bg-secondary">
+            {/* Desktop Sidebar - hidden on mobile */}
+            <div className="hidden lg:block">
+              <AppSidebar userRole={userRole} user={userData} />
+            </div>
 
-          {/* Main Content Area */}
-          <SidebarInset>
-            {/* Mobile Header with Sidebar */}
-            <SiteHeader userRole={userRole} user={userData} />
-            <main className="flex-1 overflow-y-auto p-4 md:p-8 max-w-full">
-              <div className="mx-auto max-w-full md:max-w-7xl">{children}</div>
-            </main>
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
+            {/* Main Content Area */}
+            <SidebarInset>
+              {/* Mobile Header with Sidebar */}
+              <SiteHeader userRole={userRole} user={userData} />
+              <main className="flex-1 overflow-y-auto p-4 md:p-8 max-w-full">
+                <div className="mx-auto max-w-full md:max-w-7xl">
+                  {children}
+                </div>
+              </main>
+            </SidebarInset>
+          </div>
+        </SidebarProvider>
+      </DeviceStatusProvider>
     </WarehouseProvider>
   );
 }
