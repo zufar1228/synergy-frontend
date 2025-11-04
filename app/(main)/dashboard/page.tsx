@@ -91,7 +91,7 @@ const AreaCard = ({
 
 export default function DashboardPage() {
   const { selectedWarehouse, setSelectedWarehouse } = useWarehouse();
-  const { isDeviceOnline } = useDeviceStatus();
+  const { isDeviceOnline, updateCounter } = useDeviceStatus();
   const [data, setData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -193,6 +193,12 @@ export default function DashboardPage() {
       supabase.removeChannel(channel);
     };
   }, [fetchData]);
+
+  // Force re-render when device status changes
+  React.useEffect(() => {
+    // This effect will run whenever updateCounter changes, forcing a re-render
+    console.log("Device status updated, re-rendering dashboard");
+  }, [updateCounter]);
 
   if (loading) {
     return <Skeleton className="h-64 w-full" />;

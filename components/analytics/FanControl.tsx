@@ -15,7 +15,13 @@ import { toast } from "sonner";
 import { Fan, Power, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const FanControl = ({ areaId, isDeviceOnline }: { areaId: string; isDeviceOnline?: boolean }) => {
+export const FanControl = ({
+  areaId,
+  isDeviceOnline,
+}: {
+  areaId: string;
+  isDeviceOnline?: boolean;
+}) => {
   const [device, setDevice] = useState<EnvironmentDeviceStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSendingCmd, setIsSendingCmd] = useState(false);

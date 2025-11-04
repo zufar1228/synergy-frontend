@@ -18,6 +18,7 @@ interface DeviceStatus {
 
 interface DeviceStatusContextType {
   deviceStatuses: Map<string, DeviceStatus>; // key: `${areaId}-${systemType}`
+  updateCounter: number; // Counter to trigger re-renders
   updateDeviceStatus: (
     areaId: string,
     systemType: string,
@@ -35,6 +36,7 @@ export const DeviceStatusProvider = ({ children }: { children: ReactNode }) => {
   const [deviceStatuses, setDeviceStatuses] = useState<
     Map<string, DeviceStatus>
   >(new Map());
+  const [updateCounter, setUpdateCounter] = useState(0); // Counter to trigger re-renders
 
   // Clean up old statuses periodically (devices inactive for more than 10 minutes)
   useEffect(() => {
@@ -42,6 +44,7 @@ export const DeviceStatusProvider = ({ children }: { children: ReactNode }) => {
       const now = Date.now();
       setDeviceStatuses((prev) => {
         const newMap = new Map(prev);
+        let hasChanges = false;
         for (const [key, status] of newMap) {
           if (
             status.lastActivity &&
@@ -49,7 +52,11 @@ export const DeviceStatusProvider = ({ children }: { children: ReactNode }) => {
           ) {
             // Device hasn't been active for 10 minutes, mark as offline
             newMap.set(key, { ...status, isOnline: false });
+            hasChanges = true;
           }
+        }
+        if (hasChanges) {
+          setUpdateCounter((prev) => prev + 1);
         }
         return newMap;
       });
@@ -77,6 +84,7 @@ export const DeviceStatusProvider = ({ children }: { children: ReactNode }) => {
       });
       return newMap;
     });
+    setUpdateCounter((prev) => prev + 1); // Trigger re-render
   };
 
   const getDeviceStatus = (areaId: string, systemType: string): boolean => {
@@ -104,6 +112,7 @@ export const DeviceStatusProvider = ({ children }: { children: ReactNode }) => {
     <DeviceStatusContext.Provider
       value={{
         deviceStatuses,
+        updateCounter,
         updateDeviceStatus,
         getDeviceStatus,
         isDeviceOnline,
