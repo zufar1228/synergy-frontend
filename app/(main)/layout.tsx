@@ -1,11 +1,10 @@
 // frontend/app/(main)/layout.tsx
 import React from "react";
 import { createClient } from "@/lib/supabase/server";
-import { jwtDecode } from "jwt-decode";
 import { WarehouseProvider } from "@/contexts/WarehouseContext";
 import { DeviceStatusProvider } from "@/contexts/DeviceStatusContext";
 import { AppSidebar } from "@/components/app-sidebar";
-import { getMyProfile, Profile } from "@/lib/api";
+import { getMyProfile } from "@/lib/api";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { redirect } from "next/navigation";
@@ -33,9 +32,14 @@ export default async function MainAppLayout({
   let userEmail = "";
 
   if (user && session) {
-    // Decode JWT for role
-    const jwt = jwtDecode(session.access_token) as { role: string };
-    userRole = jwt.role || "user";
+    // Ambil role dari API backend, bukan dari JWT
+    try {
+      const profile = await getMyProfile(session.access_token);
+      userRole = (profile as any).role || "user";
+    } catch (error) {
+      console.error("Failed to fetch user profile for role:", error);
+      userRole = "user"; // fallback
+    }
     userEmail = user.email || "";
   }
 

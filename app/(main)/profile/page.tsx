@@ -11,7 +11,8 @@ import {
 } from "@/lib/api";
 import { UpdateProfileForm } from "@/components/profile/UpdateProfileForm";
 import { UpdatePasswordForm } from "@/components/profile/UpdatePasswordForm";
-import { UpdatePreferencesForm } from "@/components/profile/UpdatePreferencesForm"; // <-- IMPORT
+import { UpdatePreferencesForm } from "@/components/profile/UpdatePreferencesForm";
+import { PushNotificationManager } from "@/components/profile/PushNotificationManager";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProfilePage() {
@@ -93,6 +94,7 @@ export default function ProfilePage() {
         {profile && <UpdateProfileForm profile={profile} />}
         <UpdatePasswordForm />
         {preferences && <UpdatePreferencesForm initialData={preferences} />}
+        <PushNotificationManager />
       </div>
     </div>
   );

@@ -335,6 +335,10 @@ export const deleteUser = async (id: string, token: string): Promise<void> => {
 export interface Profile {
   id: string;
   username: string;
+  email?: string;
+  role?: string;
+  avatar_url?: string;
+  full_name?: string;
 }
 
 // --- PROFILE API FUNCTIONS ---

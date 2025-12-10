@@ -79,9 +79,14 @@ export async function updateSession(request: NextRequest) {
   } else {
     // 2. Jika ada user dan sesi, lakukan pengecekan otorisasi
     try {
-      // Decode JWT untuk mendapatkan peran secara pasti
-      const jwt = jwtDecode(session.access_token) as { role?: string };
-      const userRole = jwt.role || "user";
+      // Decode JWT untuk mendapatkan peran
+      // Role disimpan di app_metadata oleh backend
+      const jwt = jwtDecode(session.access_token) as { 
+        role?: string;
+        app_metadata?: { role?: string };
+      };
+      // Cek role dari app_metadata terlebih dahulu, fallback ke root level, lalu default 'user'
+      const userRole = jwt.app_metadata?.role || jwt.role || "user";
       console.log("[Middleware] Path:", requestedPath, "Role:", userRole);
 
       // Jika pengguna mencoba mengakses halaman manajemen tapi bukan admin

@@ -120,3 +120,49 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
+// ============================
+// PUSH NOTIFICATION HANDLERS
+// ============================
+
+self.addEventListener("push", function (event) {
+  console.log("[SW] Push event received!"); // <-- Cek apakah ini muncul di konsol SW
+
+  if (event.data) {
+    console.log("[SW] Raw Data:", event.data.text()); // <-- Lihat data mentahnya
+
+    try {
+      const data = event.data.json();
+      console.log("[SW] Parsed Data:", data);
+
+      const options = {
+        body: data.body,
+        icon: data.icon,
+        badge: data.badge,
+        vibrate: [100, 50, 100],
+        data: { url: data.url },
+      };
+
+      const promiseChain = self.registration
+        .showNotification(data.title, options)
+        .then(() => console.log("[SW] Notification shown!"))
+        .catch((err) => console.error("[SW] Error showing notification:", err));
+
+      event.waitUntil(promiseChain);
+    } catch (err) {
+      console.error("[SW] Error parsing JSON:", err);
+    }
+  } else {
+    console.log("[SW] Push event but no data.");
+  }
+});
+
+self.addEventListener("notificationclick", function (event) {
+  console.log("Notification click received.");
+  event.notification.close();
+
+  // Open URL when notification is clicked
+  event.waitUntil(
+    clients.openWindow(event.notification.data.url || "/dashboard")
+  );
+});
