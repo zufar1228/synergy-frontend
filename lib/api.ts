@@ -753,3 +753,96 @@ export const sendManualFanCommand = async (
   if (!res.ok) throw new Error("Gagal mengirim perintah");
   return res.json();
 };
+
+// ============================================================================
+// TELEGRAM API FUNCTIONS
+// ============================================================================
+
+// --- Tipe Data Telegram ---
+export interface TelegramSubscriber {
+  user_id: string; // BigInt dikirim sebagai string dari backend untuk keamanan
+  username: string | null;
+  first_name: string | null;
+  status: "active" | "left" | "kicked";
+  joined_at: string;
+  left_at: string | null;
+  kicked_at: string | null;
+}
+
+export interface TelegramInviteResponse {
+  success: boolean;
+  invite_link: string;
+  expires_at: string;
+  member_limit: number;
+}
+
+export interface TelegramMembersResponse {
+  success: boolean;
+  count: number;
+  data: TelegramSubscriber[];
+}
+
+// 1. Ambil daftar member grup
+export const getTelegramMembers = async (
+  token: string,
+  includeInactive = false
+): Promise<TelegramSubscriber[]> => {
+  const url = includeInactive
+    ? `${API_BASE_URL}/telegram/members?include_inactive=true`
+    : `${API_BASE_URL}/telegram/members`;
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store", // Selalu ambil data terbaru
+  });
+  if (!res.ok) throw new Error("Gagal mengambil daftar member Telegram");
+  const json: TelegramMembersResponse = await res.json();
+  return json.data;
+};
+
+// 2. Generate Link Undangan
+export const generateTelegramInvite = async (
+  token: string
+): Promise<TelegramInviteResponse> => {
+  const res = await fetch(`${API_BASE_URL}/telegram/invite`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) throw new Error("Gagal membuat link undangan");
+  return res.json();
+};
+
+// 3. Kick Member
+export const kickTelegramMember = async (
+  token: string,
+  telegramUserId: string
+): Promise<{ success: boolean; message: string }> => {
+  const res = await fetch(`${API_BASE_URL}/telegram/kick`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ user_id: telegramUserId }),
+  });
+  if (!res.ok) throw new Error("Gagal mengeluarkan member");
+  return res.json();
+};
+
+// 4. Kirim Test Alert
+export const sendTelegramTestAlert = async (
+  token: string
+): Promise<{ success: boolean; message: string }> => {
+  const res = await fetch(`${API_BASE_URL}/telegram/test-alert`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) throw new Error("Gagal mengirim test alert");
+  return res.json();
+};
