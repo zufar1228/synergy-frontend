@@ -846,3 +846,128 @@ export const sendTelegramTestAlert = async (
   if (!res.ok) throw new Error("Gagal mengirim test alert");
   return res.json();
 };
+
+// --- INTRUSION DETECTION (TinyML) API FUNCTIONS ---
+
+export type IntrusiEventClass = "Normal" | "Disturbance" | "Intrusion";
+
+export interface IntrusiLog {
+  id: string;
+  device_id: string;
+  event_class: IntrusiEventClass;
+  confidence: number;
+  payload: object | null;
+  timestamp: string;
+}
+
+export interface IntrusiSummary {
+  total_events: number;
+  intrusions: number;
+  disturbances: number;
+  normals: number;
+  latest_event: IntrusiLog | null;
+}
+
+export interface IntrusiStatus {
+  status: "AMAN" | "GANGGUAN" | "BAHAYA";
+  isInAlert: boolean;
+  latestEvent: IntrusiLog | null;
+  summary: {
+    total_events: number;
+    intrusions: number;
+    disturbances: number;
+  };
+}
+
+// Get intrusion logs for a device
+export const getIntrusiLogs = async (
+  token: string,
+  deviceId: string,
+  options?: {
+    limit?: number;
+    offset?: number;
+    from?: string;
+    to?: string;
+    eventClass?: IntrusiEventClass;
+  }
+): Promise<{
+  data: IntrusiLog[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+}> => {
+  const params = new URLSearchParams();
+  if (options?.limit) params.set("limit", options.limit.toString());
+  if (options?.offset) params.set("offset", options.offset.toString());
+  if (options?.from) params.set("from", options.from);
+  if (options?.to) params.set("to", options.to);
+  if (options?.eventClass) params.set("eventClass", options.eventClass);
+
+  const res = await fetch(
+    `${API_BASE_URL}/devices/${deviceId}/intrusi/logs?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengambil data intrusi");
+  }
+
+  return res.json();
+};
+
+// Get intrusion summary for a device
+export const getIntrusiSummary = async (
+  token: string,
+  deviceId: string,
+  from?: string,
+  to?: string
+): Promise<IntrusiSummary> => {
+  const params = new URLSearchParams();
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+
+  const res = await fetch(
+    `${API_BASE_URL}/devices/${deviceId}/intrusi/summary?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengambil ringkasan intrusi");
+  }
+
+  const json = await res.json();
+  return json.data;
+};
+
+// Get current intrusion status for a device
+export const getIntrusiStatus = async (
+  token: string,
+  deviceId: string
+): Promise<IntrusiStatus> => {
+  const res = await fetch(
+    `${API_BASE_URL}/devices/${deviceId}/intrusi/status`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw await buildApiError(res, "Gagal mengambil status intrusi");
+  }
+
+  const json = await res.json();
+  return json.data;
+};

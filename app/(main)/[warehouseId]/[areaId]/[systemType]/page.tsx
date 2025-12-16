@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { LingkunganView } from "@/components/analytics/LingkunganView";
 import { GangguanView } from "@/components/analytics/GangguanView";
 import { KeamananView } from "@/components/analytics/KeamananView";
+import { IntrusiView } from "@/components/analytics/IntrusiView";
 
 // Update getAnalytics function definition
 async function getAnalytics(
@@ -90,6 +91,8 @@ export default async function AnalyticsPage({
         return <GangguanView initialData={data} />;
       case "keamanan":
         return <KeamananView initialData={data} />;
+      case "intrusi":
+        return <IntrusiView deviceId={data.deviceId} initialData={data} />;
       default:
         return (
           <div className="text-center">
