@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { getMyProfile } from "@/lib/api";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/site-header";
+import { SessionRefresh } from "@/components/session-refresh";
 import { redirect } from "next/navigation";
 export default async function MainAppLayout({
   children,
@@ -52,6 +53,7 @@ export default async function MainAppLayout({
   return (
     <WarehouseProvider>
       <DeviceStatusProvider>
+        <SessionRefresh />
         <SidebarProvider>
           <div className="flex h-screen w-full bg-secondary">
             {/* Desktop Sidebar - hidden on mobile */}
