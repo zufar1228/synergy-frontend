@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Thermometer,
   Camera,
+  Shield,
 } from "lucide-react";
 import {
   Collapsible,
@@ -51,6 +52,7 @@ export function MobileNavigation({
   const [incidentAreas, setIncidentAreas] = useState<NavArea[]>([]);
   const [environmentAreas, setEnvironmentAreas] = useState<NavArea[]>([]);
   const [securityAreas, setSecurityAreas] = useState<NavArea[]>([]);
+  const [intrusiAreas, setIntrusiAreas] = useState<NavArea[]>([]);
 
   useEffect(() => {
     const fetchNavData = async () => {
@@ -60,17 +62,19 @@ export function MobileNavigation({
       } = await supabase.auth.getSession();
       if (!session) return;
       try {
-        // Fetch data for both systems simultaneously
-        const [incidentData, environmentData, securityData] = await Promise.all(
+        // Fetch data for all systems simultaneously
+        const [incidentData, environmentData, securityData, intrusiData] = await Promise.all(
           [
             getNavAreasBySystem("gangguan", session.access_token),
             getNavAreasBySystem("lingkungan", session.access_token),
             getNavAreasBySystem("keamanan", session.access_token),
+            getNavAreasBySystem("intrusi", session.access_token),
           ]
         );
         setIncidentAreas(incidentData);
         setEnvironmentAreas(environmentData);
         setSecurityAreas(securityData);
+        setIntrusiAreas(intrusiData);
       } catch (error) {
         toast.error("Gagal memuat navigasi.");
       }
@@ -90,6 +94,11 @@ export function MobileNavigation({
   );
 
   const filteredSecurityAreas = securityAreas.filter(
+    (area) =>
+      selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+  );
+
+  const filteredIntrusiAreas = intrusiAreas.filter(
     (area) =>
       selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
   );
@@ -120,6 +129,12 @@ export function MobileNavigation({
   const isGangguanActive = () => {
     return filteredIncidentAreas.some(
       (area) => pathname === `/${area.warehouse_id}/${area.id}/gangguan`
+    );
+  };
+
+  const isIntrusiActive = () => {
+    return filteredIntrusiAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/intrusi`
     );
   };
 
@@ -236,6 +251,39 @@ export function MobileNavigation({
               onClick={onLinkClick}
               className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
                 pathname === `/${area.warehouse_id}/${area.id}/gangguan`
+                  ? "bg-main text-main-foreground"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              <span>{area.name}</span>
+            </Link>
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Collapsible Intrusi Menu */}
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <div
+            className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
+              isIntrusiActive()
+                ? "bg-main text-main-foreground"
+                : "hover:bg-accent hover:text-accent-foreground"
+            }`}
+          >
+            <Shield className="h-5 w-5 flex-shrink-0" />
+            <span className="flex-1">Intrusi</span>
+            <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pl-5 pt-1 space-y-1">
+          {filteredIntrusiAreas.map((area) => (
+            <Link
+              key={area.id}
+              href={`/${area.warehouse_id}/${area.id}/intrusi`}
+              onClick={onLinkClick}
+              className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                pathname === `/${area.warehouse_id}/${area.id}/intrusi`
                   ? "bg-main text-main-foreground"
                   : "hover:bg-accent hover:text-accent-foreground"
               }`}
