@@ -16,6 +16,7 @@ import {
   Thermometer,
   Camera,
   Shield,
+  ShieldAlert,
 } from "lucide-react";
 import {
   Collapsible,
@@ -53,6 +54,7 @@ export function MobileNavigation({
   const [environmentAreas, setEnvironmentAreas] = useState<NavArea[]>([]);
   const [securityAreas, setSecurityAreas] = useState<NavArea[]>([]);
   const [intrusiAreas, setIntrusiAreas] = useState<NavArea[]>([]);
+  const [proteksiAsetAreas, setProteksiAsetAreas] = useState<NavArea[]>([]);
 
   useEffect(() => {
     const fetchNavData = async () => {
@@ -63,18 +65,20 @@ export function MobileNavigation({
       if (!session) return;
       try {
         // Fetch data for all systems simultaneously
-        const [incidentData, environmentData, securityData, intrusiData] = await Promise.all(
+        const [incidentData, environmentData, securityData, intrusiData, proteksiAsetData] = await Promise.all(
           [
             getNavAreasBySystem("gangguan", session.access_token),
             getNavAreasBySystem("lingkungan", session.access_token),
             getNavAreasBySystem("keamanan", session.access_token),
             getNavAreasBySystem("intrusi", session.access_token),
+            getNavAreasBySystem("proteksi_aset", session.access_token),
           ]
         );
         setIncidentAreas(incidentData);
         setEnvironmentAreas(environmentData);
         setSecurityAreas(securityData);
         setIntrusiAreas(intrusiData);
+        setProteksiAsetAreas(proteksiAsetData);
       } catch (error) {
         toast.error("Gagal memuat navigasi.");
       }
@@ -99,6 +103,11 @@ export function MobileNavigation({
   );
 
   const filteredIntrusiAreas = intrusiAreas.filter(
+    (area) =>
+      selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+  );
+
+  const filteredProteksiAsetAreas = proteksiAsetAreas.filter(
     (area) =>
       selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
   );
@@ -135,6 +144,12 @@ export function MobileNavigation({
   const isIntrusiActive = () => {
     return filteredIntrusiAreas.some(
       (area) => pathname === `/${area.warehouse_id}/${area.id}/intrusi`
+    );
+  };
+
+  const isProteksiAsetActive = () => {
+    return filteredProteksiAsetAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/proteksi_aset`
     );
   };
 
@@ -284,6 +299,39 @@ export function MobileNavigation({
               onClick={onLinkClick}
               className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
                 pathname === `/${area.warehouse_id}/${area.id}/intrusi`
+                  ? "bg-main text-main-foreground"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              <span>{area.name}</span>
+            </Link>
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Collapsible Proteksi Aset Menu */}
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <div
+            className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
+              isProteksiAsetActive()
+                ? "bg-main text-main-foreground"
+                : "hover:bg-accent hover:text-accent-foreground"
+            }`}
+          >
+            <ShieldAlert className="h-5 w-5 flex-shrink-0" />
+            <span className="flex-1">Proteksi Aset</span>
+            <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pl-5 pt-1 space-y-1">
+          {filteredProteksiAsetAreas.map((area) => (
+            <Link
+              key={area.id}
+              href={`/${area.warehouse_id}/${area.id}/proteksi_aset`}
+              onClick={onLinkClick}
+              className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                pathname === `/${area.warehouse_id}/${area.id}/proteksi_aset`
                   ? "bg-main text-main-foreground"
                   : "hover:bg-accent hover:text-accent-foreground"
               }`}

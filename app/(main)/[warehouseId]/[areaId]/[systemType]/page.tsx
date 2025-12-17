@@ -5,6 +5,7 @@ import { LingkunganView } from "@/components/analytics/LingkunganView";
 import { GangguanView } from "@/components/analytics/GangguanView";
 import { KeamananView } from "@/components/analytics/KeamananView";
 import { IntrusiView } from "@/components/analytics/IntrusiView";
+import { ProteksiAsetView } from "@/components/analytics/ProteksiAsetView";
 
 // Update getAnalytics function definition
 async function getAnalytics(
@@ -93,6 +94,8 @@ export default async function AnalyticsPage({
         return <KeamananView initialData={data} />;
       case "intrusi":
         return <IntrusiView deviceId={data.deviceId} initialData={data} />;
+      case "proteksi_aset":
+        return <ProteksiAsetView deviceId={data.deviceId} initialData={data} />;
       default:
         return (
           <div className="text-center">

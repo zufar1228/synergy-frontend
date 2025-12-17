@@ -16,6 +16,7 @@ import {
   Thermometer,
   Camera,
   Shield,
+  ShieldAlert,
 } from "lucide-react";
 import {
   Collapsible,
@@ -57,6 +58,7 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   const [environmentAreas, setEnvironmentAreas] = useState<NavArea[]>([]);
   const [securityAreas, setSecurityAreas] = useState<NavArea[]>([]);
   const [intrusiAreas, setIntrusiAreas] = useState<NavArea[]>([]);
+  const [proteksiAsetAreas, setProteksiAsetAreas] = useState<NavArea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -71,18 +73,20 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
       }
       try {
         // Fetch data for all systems simultaneously
-        const [incidentData, environmentData, securityData, intrusiData] = await Promise.all(
+        const [incidentData, environmentData, securityData, intrusiData, proteksiAsetData] = await Promise.all(
           [
             getNavAreasBySystem("gangguan", session.access_token),
             getNavAreasBySystem("lingkungan", session.access_token),
             getNavAreasBySystem("keamanan", session.access_token),
             getNavAreasBySystem("intrusi", session.access_token),
+            getNavAreasBySystem("proteksi_aset", session.access_token),
           ]
         );
         setIncidentAreas(incidentData);
         setEnvironmentAreas(environmentData);
         setSecurityAreas(securityData);
         setIntrusiAreas(intrusiData);
+        setProteksiAsetAreas(proteksiAsetData);
       } catch (error) {
         console.error("Failed to load navigation areas:", error);
         // Don't show toast on every render, just log the error
@@ -126,6 +130,14 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
     );
   }, [intrusiAreas, selectedWarehouse]);
 
+  // Memoize filtered proteksi aset areas to avoid recalculation on every render
+  const filteredProteksiAsetAreas = useMemo(() => {
+    return proteksiAsetAreas.filter(
+      (area) =>
+        selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+    );
+  }, [proteksiAsetAreas, selectedWarehouse]);
+
   // Memoize the isActive function to avoid recreation on every render
   const isActive = useCallback(
     (href: string) => {
@@ -157,6 +169,13 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
       (area) => pathname === `/${area.warehouse_id}/${area.id}/intrusi`
     );
   }, [filteredIntrusiAreas, pathname]);
+
+  // Check if any proteksi aset sub-menu is active
+  const isProteksiAsetActive = useMemo(() => {
+    return filteredProteksiAsetAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/proteksi_aset`
+    );
+  }, [filteredProteksiAsetAreas, pathname]);
 
   // Check if any incident sub-menu is active
   const isIncidentActive = useMemo(() => {
@@ -371,6 +390,52 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
                           >
                             <Link
                               href={`/${area.warehouse_id}/${area.id}/intrusi`}
+                            >
+                              <span>{area.name}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+
+          {/* Collapsible Proteksi Aset (ML Detection) Menu */}
+          <Collapsible asChild>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton
+                  suppressHydrationWarning
+                  isActive={isProteksiAsetActive}
+                >
+                  <ShieldAlert />
+                  <span>Proteksi Aset</span>
+                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent suppressHydrationWarning>
+                <SidebarMenuSub>
+                  {isLoading
+                    ? // Show skeleton while loading
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <SidebarMenuSubItem key={i}>
+                          <SidebarMenuSubButton>
+                            <Skeleton className="h-4 w-24" />
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))
+                    : filteredProteksiAsetAreas.map((area) => (
+                        <SidebarMenuSubItem key={area.id}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={
+                              pathname ===
+                              `/${area.warehouse_id}/${area.id}/proteksi_aset`
+                            }
+                          >
+                            <Link
+                              href={`/${area.warehouse_id}/${area.id}/proteksi_aset`}
                             >
                               <span>{area.name}</span>
                             </Link>
