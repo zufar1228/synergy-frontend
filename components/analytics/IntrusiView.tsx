@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ShieldAlert, ShieldCheck, AlertTriangle, Activity } from "lucide-react";
+import { ShieldAlert, ShieldOff } from "lucide-react";
 import { subDays } from "date-fns";
 import { useSearchParams } from "next/navigation";
 
@@ -37,10 +37,9 @@ interface IntrusiLog {
 }
 
 interface IntrusiSummary {
-  total_events: number;
   intrusions: number;
-  disturbances: number;
-  normals: number;
+  lastIntrusion?: string;
+  averageConfidence: number;
 }
 
 interface IntrusiViewProps {
@@ -55,10 +54,9 @@ export const IntrusiView = ({ deviceId, initialData }: IntrusiViewProps) => {
   const [logs, setLogs] = useState<IntrusiLog[]>(initialData?.logs || []);
   const [summary, setSummary] = useState<IntrusiSummary>(
     initialData?.summary || {
-      total_events: 0,
       intrusions: 0,
-      disturbances: 0,
-      normals: 0,
+      lastIntrusion: undefined,
+      averageConfidence: 0,
     }
   );
   const [isLoading, setIsLoading] = useState(false);
@@ -95,16 +93,17 @@ export const IntrusiView = ({ deviceId, initialData }: IntrusiViewProps) => {
       if (data) {
         setLogs(data as IntrusiLog[]);
 
-        // Calculate summary
+        // Calculate summary - only count intrusions (TinyML only sends Intrusion events)
         const intrusions = data.filter((l) => l.event_class === "Intrusion").length;
-        const disturbances = data.filter((l) => l.event_class === "Disturbance").length;
-        const normals = data.filter((l) => l.event_class === "Normal").length;
+        const lastIntrusion = intrusions > 0 ? data.find((l) => l.event_class === "Intrusion")?.timestamp : undefined;
+        const averageConfidence = intrusions > 0 
+          ? data.filter((l) => l.event_class === "Intrusion").reduce((sum, l) => sum + l.confidence, 0) / intrusions 
+          : 0;
 
         setSummary({
-          total_events: data.length,
           intrusions,
-          disturbances,
-          normals,
+          lastIntrusion,
+          averageConfidence,
         });
       }
     } finally {
@@ -151,26 +150,12 @@ export const IntrusiView = ({ deviceId, initialData }: IntrusiViewProps) => {
         <DateRangePicker />
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Event
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-blue-500" />
-              <span className="text-2xl font-bold">{summary.total_events}</span>
-            </div>
-          </CardContent>
-        </Card>
-
+      {/* Summary Cards - TinyML Analytics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-red-200 dark:border-red-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Intrusi Terdeteksi
+              Total Intrusi Terdeteksi
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -180,38 +165,50 @@ export const IntrusiView = ({ deviceId, initialData }: IntrusiViewProps) => {
                 {summary.intrusions}
               </span>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Dalam periode yang dipilih
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="border-yellow-200 dark:border-yellow-800">
+        <Card className="border-blue-200 dark:border-blue-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Gangguan
+              Intrusi Terakhir
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
-              <span className="text-2xl font-bold text-yellow-500">
-                {summary.disturbances}
+              <ShieldAlert className="h-5 w-5 text-blue-500" />
+              <span className="text-lg font-semibold text-blue-600">
+                {summary.lastIntrusion 
+                  ? format(new Date(summary.lastIntrusion), "dd MMM HH:mm", { locale: localeID })
+                  : "Belum ada"
+                }
               </span>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Waktu deteksi terakhir
+            </p>
           </CardContent>
         </Card>
 
         <Card className="border-green-200 dark:border-green-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Normal
+              Rata-rata Confidence
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-green-500" />
-              <span className="text-2xl font-bold text-green-500">
-                {summary.normals}
+              <ShieldAlert className="h-5 w-5 text-green-500" />
+              <span className="text-2xl font-bold text-green-600">
+                {(summary.averageConfidence * 100).toFixed(1)}%
               </span>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Tingkat kepercayaan AI
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -234,7 +231,7 @@ export const IntrusiView = ({ deviceId, initialData }: IntrusiViewProps) => {
                 </div>
               ) : logs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                  <ShieldCheck className="h-12 w-12 mb-2 opacity-50" />
+                  <ShieldOff className="h-12 w-12 mb-2 opacity-50" />
                   <p>Tidak ada event dalam rentang waktu ini.</p>
                 </div>
               ) : (

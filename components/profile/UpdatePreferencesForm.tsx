@@ -26,7 +26,9 @@ import { Button } from "@/components/ui/button";
 
 // Definisikan sistem yang bisa di-subscribe pengguna
 const availableSystems = [
-  { id: "lingkungan", label: "Lingkungan (Suhu, Kelembapan)" },
+  { id: "lingkungan", label: "Lingkungan (Suhu, Kelembapan, CO2)" },
+  { id: "intrusi", label: "Intrusi (TinyML Intrusion Detection)" },
+  { id: "proteksi_aset", label: "Proteksi Aset (Getaran, Thermal, Kebocoran)" },
   { id: "gangguan", label: "Gangguan (Insiden, Benturan)" },
   { id: "keamanan", label: "Keamanan (Gerakan)" },
   { id: "medis_air", label: "Air Medis (pH, Kekeruhan)" },

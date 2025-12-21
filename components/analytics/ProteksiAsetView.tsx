@@ -36,14 +36,19 @@ import {
   Thermometer,
   Settings2,
   Activity,
+  MessageCircle,
   Camera,
   Zap,
+  ShieldAlert,
   CheckCircle,
   Shield,
 } from "lucide-react";
 import { subDays, format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import { useSearchParams } from "next/navigation";
+
+// Telegram invite link
+const TELEGRAM_INVITE_LINK = "https://t.me/+PdgEF74PJJJmYzZl";
 
 interface ChartData {
   time: string;
@@ -665,6 +670,14 @@ export const ProteksiAsetView = ({
                 </div>
               </div>
 
+              <Button
+                variant="neutral"
+                className="w-full border-blue-400 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                onClick={() => window.open(TELEGRAM_INVITE_LINK, "_blank")}
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Gabung Grup Notifikasi Telegram
+              </Button>
             </div>
           </CardContent>
         </Card>

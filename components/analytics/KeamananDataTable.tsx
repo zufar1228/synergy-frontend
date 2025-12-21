@@ -172,31 +172,38 @@ const ExpandableReviewForm = ({
                   Atribut Terdeteksi ({log.attributes.length} orang)
                 </h4>
                 <div className="space-y-3 max-h-40 overflow-y-auto">
-                  {log.attributes.map((person: any, index: number) => (
-                    <div
-                      key={index}
-                      className="border-b border-gray-700 pb-2 last:border-b-0 last:pb-0"
-                    >
-                      <h5 className="text-xs font-medium text-gray-200 mb-1">
-                        Orang {index + 1} (Keyakinan:{" "}
-                        {(person.confidence * 100).toFixed(0)}%)
-                      </h5>
-                      <ul className="list-disc list-inside space-y-1 text-xs text-gray-200">
-                        {person.attributes.map((attr: any, i: number) => (
-                          <li key={i}>
-                            <span className="capitalize">
-                              {attr.attribute
-                                .replace("person wearing a ", "")
-                                .replace("person not wearing a ", "")}
-                            </span>
-                            <span className="text-gray-200 ml-1">
-                              ({(attr.confidence * 100).toFixed(0)}%)
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                  {log.attributes.map((person: any, index: number) => {
+                    // Handle both nested and flat attribute structures
+                    const isNested = person.attributes && Array.isArray(person.attributes);
+                    const attributes = isNested ? person.attributes : [person];
+                    const personConfidence = person.confidence || log.confidence || 0.85;
+
+                    return (
+                      <div
+                        key={index}
+                        className="border-b border-gray-700 pb-2 last:border-b-0 last:pb-0"
+                      >
+                        <h5 className="text-xs font-medium text-gray-200 mb-1">
+                          Orang {index + 1} (Keyakinan:{" "}
+                          {(personConfidence * 100).toFixed(0)}%)
+                        </h5>
+                        <ul className="list-disc list-inside space-y-1 text-xs text-gray-200">
+                          {attributes.map((attr: any, i: number) => (
+                            <li key={i}>
+                              <span className="capitalize">
+                                {attr.attribute
+                                  .replace("person wearing a ", "")
+                                  .replace("person not wearing a ", "")}
+                              </span>
+                              <span className="text-gray-200 ml-1">
+                                ({((attr.confidence || personConfidence) * 100).toFixed(0)}%)
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -273,30 +280,37 @@ const AttributeDetails = ({ data }: { data: any[] | null }) => {
           <DialogTitle>Detail Atribut Terdeteksi</DialogTitle>
         </DialogHeader>
         <div className="py-4 space-y-4 max-h-[60vh] overflow-y-auto">
-          {data.map((person, index) => (
-            <div key={index} className="border-b pb-4 last:border-b-0">
-              <h4 className="font-semibold mb-2">
-                Orang {index + 1} (Keyakinan:{" "}
-                {(person.confidence * 100).toFixed(0)}%)
-              </h4>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                {person.attributes.map((attr: any, i: number) => (
-                  <li key={i}>
-                    {/* Membersihkan teks dari skrip Python */}
-                    <span className="capitalize">
-                      {attr.attribute
-                        .replace("person wearing a ", "")
-                        .replace("person not wearing a ", "")}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {" "}
-                      ({(attr.confidence * 100).toFixed(0)}%)
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {data.map((person, index) => {
+            // Handle both nested and flat attribute structures
+            const isNested = person.attributes && Array.isArray(person.attributes);
+            const attributes = isNested ? person.attributes : [person];
+            const personConfidence = person.confidence || 0.85;
+
+            return (
+              <div key={index} className="border-b pb-4 last:border-b-0">
+                <h4 className="font-semibold mb-2">
+                  Orang {index + 1} (Keyakinan:{" "}
+                  {(personConfidence * 100).toFixed(0)}%)
+                </h4>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  {attributes.map((attr: any, i: number) => (
+                    <li key={i}>
+                      {/* Membersihkan teks dari skrip Python */}
+                      <span className="capitalize">
+                        {attr.attribute
+                          .replace("person wearing a ", "")
+                          .replace("person not wearing a ", "")}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {" "}
+                        ({((attr.confidence || personConfidence) * 100).toFixed(0)}%)
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       </DialogContent>
     </Dialog>
