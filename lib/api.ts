@@ -68,6 +68,24 @@ const buildApiError = async (
   return apiError;
 };
 
+// --- USER ACCESS VERIFICATION ---
+
+export interface VerifyAccessResponse {
+  authorized: boolean;
+  message: string;
+}
+
+/**
+ * Verify if the current user is authorized to access the system.
+ * Users must be invited through user management or manually added to Supabase.
+ */
+export const verifyUserAccess = async (token: string): Promise<VerifyAccessResponse> => {
+  const res = await fetch(`${API_BASE_URL}/users/verify-access`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
+};
+
 // --- WAREHOUSE API FUNCTIONS ---
 
 export const getWarehouses = async (token: string): Promise<Warehouse[]> => {
