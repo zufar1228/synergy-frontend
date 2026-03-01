@@ -1,9 +1,9 @@
 // frontend/components/app-navigation.tsx
-"use client";
+'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   ChevronRight,
   LayoutDashboard,
@@ -12,17 +12,15 @@ import {
   Building,
   HardDrive,
   AreaChart,
-  AlertTriangle,
   Thermometer,
   Camera,
-  Shield,
-  ShieldAlert,
-} from "lucide-react";
+  DoorOpen
+} from 'lucide-react';
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+  CollapsibleTrigger
+} from '@/components/ui/collapsible';
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -31,41 +29,39 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
-  SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
-import { useWarehouse } from "@/contexts/WarehouseContext";
-import { createClient } from "@/lib/supabase/client";
-import { getNavAreasBySystem, NavArea } from "@/lib/api";
-import { Skeleton } from "@/components/ui/skeleton";
+  SidebarMenuSubItem
+} from '@/components/ui/sidebar';
+import { useWarehouse } from '@/contexts/WarehouseContext';
+import { createClient } from '@/lib/supabase/client';
+import { getNavAreasBySystem, NavArea } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Define navigation data
 const mainLinks = [
-  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Profil", href: "/profile", icon: Settings },
+  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { title: 'Profil', href: '/profile', icon: Settings }
 ];
 
 const managementLinks = [
-  { title: "Gudang", href: "/management/warehouses", icon: Building },
-  { title: "Area", href: "/management/areas", icon: AreaChart },
-  { title: "Perangkat", href: "/management/devices", icon: HardDrive },
-  { title: "Pengguna", href: "/management/users", icon: Users },
+  { title: 'Gudang', href: '/management/warehouses', icon: Building },
+  { title: 'Area', href: '/management/areas', icon: AreaChart },
+  { title: 'Perangkat', href: '/management/devices', icon: HardDrive },
+  { title: 'Pengguna', href: '/management/users', icon: Users }
 ];
 
 const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   const pathname = usePathname();
   const { selectedWarehouse } = useWarehouse();
-  const [incidentAreas, setIncidentAreas] = useState<NavArea[]>([]);
   const [environmentAreas, setEnvironmentAreas] = useState<NavArea[]>([]);
   const [securityAreas, setSecurityAreas] = useState<NavArea[]>([]);
   const [intrusiAreas, setIntrusiAreas] = useState<NavArea[]>([]);
-  const [proteksiAsetAreas, setProteksiAsetAreas] = useState<NavArea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchNavData = async () => {
       const supabase = createClient();
       const {
-        data: { session },
+        data: { session }
       } = await supabase.auth.getSession();
       if (!session) {
         setIsLoading(false);
@@ -73,22 +69,16 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
       }
       try {
         // Fetch data for all systems simultaneously
-        const [incidentData, environmentData, securityData, intrusiData, proteksiAsetData] = await Promise.all(
-          [
-            getNavAreasBySystem("gangguan", session.access_token),
-            getNavAreasBySystem("lingkungan", session.access_token),
-            getNavAreasBySystem("keamanan", session.access_token),
-            getNavAreasBySystem("intrusi", session.access_token),
-            getNavAreasBySystem("proteksi_aset", session.access_token),
-          ]
-        );
-        setIncidentAreas(incidentData);
+        const [environmentData, securityData, intrusiData] = await Promise.all([
+          getNavAreasBySystem('lingkungan', session.access_token),
+          getNavAreasBySystem('keamanan', session.access_token),
+          getNavAreasBySystem('intrusi', session.access_token)
+        ]);
         setEnvironmentAreas(environmentData);
         setSecurityAreas(securityData);
         setIntrusiAreas(intrusiData);
-        setProteksiAsetAreas(proteksiAsetData);
       } catch (error) {
-        console.error("Failed to load navigation areas:", error);
+        console.error('Failed to load navigation areas:', error);
         // Don't show toast on every render, just log the error
       } finally {
         setIsLoading(false);
@@ -98,19 +88,11 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
     fetchNavData();
   }, []); // Only fetch once on mount
 
-  // Memoize filtered incident areas to avoid recalculation on every render
-  const filteredIncidentAreas = useMemo(() => {
-    return incidentAreas.filter(
-      (area) =>
-        selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
-    );
-  }, [incidentAreas, selectedWarehouse]);
-
   // Memoize filtered environment areas to avoid recalculation on every render
   const filteredEnvironmentAreas = useMemo(() => {
     return environmentAreas.filter(
       (area) =>
-        selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+        selectedWarehouse === 'all' || area.warehouse_id === selectedWarehouse
     );
   }, [environmentAreas, selectedWarehouse]);
 
@@ -118,33 +100,25 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   const filteredSecurityAreas = useMemo(() => {
     return securityAreas.filter(
       (area) =>
-        selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+        selectedWarehouse === 'all' || area.warehouse_id === selectedWarehouse
     );
   }, [securityAreas, selectedWarehouse]);
 
-  // Memoize filtered intrusi areas to avoid recalculation on every render
+  // Memoize filtered intrusi areas
   const filteredIntrusiAreas = useMemo(() => {
     return intrusiAreas.filter(
       (area) =>
-        selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
+        selectedWarehouse === 'all' || area.warehouse_id === selectedWarehouse
     );
   }, [intrusiAreas, selectedWarehouse]);
-
-  // Memoize filtered proteksi aset areas to avoid recalculation on every render
-  const filteredProteksiAsetAreas = useMemo(() => {
-    return proteksiAsetAreas.filter(
-      (area) =>
-        selectedWarehouse === "all" || area.warehouse_id === selectedWarehouse
-    );
-  }, [proteksiAsetAreas, selectedWarehouse]);
 
   // Memoize the isActive function to avoid recreation on every render
   const isActive = useCallback(
     (href: string) => {
-      if (href === "/dashboard" || href === "/profile") {
+      if (href === '/dashboard' || href === '/profile') {
         return pathname === href;
       }
-      return pathname === href || pathname.startsWith(href + "/");
+      return pathname === href || pathname.startsWith(href + '/');
     },
     [pathname]
   );
@@ -170,31 +144,17 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
     );
   }, [filteredIntrusiAreas, pathname]);
 
-  // Check if any proteksi aset sub-menu is active
-  const isProteksiAsetActive = useMemo(() => {
-    return filteredProteksiAsetAreas.some(
-      (area) => pathname === `/${area.warehouse_id}/${area.id}/proteksi_aset`
-    );
-  }, [filteredProteksiAsetAreas, pathname]);
-
-  // Check if any incident sub-menu is active
-  const isIncidentActive = useMemo(() => {
-    return filteredIncidentAreas.some(
-      (area) => pathname === `/${area.warehouse_id}/${area.id}/gangguan`
-    );
-  }, [filteredIncidentAreas, pathname]);
-
   // Memoize management links filtering
   const filteredManagementLinks = useMemo(() => {
     return managementLinks.filter((link) => {
-      if (link.href === "/management/users") {
-        return userRole === "super_admin";
+      if (link.href === '/management/users') {
+        return userRole === 'super_admin';
       }
       return true;
     });
   }, [userRole]);
 
-  const showManagement = ["admin", "super_admin"].includes(userRole);
+  const showManagement = ['admin', 'super_admin'].includes(userRole);
 
   return (
     <>
@@ -214,7 +174,6 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
         </SidebarMenu>
       </SidebarGroup>
 
-      {/* Collapsible Incident Menu */}
       <SidebarGroup className="mb-3">
         <SidebarGroupLabel>Monitoring</SidebarGroupLabel>
         <SidebarMenu>
@@ -309,53 +268,7 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
               </CollapsibleContent>
             </SidebarMenuItem>
           </Collapsible>
-
-          <Collapsible asChild>
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  suppressHydrationWarning
-                  isActive={isIncidentActive}
-                >
-                  <AlertTriangle />
-                  <span>Gangguan</span>
-                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent suppressHydrationWarning>
-                <SidebarMenuSub>
-                  {isLoading
-                    ? // Show skeleton while loading
-                      Array.from({ length: 3 }).map((_, i) => (
-                        <SidebarMenuSubItem key={i}>
-                          <SidebarMenuSubButton>
-                            <Skeleton className="h-4 w-24" />
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))
-                    : filteredIncidentAreas.map((area) => (
-                        <SidebarMenuSubItem key={area.id}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={
-                              pathname ===
-                              `/${area.warehouse_id}/${area.id}/gangguan`
-                            }
-                          >
-                            <Link
-                              href={`/${area.warehouse_id}/${area.id}/gangguan`}
-                            >
-                              <span>{area.name}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-
-          {/* Collapsible Intrusi (TinyML) Menu */}
+          {/* Collapsible Intrusi Menu */}
           <Collapsible asChild>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
@@ -363,16 +276,15 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
                   suppressHydrationWarning
                   isActive={isIntrusiActive}
                 >
-                  <Shield />
-                  <span>Intrusi</span>
+                  <DoorOpen />
+                  <span>Intrusi Pintu</span>
                   <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent suppressHydrationWarning>
                 <SidebarMenuSub>
                   {isLoading
-                    ? // Show skeleton while loading
-                      Array.from({ length: 3 }).map((_, i) => (
+                    ? Array.from({ length: 3 }).map((_, i) => (
                         <SidebarMenuSubItem key={i}>
                           <SidebarMenuSubButton>
                             <Skeleton className="h-4 w-24" />
@@ -390,52 +302,6 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
                           >
                             <Link
                               href={`/${area.warehouse_id}/${area.id}/intrusi`}
-                            >
-                              <span>{area.name}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-
-          {/* Collapsible Proteksi Aset (ML Detection) Menu */}
-          <Collapsible asChild>
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  suppressHydrationWarning
-                  isActive={isProteksiAsetActive}
-                >
-                  <ShieldAlert />
-                  <span>Proteksi Aset</span>
-                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent suppressHydrationWarning>
-                <SidebarMenuSub>
-                  {isLoading
-                    ? // Show skeleton while loading
-                      Array.from({ length: 3 }).map((_, i) => (
-                        <SidebarMenuSubItem key={i}>
-                          <SidebarMenuSubButton>
-                            <Skeleton className="h-4 w-24" />
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))
-                    : filteredProteksiAsetAreas.map((area) => (
-                        <SidebarMenuSubItem key={area.id}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={
-                              pathname ===
-                              `/${area.warehouse_id}/${area.id}/proteksi_aset`
-                            }
-                          >
-                            <Link
-                              href={`/${area.warehouse_id}/${area.id}/proteksi_aset`}
                             >
                               <span>{area.name}</span>
                             </Link>
@@ -470,7 +336,7 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   );
 };
 
-AppNavigationComponent.displayName = "AppNavigation";
+AppNavigationComponent.displayName = 'AppNavigation';
 
 export const AppNavigation = React.memo(AppNavigationComponent);
 
@@ -534,34 +400,17 @@ export function AppNavigationSkeleton({ userRole }: { userRole: string }) {
               ))}
             </SidebarMenuSub>
           </SidebarMenuItem>
-          {/* Incident Menu Skeleton */}
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <Skeleton className="h-4 w-4 rounded" />
-              <Skeleton className="h-4 w-16" />
-              <ChevronRight className="ml-auto h-4 w-4" />
-            </SidebarMenuButton>
-            <SidebarMenuSub>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <SidebarMenuSubItem key={i}>
-                  <SidebarMenuSubButton>
-                    <Skeleton className="h-4 w-24" />
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              ))}
-            </SidebarMenuSub>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
 
       {/* Management Section - only for admin/super_admin */}
-      {["admin", "super_admin"].includes(userRole) && (
+      {['admin', 'super_admin'].includes(userRole) && (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>
             <Skeleton className="h-4 w-24" />
           </SidebarGroupLabel>
           <SidebarMenu>
-            {Array.from({ length: userRole === "super_admin" ? 4 : 3 }).map(
+            {Array.from({ length: userRole === 'super_admin' ? 4 : 3 }).map(
               (_, i) => (
                 <SidebarMenuItem key={i}>
                   <SidebarMenuButton>

@@ -1,11 +1,10 @@
 // frontend/app/(main)/[warehouseId]/[areaId]/[systemType]/page.tsx
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { LingkunganView } from "@/components/analytics/LingkunganView";
-import { GangguanView } from "@/components/analytics/GangguanView";
-import { KeamananView } from "@/components/analytics/KeamananView";
-import { IntrusiView } from "@/components/analytics/IntrusiView";
-import { ProteksiAsetView } from "@/components/analytics/ProteksiAsetView";
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { LingkunganView } from '@/components/analytics/LingkunganView';
+import { KeamananView } from '@/components/analytics/KeamananView';
+import { IntrusiView } from '@/components/analytics/IntrusiView';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 // Update getAnalytics function definition
 async function getAnalytics(
@@ -21,23 +20,23 @@ async function getAnalytics(
 ) {
   try {
     const query = new URLSearchParams();
-    query.append("area_id", params.areaId);
-    if (params.page) query.append("page", params.page);
-    if (params.perPage) query.append("per_page", params.perPage);
-    if (params.from) query.append("from", params.from);
-    if (params.to) query.append("to", params.to);
+    query.append('area_id', params.areaId);
+    if (params.page) query.append('page', params.page);
+    if (params.perPage) query.append('per_page', params.perPage);
+    if (params.from) query.append('from', params.from);
+    if (params.to) query.append('to', params.to);
 
     const url =
       process.env.NEXT_PUBLIC_API_URL +
       `/api/analytics/${params.systemType}?${query.toString()}`;
     const res = await fetch(url, {
-      cache: "no-store",
-      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: 'no-store',
+      headers: { Authorization: `Bearer ${accessToken}` }
     });
     if (!res.ok) return null;
     return res.json();
   } catch (error) {
-    console.error("Failed to fetch analytics:", error);
+    console.error('Failed to fetch analytics:', error);
     return null;
   }
 }
@@ -45,7 +44,7 @@ async function getAnalytics(
 // Komponen Halaman Server yang bertindak sebagai dispatcher
 export default async function AnalyticsPage({
   params,
-  searchParams,
+  searchParams
 }: {
   params: { warehouseId: string; areaId: string; systemType: string };
   searchParams: {
@@ -57,9 +56,9 @@ export default async function AnalyticsPage({
 }) {
   const supabase = await createClient();
   const {
-    data: { session },
+    data: { session }
   } = await supabase.auth.getSession();
-  if (!session) return redirect("/login");
+  if (!session) return redirect('/login');
 
   // --- PERBAIKAN: Await params sebelum mengakses properties ---
   const awaitedParams = await params;
@@ -67,8 +66,8 @@ export default async function AnalyticsPage({
 
   // --- PERBAIKAN 3: Await searchParams sebelum mengakses properties ---
   const awaitedSearchParams = await searchParams;
-  const page = awaitedSearchParams.page || "1";
-  const perPage = awaitedSearchParams.per_page || "25";
+  const page = awaitedSearchParams.page || '1';
+  const perPage = awaitedSearchParams.per_page || '25';
 
   // Pass all relevant searchParams to the fetch function
   const data = await getAnalytics(session.access_token, {
@@ -77,29 +76,50 @@ export default async function AnalyticsPage({
     page: page,
     perPage: perPage,
     from: awaitedSearchParams.from,
-    to: awaitedSearchParams.to,
+    to: awaitedSearchParams.to
   });
 
   if (!data) {
-    return <div className="text-center">Gagal memuat data analitik.</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/50 mb-4">
+          <AlertTriangle className="h-8 w-8 text-red-500" />
+        </div>
+        <h2 className="text-lg font-heading mb-1">Gagal Memuat Data</h2>
+        <p className="text-muted-foreground text-sm max-w-xs mb-4">
+          Terjadi kesalahan saat mengambil data analitik. Silakan coba lagi.
+        </p>
+        <a
+          href={`/${awaitedParams.warehouseId}/${areaId}/${systemType}`}
+          className="inline-flex items-center gap-2 text-sm font-medium text-main hover:underline"
+        >
+          <RefreshCw className="h-4 w-4" /> Muat Ulang
+        </a>
+      </div>
+    );
   }
 
   const renderAnalyticsView = () => {
     switch (systemType) {
-      case "lingkungan":
+      case 'lingkungan':
         return <LingkunganView initialData={data} />;
-      case "gangguan":
-        return <GangguanView initialData={data} />;
-      case "keamanan":
+      case 'keamanan':
         return <KeamananView initialData={data} />;
-      case "intrusi":
-        return <IntrusiView deviceId={data.deviceId} initialData={data} />;
-      case "proteksi_aset":
-        return <ProteksiAsetView deviceId={data.deviceId} initialData={data} />;
+      case 'intrusi':
+        return <IntrusiView initialData={data} />;
       default:
         return (
-          <div className="text-center">
-            Tampilan analitik untuk tipe sistem '{systemType}' belum tersedia.
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+              <AlertTriangle className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h2 className="text-lg font-heading mb-1">
+              Tampilan Belum Tersedia
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-xs">
+              Analitik untuk tipe sistem &apos;{systemType}&apos; belum
+              tersedia.
+            </p>
           </div>
         );
     }
@@ -107,8 +127,8 @@ export default async function AnalyticsPage({
 
   return (
     <div className="w-full">
-      <h1 className="text-3xl font-bold mb-6 capitalize">
-        Analitik Sistem: {systemType.replace("_", " ")}
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6 capitalize">
+        Analitik: {systemType.replace('_', ' ')}
       </h1>
       {renderAnalyticsView()}
     </div>

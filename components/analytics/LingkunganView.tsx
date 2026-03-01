@@ -1,17 +1,17 @@
 // frontend/components/analytics/LingkunganView.tsx
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+  TableRow
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import {
   LineChart,
   Line,
@@ -20,13 +20,13 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { format } from "date-fns";
-import { useRouter, useSearchParams, useParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { FanControl } from "./FanControl";
-import { useDeviceStatus } from "@/contexts/DeviceStatusContext";
+  ResponsiveContainer
+} from 'recharts';
+import { format } from 'date-fns';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { FanControl } from './FanControl';
+import { useDeviceStatus } from '@/contexts/DeviceStatusContext';
 
 // 1. Perbarui tipe data
 interface Log {
@@ -50,7 +50,7 @@ interface AnalyticsData {
 }
 
 export const LingkunganView = ({
-  initialData,
+  initialData
 }: {
   initialData: AnalyticsData;
 }) => {
@@ -64,6 +64,7 @@ export const LingkunganView = ({
   const [summary, setSummary] = useState(initialData.summary);
   const [lastDataTimestamp, setLastDataTimestamp] = useState<Date | null>(null);
   const { pagination } = initialData;
+  const newRowIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     setLogs(initialData.logs);
@@ -79,13 +80,13 @@ export const LingkunganView = ({
     const channel = supabase
       .channel(`realtime-lingkungan`)
       .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "lingkungan_logs" },
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'lingkungan_logs' },
         (payload: any) => {
           setLogs((currentLogs) => [payload.new as Log, ...currentLogs]);
           setLastDataTimestamp(new Date(payload.new.timestamp));
           // Update device status context - device is online since it's sending data
-          updateDeviceStatus(areaId, "lingkungan", true);
+          updateDeviceStatus(areaId, 'lingkungan', true);
           // TODO: Update summary secara real-time (opsional)
         }
       )
@@ -98,16 +99,16 @@ export const LingkunganView = ({
   // 2. Perbarui data untuk chart
   const chartData = logs
     .map((log) => ({
-      name: format(new Date(log.timestamp), "HH:mm"),
+      name: format(new Date(log.timestamp), 'HH:mm'),
       Suhu: log.temperature,
       Kelembapan: log.humidity,
-      CO2: log.co2_ppm, // <-- TAMBAHKAN
+      CO2: log.co2_ppm // <-- TAMBAHKAN
     }))
     .reverse();
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", newPage.toString());
+    params.set('page', newPage.toString());
     router.push(`?${params.toString()}`);
   };
 
@@ -117,54 +118,59 @@ export const LingkunganView = ({
     : logs.length > 0; // If we have any data, assume device was recently active
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* 3. Tambahkan komponen FanControl di sini */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+        <div className="md:col-span-2 space-y-4 md:space-y-8">
           {/* Kartu Ringkasan (yang sudah ada) */}
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">
+              <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6 pb-1 sm:pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">
                   Suhu Rata-rata
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{summary.avg_temp}°C</div>
+              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+                <div className="text-xl sm:text-2xl font-bold">
+                  {summary.avg_temp}°C
+                </div>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">
+              <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6 pb-1 sm:pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">
                   Kelembapan Maks
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
+              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+                <div className="text-xl sm:text-2xl font-bold">
                   {summary.max_humidity}%
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">
+              <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6 pb-1 sm:pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">
                   CO2 Rata-rata
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {summary.avg_co2} <span className="text-lg">ppm</span>
+              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+                <div className="text-xl sm:text-2xl font-bold">
+                  {summary.avg_co2}{' '}
+                  <span className="text-base sm:text-lg">ppm</span>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">
+              <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6 pb-1 sm:pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">
                   Suhu Minimum
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{summary.min_temp}°C</div>
+              <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+                <div className="text-xl sm:text-2xl font-bold">
+                  {summary.min_temp}°C
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -175,34 +181,41 @@ export const LingkunganView = ({
               <CardTitle>Grafik Sensor</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer
+                width="100%"
+                height={
+                  typeof window !== 'undefined' && window.innerWidth < 640
+                    ? 200
+                    : 300
+                }
+              >
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis
                     yAxisId="left"
-                    stroke="#ef4444"
-                    label={{ value: "°C", angle: -90, position: "insideLeft" }}
+                    stroke="var(--chart-temp)"
+                    label={{ value: '°C', angle: -90, position: 'insideLeft' }}
                   />
                   <YAxis
                     yAxisId="center"
                     orientation="right"
-                    stroke="#3b82f6"
+                    stroke="var(--chart-humidity)"
                     label={{
-                      value: "%",
+                      value: '%',
                       angle: -90,
-                      position: "insideRight",
-                      offset: 40,
+                      position: 'insideRight',
+                      offset: 40
                     }}
                   />
                   <YAxis
                     yAxisId="right"
                     orientation="right"
-                    stroke="#22c55e"
+                    stroke="var(--chart-co2)"
                     label={{
-                      value: "ppm",
+                      value: 'ppm',
                       angle: -90,
-                      position: "insideRight",
+                      position: 'insideRight'
                     }}
                   />
                   <Tooltip />
@@ -211,21 +224,21 @@ export const LingkunganView = ({
                     yAxisId="left"
                     type="monotone"
                     dataKey="Suhu"
-                    stroke="#ef4444"
+                    stroke="var(--chart-temp)"
                     dot={false}
                   />
                   <Line
                     yAxisId="center"
                     type="monotone"
                     dataKey="Kelembapan"
-                    stroke="#3b82f6"
+                    stroke="var(--chart-humidity)"
                     dot={false}
                   />
                   <Line
                     yAxisId="right"
                     type="monotone"
                     dataKey="CO2"
-                    stroke="#22c55e"
+                    stroke="var(--chart-co2)"
                     dot={false}
                   />
                 </LineChart>
@@ -246,43 +259,55 @@ export const LingkunganView = ({
           <CardTitle>Detail Log</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Waktu</TableHead>
-                <TableHead>Suhu (°C)</TableHead>
-                <TableHead>Kelembapan (%)</TableHead>
-                <TableHead>CO2 (ppm)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {logs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell>
-                    {format(new Date(log.timestamp), "dd MMM, HH:mm:ss")}
-                  </TableCell>
-                  <TableCell>{log.temperature ?? "N/A"}</TableCell>
-                  <TableCell>{log.humidity ?? "N/A"}</TableCell>
-                  <TableCell>{log.co2_ppm ?? "N/A"}</TableCell>
+          <div className="overflow-x-auto -mx-6 px-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Waktu</TableHead>
+                  <TableHead>Suhu (°C)</TableHead>
+                  <TableHead>Kelembapan (%)</TableHead>
+                  <TableHead>CO2 (ppm)</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {logs.map((log) => (
+                  <TableRow
+                    key={log.id}
+                    className={
+                      newRowIds.current.has(log.id)
+                        ? 'animate-row-highlight'
+                        : ''
+                    }
+                  >
+                    <TableCell>
+                      {format(new Date(log.timestamp), 'dd MMM, HH:mm:ss')}
+                    </TableCell>
+                    <TableCell>{log.temperature ?? 'N/A'}</TableCell>
+                    <TableCell>{log.humidity ?? 'N/A'}</TableCell>
+                    <TableCell>{log.co2_ppm ?? 'N/A'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
       {/* ... (Kontrol Paginasi tidak berubah) ... */}
-      <div className="flex items-center justify-end space-x-2">
+      <div className="flex items-center justify-between sm:justify-end gap-2 sm:space-x-2">
         <Button
+          size="sm"
           onClick={() => handlePageChange(pagination.page - 1)}
           disabled={pagination.page <= 1}
         >
-          Previous
+          <span className="hidden sm:inline">Previous</span>
+          <span className="sm:hidden">Prev</span>
         </Button>
-        <span>
-          Page {pagination.page} of {pagination.total_pages}
+        <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+          {pagination.page}/{pagination.total_pages}
         </span>
         <Button
+          size="sm"
           onClick={() => handlePageChange(pagination.page + 1)}
           disabled={pagination.page >= pagination.total_pages}
         >

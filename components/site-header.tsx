@@ -1,11 +1,12 @@
 // frontend/components/site-header.tsx
-"use client";
+'use client';
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { MobileSidebar } from "./mobile-sidebar";
-import { ThemeToggle } from "./theme-toggle";
+import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { MobileSidebar } from './mobile-sidebar';
+import { ThemeToggle } from './theme-toggle';
+import { HeaderBreadcrumbs } from './header-breadcrumbs';
 
 interface UserData {
   username?: string;
@@ -15,7 +16,7 @@ interface UserData {
 
 export function SiteHeader({
   user,
-  userRole,
+  userRole
 }: {
   user: UserData;
   userRole: string;
@@ -35,9 +36,17 @@ export function SiteHeader({
       <Separator
         orientation="vertical"
         className="mx-3"
-        style={{ width: "2.5px" }}
+        style={{ width: '2.5px' }}
       />
-      <h1 className="text-base font-medium">Synergy</h1>
+
+      {/* Breadcrumbs (#4) — replaces static "Synergy" text */}
+      <div className="hidden sm:flex items-center min-w-0">
+        <HeaderBreadcrumbs />
+      </div>
+      <div className="sm:hidden min-w-0 flex-1">
+        <HeaderBreadcrumbs />
+      </div>
+
       <div className="ml-auto flex items-center gap-2">
         <ThemeToggle />
       </div>

@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -33,6 +33,11 @@
   --chart-4: #ff4d50;
   --chart-5: #0099ff;
   --chart-active-dot: #000;
+
+  /* Semantic chart colors for sensor data (#6) */
+  --chart-temp: #ef4444; /* Temperature — warm red */
+  --chart-humidity: #3b82f6; /* Humidity — blue */
+  --chart-co2: #8b5cf6; /* CO2 — purple */
   --skeleton-shimmer: rgba(0, 0, 0, 0.1);
   --theme-switcher-border: #000000;
 }
@@ -43,10 +48,10 @@
   --foreground: oklch(92.49% 0 0);
   --main-foreground: oklch(0% 0 0);
   --main: oklch(70.54% 0.1525 162.97);
-  --border: oklch(0% 0 0);
-  --sidebar-border: oklch(0% 0 0); /* Black border for dark theme */
+  --border: oklch(40% 0 0); /* Softer border for dark theme (#9) */
+  --sidebar-border: oklch(40% 0 0); /* Softer sidebar border (#9) */
   --ring: oklch(100% 0 0);
-  --shadow: 4px 4px 0px 0px var(--border);
+  --shadow: 4px 4px 0px 0px oklch(18% 0 0); /* Subtler shadow (#9) */
 
   /* Standard Tailwind theme colors for dark mode */
   --muted: oklch(23.93% 0 0);
@@ -66,6 +71,11 @@
   --chart-4: #ff6669;
   --chart-5: #008ae5;
   --chart-active-dot: #fff;
+
+  /* Semantic chart colors for sensor data (#6) */
+  --chart-temp: #f87171; /* Temperature — warm red */
+  --chart-humidity: #60a5fa; /* Humidity — blue */
+  --chart-co2: #a78bfa; /* CO2 — purple */
   --skeleton-shimmer: rgba(255, 255, 255, 0.1);
   --theme-switcher-border: #ffffff;
 }
@@ -85,6 +95,9 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-temp: var(--chart-temp);
+  --color-chart-humidity: var(--chart-humidity);
+  --color-chart-co2: var(--chart-co2);
   --color-skeleton-shimmer: var(--skeleton-shimmer);
   --color-theme-switcher-border: var(--theme-switcher-border);
 
@@ -132,4 +145,31 @@
     transparent
   );
   background-size: 200px 100%;
+}
+
+/* Real-time row highlight animation (#10) */
+@keyframes row-highlight {
+  0% {
+    background-color: oklch(85% 0.15 162.78);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes row-highlight-dark {
+  0% {
+    background-color: oklch(35% 0.08 162.97);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-row-highlight {
+  animation: row-highlight 2s ease-out forwards;
+}
+
+.dark .animate-row-highlight {
+  animation: row-highlight-dark 2s ease-out forwards;
 }

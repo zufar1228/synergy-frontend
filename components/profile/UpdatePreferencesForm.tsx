@@ -1,37 +1,34 @@
 // frontend/components/profile/UpdatePreferencesForm.tsx
-"use client";
+'use client';
 
-import { useForm, useFieldArray } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { NotificationPreference, updateMyPreferences } from "@/lib/api";
-import { createClient } from "@/lib/supabase/client";
+import { useForm, useFieldArray } from 'react-hook-form';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { NotificationPreference, updateMyPreferences } from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  CardTitle
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
+  FormLabel
+} from '@/components/ui/form';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 
 // Definisikan sistem yang bisa di-subscribe pengguna
 const availableSystems = [
-  { id: "lingkungan", label: "Lingkungan (Suhu, Kelembapan, CO2)" },
-  { id: "intrusi", label: "Intrusi (TinyML Intrusion Detection)" },
-  { id: "proteksi_aset", label: "Proteksi Aset (Getaran, Thermal, Kebocoran)" },
-  { id: "gangguan", label: "Gangguan (Insiden, Benturan)" },
-  { id: "keamanan", label: "Keamanan (Gerakan)" },
-  { id: "medis_air", label: "Air Medis (pH, Kekeruhan)" },
+  { id: 'lingkungan', label: 'Lingkungan (Suhu, Kelembapan, CO2)' },
+  { id: 'keamanan', label: 'Keamanan (Gerakan)' },
+  { id: 'intrusi', label: 'Intrusi (Keamanan Pintu Gudang)' }
 ];
 
 // Skema validasi untuk form
@@ -39,15 +36,15 @@ const formSchema = z.object({
   preferences: z.array(
     z.object({
       system_type: z.string(),
-      is_enabled: z.boolean(),
+      is_enabled: z.boolean()
     })
-  ),
+  )
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export const UpdatePreferencesForm = ({
-  initialData,
+  initialData
 }: {
   initialData: NotificationPreference[];
 }) => {
@@ -56,30 +53,30 @@ export const UpdatePreferencesForm = ({
     const existingPref = initialData.find((p) => p.system_type === system.id);
     return {
       system_type: system.id,
-      is_enabled: existingPref ? existingPref.is_enabled : true, // Default ke 'true' jika belum ada
+      is_enabled: existingPref ? existingPref.is_enabled : true // Default ke 'true' jika belum ada
     };
   });
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: { preferences: defaultValues },
+    defaultValues: { preferences: defaultValues }
   });
 
   const { fields } = useFieldArray({
     control: form.control,
-    name: "preferences",
+    name: 'preferences'
   });
 
   async function onSubmit(values: FormData) {
     const supabase = createClient();
     const {
-      data: { session },
+      data: { session }
     } = await supabase.auth.getSession();
-    if (!session) return toast.error("Sesi tidak valid.");
+    if (!session) return toast.error('Sesi tidak valid.');
 
     try {
       await updateMyPreferences(values.preferences, session.access_token);
-      toast.success("Preferensi notifikasi berhasil diperbarui.");
+      toast.success('Preferensi notifikasi berhasil diperbarui.');
     } catch (error) {
       toast.error((error as Error).message);
     }
@@ -120,8 +117,8 @@ export const UpdatePreferencesForm = ({
             </div>
             <Button type="submit" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting
-                ? "Menyimpan..."
-                : "Simpan Preferensi"}
+                ? 'Menyimpan...'
+                : 'Simpan Preferensi'}
             </Button>
           </form>
         </Form>

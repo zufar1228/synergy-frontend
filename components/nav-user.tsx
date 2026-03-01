@@ -1,11 +1,18 @@
 // frontend/components/nav-user.tsx
-"use client";
+'use client';
 
-import { ChevronsUpDown, User, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { logout } from "@/app/login/actions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  ChevronsUpDown,
+  User,
+  LogOut,
+  Bell,
+  BellOff,
+  BellRing
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { logout } from '@/app/login/actions';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,17 +20,19 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+  useSidebar
+} from '@/components/ui/sidebar';
 
-import { UserProfileDisplay } from "@/components/user-profile-display";
-import { useUserProfile } from "@/hooks/use-user-profile";
+import { UserProfileDisplay } from '@/components/user-profile-display';
+import { useUserProfile } from '@/hooks/use-user-profile';
+import { usePushNotification } from '@/hooks/use-push-notification';
+import { toast } from 'sonner';
 
 interface NavUserProps {
   user: {
@@ -38,19 +47,55 @@ export function NavUser({ user }: NavUserProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const { profile } = useUserProfile();
+  const {
+    isSupported,
+    isSubscribed,
+    isLoading: pushLoading,
+    permission,
+    subscribe,
+    unsubscribe,
+    sendTest
+  } = usePushNotification();
+
+  const handleToggleNotifications = async () => {
+    if (isSubscribed) {
+      const result = await unsubscribe();
+      if (result.success) {
+        toast.success('Notifikasi push dinonaktifkan');
+      } else {
+        toast.error(result.error || 'Gagal menonaktifkan notifikasi');
+      }
+    } else {
+      const result = await subscribe();
+      if (result.success) {
+        toast.success('Notifikasi push diaktifkan');
+      } else {
+        toast.error(result.error || 'Gagal mengaktifkan notifikasi');
+      }
+    }
+  };
+
+  const handleTestNotification = async () => {
+    const result = await sendTest();
+    if (result.success) {
+      toast.success('Test notifikasi dikirim');
+    } else {
+      toast.error(result.error || 'Gagal mengirim test notifikasi');
+    }
+  };
 
   const getAvatarFallback = () => {
     // Show loading dots only when avatar is loading
-    if (imageLoading && user.avatar) return "...";
+    if (imageLoading && user.avatar) return '...';
 
     // Show first letter when avatar failed to load or no avatar exists
     if (imageError || !user.avatar) {
       if (profile?.username) return profile.username.charAt(0).toUpperCase();
-      return "U";
+      return 'U';
     }
 
     // Default fallback
-    return "U";
+    return 'U';
   };
 
   useEffect(() => {
@@ -65,7 +110,7 @@ export function NavUser({ user }: NavUserProps) {
         // If image doesn't load within 5 seconds, assume it's failed
         setImageLoading(false);
         setImageError(true);
-        console.log("Avatar image load timeout:", user.avatar);
+        console.log('Avatar image load timeout:', user.avatar);
       }, 5000);
 
       img.onload = () => {
@@ -77,7 +122,7 @@ export function NavUser({ user }: NavUserProps) {
         clearTimeout(timeout);
         setImageLoading(false);
         setImageError(true);
-        console.log("Avatar image failed to load:", user.avatar);
+        console.log('Avatar image failed to load:', user.avatar);
       };
       img.src = user.avatar;
     } else {
@@ -119,7 +164,7 @@ export function NavUser({ user }: NavUserProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -148,11 +193,37 @@ export function NavUser({ user }: NavUserProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onSelect={() => router.push("/profile")}>
+              <DropdownMenuItem onSelect={() => router.push('/profile')}>
                 <User />
                 Profil
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            {isSupported && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onSelect={handleToggleNotifications}
+                    disabled={pushLoading || permission === 'denied'}
+                  >
+                    {isSubscribed ? <BellOff /> : <Bell />}
+                    {pushLoading
+                      ? 'Memproses...'
+                      : permission === 'denied'
+                        ? 'Notifikasi Diblokir'
+                        : isSubscribed
+                          ? 'Nonaktifkan Notifikasi'
+                          : 'Aktifkan Notifikasi'}
+                  </DropdownMenuItem>
+                  {isSubscribed && (
+                    <DropdownMenuItem onSelect={handleTestNotification}>
+                      <BellRing />
+                      Test Notifikasi
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuGroup>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <form action={logout} className="w-full">

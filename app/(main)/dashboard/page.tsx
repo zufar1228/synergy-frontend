@@ -1,32 +1,31 @@
 // frontend/app/(main)/dashboard/page.tsx
-"use client";
+'use client';
 
-import * as React from "react";
-import Link from "next/link";
-import { useWarehouse } from "@/contexts/WarehouseContext";
-import { useDeviceStatus } from "@/contexts/DeviceStatusContext";
-import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
+import * as React from 'react';
+import Link from 'next/link';
+import { useWarehouse } from '@/contexts/WarehouseContext';
+import { useDeviceStatus } from '@/contexts/DeviceStatusContext';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 import {
   getWarehouses,
   getWarehouseDetails,
   getActiveAlerts,
-  ActiveAlert,
-} from "@/lib/api"; // <-- Import getActiveAlerts
-import WarehouseCard from "@/components/shared/WarehouseCard"; // <-- Import WarehouseCard sebagai default
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { WarehouseSummaryStats } from "@/components/dashboard/WarehouseSummaryStats";
-import { IncidentTrendChart } from "@/components/dashboard/IncidentTrendChart";
-import { Wifi, WifiOff, TriangleAlert } from "lucide-react"; // <-- Import ikon baru
+  ActiveAlert
+} from '@/lib/api'; // <-- Import getActiveAlerts
+import WarehouseCard from '@/components/shared/WarehouseCard'; // <-- Import WarehouseCard sebagai default
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { WarehouseSummaryStats } from '@/components/dashboard/WarehouseSummaryStats';
+import { Wifi, WifiOff, TriangleAlert } from 'lucide-react'; // <-- Import ikon baru
 
 // Komponen kartu Area (DIPERBARUI SECARA SIGNIFIKAN)
 const AreaCard = ({
   area,
   warehouseId,
   alerts,
-  deviceStatus,
+  deviceStatus
 }: {
   area: any;
   warehouseId: string;
@@ -58,10 +57,10 @@ const AreaCard = ({
               key={system.system_type}
               variant={
                 hasAlert
-                  ? "alert" // 🔴 Red with pulse animation
+                  ? 'alert' // 🔴 Red with pulse animation
                   : isOffline
-                  ? "muted" // ⚪ Grey for offline
-                  : "default" // 🟢 Primary color for online
+                    ? 'muted' // ⚪ Grey for offline
+                    : 'default' // 🟢 Primary color for online
               }
               className="w-full justify-center items-center"
             >
@@ -102,48 +101,48 @@ export default function DashboardPage() {
     setError(null);
     const supabase = createClient();
     const {
-      data: { session },
+      data: { session }
     } = await supabase.auth.getSession();
     if (!session) {
-      setError("Sesi login telah berakhir. Silakan login kembali.");
+      setError('Sesi login telah berakhir. Silakan login kembali.');
       setLoading(false);
       return;
     }
 
     try {
-      if (selectedWarehouse === "all" || !selectedWarehouse) {
+      if (selectedWarehouse === 'all' || !selectedWarehouse) {
         const warehouses = await getWarehouses(session.access_token);
-        setData({ type: "all", warehouses });
+        setData({ type: 'all', warehouses });
       } else {
         // Ambil detail gudang dan peringatan aktif secara bersamaan
         const [details, alerts] = await Promise.all([
           getWarehouseDetails(selectedWarehouse, session.access_token),
-          getActiveAlerts(selectedWarehouse, session.access_token),
+          getActiveAlerts(selectedWarehouse, session.access_token)
         ]);
-        setData({ type: "single", details, alerts });
+        setData({ type: 'single', details, alerts });
       }
     } catch (error: any) {
-      console.error("Dashboard fetch error:", error);
+      console.error('Dashboard fetch error:', error);
 
       // Handle different error types
-      let errorMessage = "Gagal memuat data dashboard.";
+      let errorMessage = 'Gagal memuat data dashboard.';
 
       if (error?.message) {
-        if (error.message.includes("500")) {
+        if (error.message.includes('500')) {
           errorMessage =
-            "Server mengalami kesalahan internal. Silakan coba lagi nanti.";
-        } else if (error.message.includes("404")) {
-          errorMessage = "Data gudang tidak ditemukan.";
-        } else if (error.message.includes("403")) {
-          errorMessage = "Anda tidak memiliki akses ke data ini.";
-        } else if (error.message.includes("401")) {
-          errorMessage = "Sesi login telah berakhir. Silakan login kembali.";
+            'Server mengalami kesalahan internal. Silakan coba lagi nanti.';
+        } else if (error.message.includes('404')) {
+          errorMessage = 'Data gudang tidak ditemukan.';
+        } else if (error.message.includes('403')) {
+          errorMessage = 'Anda tidak memiliki akses ke data ini.';
+        } else if (error.message.includes('401')) {
+          errorMessage = 'Sesi login telah berakhir. Silakan login kembali.';
         } else if (
-          error.message.includes("network") ||
-          error.message.includes("fetch")
+          error.message.includes('network') ||
+          error.message.includes('fetch')
         ) {
           errorMessage =
-            "Tidak dapat terhubung ke server. Periksa koneksi internet Anda.";
+            'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
         }
       }
 
@@ -168,22 +167,22 @@ export default function DashboardPage() {
     const handleDbChange = () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
-        console.log("Database changed, re-fetching dashboard stats...");
+        console.log('Database changed, re-fetching dashboard stats...');
         fetchData();
       }, 500); // Tunggu 500ms setelah perubahan terakhir
     };
 
     // Dengarkan perubahan pada tabel 'devices' dan 'areas'
     const channel = supabase
-      .channel("dashboard-updates")
+      .channel('dashboard-updates')
       .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "devices" },
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'devices' },
         handleDbChange
       )
       .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "areas" },
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'areas' },
         handleDbChange
       )
       .subscribe();
@@ -197,7 +196,7 @@ export default function DashboardPage() {
   // Force re-render when device status changes
   React.useEffect(() => {
     // This effect will run whenever updateCounter changes, forcing a re-render
-    console.log("Device status updated, re-rendering dashboard");
+    console.log('Device status updated, re-rendering dashboard');
   }, [updateCounter]);
 
   if (loading) {
@@ -215,7 +214,7 @@ export default function DashboardPage() {
           <Button onClick={fetchData} className="mr-2">
             Coba Lagi
           </Button>
-          <Button variant="neutral" onClick={() => setSelectedWarehouse("all")}>
+          <Button variant="neutral" onClick={() => setSelectedWarehouse('all')}>
             Kembali ke Semua Gudang
           </Button>
         </div>
@@ -234,7 +233,7 @@ export default function DashboardPage() {
     <div>
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
-      {data?.type === "all" && (
+      {data?.type === 'all' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {data.warehouses && data.warehouses.length > 0 ? (
             data.warehouses.map((warehouse: any) => (
@@ -245,7 +244,7 @@ export default function DashboardPage() {
               >
                 <WarehouseCard
                   id={warehouse.id}
-                  name={warehouse.name || "Unnamed Warehouse"}
+                  name={warehouse.name || 'Unnamed Warehouse'}
                   location={warehouse.location}
                   // === PERBAIKAN DI SINI ===
                   // Akses properti langsung dari objek warehouse
@@ -265,18 +264,13 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {data?.type === "single" && data.details && (
+      {data?.type === 'single' && data.details && (
         <div>
           <h2 className="text-2xl font-semibold mb-4">{data.details.name}</h2>
 
           {/* Warehouse Summary Stats */}
           <div className="mb-6">
             <WarehouseSummaryStats details={data.details} />
-          </div>
-
-          {/* Incident Trend Chart */}
-          <div className="mb-6">
-            <IncidentTrendChart warehouseId={data.details.id} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

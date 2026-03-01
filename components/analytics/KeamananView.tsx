@@ -1,14 +1,15 @@
 // frontend/components/analytics/KeamananView.tsx
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { KeamananDataTable } from "./KeamananDataTable";
-import { createClient } from "@/lib/supabase/client";
-import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- 1. IMPORT
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { KeamananDataTable } from './KeamananDataTable';
+import { createClient } from '@/lib/supabase/client';
+import { DateRangePicker } from '@/components/ui/date-range-picker'; // <-- 1. IMPORT
 
 export const KeamananView = ({ initialData }: { initialData: any }) => {
   const [logs, setLogs] = useState(initialData.logs);
+  const newRowIds = useRef<Set<string>>(new Set());
   const [summary, setSummary] = useState(initialData.summary);
   const [pagination, setPagination] = useState(initialData.pagination);
 
@@ -23,7 +24,7 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
 
   // Function to update a log locally (fallback for real-time)
   const updateLogLocally = (logId: string, updates: Partial<any>) => {
-    console.log("Updating log locally:", logId, updates);
+    console.log('Updating log locally:', logId, updates);
     setLogs((currentLogs: any[]) =>
       currentLogs.map((log: any) =>
         log.id === logId ? { ...log, ...updates } : log
@@ -40,8 +41,8 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
 
         // If status changed from unacknowledged to acknowledged/resolved
         if (
-          currentLog.status === "unacknowledged" &&
-          updates.status !== "unacknowledged"
+          currentLog.status === 'unacknowledged' &&
+          updates.status !== 'unacknowledged'
         ) {
           newSummary.unacknowledged_alerts = Math.max(
             0,
@@ -50,8 +51,8 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
         }
         // If status changed back to unacknowledged
         else if (
-          currentLog.status !== "unacknowledged" &&
-          updates.status === "unacknowledged"
+          currentLog.status !== 'unacknowledged' &&
+          updates.status === 'unacknowledged'
         ) {
           newSummary.unacknowledged_alerts = s.unacknowledged_alerts + 1;
         }
@@ -64,25 +65,28 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
-      .channel("realtime-keamanan")
+      .channel('realtime-keamanan')
       .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "keamanan_logs" },
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'keamanan_logs' },
         (payload) => {
-          console.log("Real-time INSERT:", payload.new);
-          setLogs((currentLogs: any[]) => [payload.new, ...currentLogs]);
+          console.log('Real-time INSERT:', payload.new);
+          const newLog = payload.new as any;
+          newRowIds.current.add(newLog.id);
+          setTimeout(() => newRowIds.current.delete(newLog.id), 2200);
+          setLogs((currentLogs: any[]) => [newLog, ...currentLogs]);
           setSummary((s: any) => ({
             ...s,
             total_detections: s.total_detections + 1,
-            unacknowledged_alerts: s.unacknowledged_alerts + 1,
+            unacknowledged_alerts: s.unacknowledged_alerts + 1
           }));
         }
       )
       .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "keamanan_logs" },
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'keamanan_logs' },
         (payload) => {
-          console.log("Real-time UPDATE:", payload.new);
+          console.log('Real-time UPDATE:', payload.new);
           setLogs((currentLogs: any[]) =>
             currentLogs.map((log: any) =>
               log.id === payload.new.id ? payload.new : log
@@ -96,8 +100,8 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
 
             // If status changed from unacknowledged to acknowledged/resolved
             if (
-              oldLog.status === "unacknowledged" &&
-              newLog.status !== "unacknowledged"
+              oldLog.status === 'unacknowledged' &&
+              newLog.status !== 'unacknowledged'
             ) {
               newSummary.unacknowledged_alerts = Math.max(
                 0,
@@ -106,8 +110,8 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
             }
             // If status changed back to unacknowledged
             else if (
-              oldLog.status !== "unacknowledged" &&
-              newLog.status === "unacknowledged"
+              oldLog.status !== 'unacknowledged' &&
+              newLog.status === 'unacknowledged'
             ) {
               newSummary.unacknowledged_alerts = s.unacknowledged_alerts + 1;
             }
@@ -117,7 +121,7 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
         }
       )
       .subscribe((status) => {
-        console.log("Real-time subscription status:", status);
+        console.log('Real-time subscription status:', status);
       });
 
     return () => {
@@ -126,29 +130,33 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
   }, []);
 
   return (
-    <div className="space-y-8 pr-2 md:pr-4">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8">
       {/* 2. TAMBAHKAN DATE RANGE PICKER DI SINI */}
       <div className="flex justify-end">
         <DateRangePicker />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Total Deteksi</CardTitle>
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6 pb-1 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Total Deteksi
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.total_detections}</div>
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold">
+              {summary.total_detections}
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">
+          <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6 pb-1 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">
               Peringatan Baru
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold">
               {summary.unacknowledged_alerts}
             </div>
           </CardContent>
@@ -158,6 +166,7 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
         data={logs}
         pagination={pagination}
         onLogUpdate={updateLogLocally}
+        highlightIds={newRowIds.current}
       />
     </div>
   );

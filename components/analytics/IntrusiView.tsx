@@ -1,275 +1,227 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/client";
-import { IntrusiMonitor } from "./IntrusiMonitor";
-import { DateRangePicker } from "@/components/date-range-picker";
-import { format } from "date-fns";
-import { id as localeID } from "date-fns/locale";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ShieldAlert, ShieldOff } from "lucide-react";
-import { subDays } from "date-fns";
-import { useSearchParams } from "next/navigation";
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { IntrusiDataTable } from './IntrusiDataTable';
+import { IntrusiDeviceControls } from './IntrusiDeviceControls';
+import { createClient } from '@/lib/supabase/client';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { IntrusiLog } from '@/lib/api';
+import { useDeviceStatus } from '@/contexts/DeviceStatusContext';
+import { ShieldAlert, AlertTriangle, Bell, Activity } from 'lucide-react';
 
-interface IntrusiLog {
-  id: string;
-  device_id: string;
-  event_class: "Normal" | "Disturbance" | "Intrusion";
-  confidence: number;
-  payload: object | null;
-  timestamp: string;
-  device?: {
-    name: string;
-    area?: {
-      name: string;
-    };
-  };
-}
+export const IntrusiView = ({ initialData }: { initialData: any }) => {
+  const params = useParams();
+  const areaId = params.areaId as string;
+  const { updateDeviceStatus } = useDeviceStatus();
 
-interface IntrusiSummary {
-  intrusions: number;
-  lastIntrusion?: string;
-  averageConfidence: number;
-}
-
-interface IntrusiViewProps {
-  deviceId: string;
-  initialData?: {
-    logs: IntrusiLog[];
-    summary: IntrusiSummary;
-  };
-}
-
-export const IntrusiView = ({ deviceId, initialData }: IntrusiViewProps) => {
-  const [logs, setLogs] = useState<IntrusiLog[]>(initialData?.logs || []);
-  const [summary, setSummary] = useState<IntrusiSummary>(
-    initialData?.summary || {
-      intrusions: 0,
-      lastIntrusion: undefined,
-      averageConfidence: 0,
-    }
-  );
-  const [isLoading, setIsLoading] = useState(false);
-  const searchParams = useSearchParams();
-
-  const supabase = createClient();
-
-  // Get date range from URL params (set by DateRangePicker)
-  const fromParam = searchParams.get("from");
-  const toParam = searchParams.get("to");
-
-  // Fetch logs based on date range from URL
-  const fetchLogs = async () => {
-    // Use URL params or default to last 7 days
-    const from = fromParam ? new Date(fromParam) : subDays(new Date(), 7);
-    const to = toParam ? new Date(toParam) : new Date();
-
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("intrusi_logs")
-        .select("*")
-        .eq("device_id", deviceId)
-        .gte("timestamp", from.toISOString())
-        .lte("timestamp", to.toISOString())
-        .order("timestamp", { ascending: false })
-        .limit(100);
-
-      if (error) {
-        console.error("[IntrusiView] Error fetching logs:", error);
-        return;
-      }
-
-      if (data) {
-        setLogs(data as IntrusiLog[]);
-
-        // Calculate summary - only count intrusions (TinyML only sends Intrusion events)
-        const intrusions = data.filter((l) => l.event_class === "Intrusion").length;
-        const lastIntrusion = intrusions > 0 ? data.find((l) => l.event_class === "Intrusion")?.timestamp : undefined;
-        const averageConfidence = intrusions > 0 
-          ? data.filter((l) => l.event_class === "Intrusion").reduce((sum, l) => sum + l.confidence, 0) / intrusions 
-          : 0;
-
-        setSummary({
-          intrusions,
-          lastIntrusion,
-          averageConfidence,
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [logs, setLogs] = useState<IntrusiLog[]>(initialData.logs || []);
+  const newRowIds = useRef<Set<string>>(new Set());
+  const [summary, setSummary] = useState({
+    total_events: 0,
+    alarm_events: 0,
+    impact_warnings: 0,
+    unacknowledged: 0,
+    ...initialData.summary
+  });
+  const [pagination, setPagination] = useState(initialData.pagination);
+  const [lastDataTimestamp, setLastDataTimestamp] = useState<Date | null>(null);
 
   useEffect(() => {
-    fetchLogs();
-  }, [deviceId, fromParam, toParam]);
-
-  // Sync with initialData
-  useEffect(() => {
-    if (initialData) {
-      setLogs(initialData.logs);
-      setSummary(initialData.summary);
+    setLogs(initialData.logs || []);
+    setSummary({
+      total_events: 0,
+      alarm_events: 0,
+      impact_warnings: 0,
+      unacknowledged: 0,
+      ...initialData.summary
+    });
+    if (initialData.logs?.length > 0) {
+      setLastDataTimestamp(new Date(initialData.logs[0].timestamp));
     }
   }, [initialData]);
 
-  const getEventClassName = (eventClass: string): string => {
-    switch (eventClass) {
-      case "Intrusion":
-        return "bg-red-500 text-white border-red-600";
-      case "Disturbance":
-        return "bg-yellow-500 text-black border-yellow-600";
-      default:
-        return "bg-green-500 text-white border-green-600";
+  const updateLogLocally = (logId: string, updates: Partial<IntrusiLog>) => {
+    setLogs((currentLogs) =>
+      currentLogs.map((log) =>
+        log.id === logId ? { ...log, ...updates } : log
+      )
+    );
+    if (updates.status) {
+      setSummary((s: any) => {
+        const currentLog = logs.find((l) => l.id === logId);
+        if (!currentLog) return s;
+        const newSummary = { ...s };
+        if (
+          currentLog.status === 'unacknowledged' &&
+          updates.status !== 'unacknowledged'
+        ) {
+          newSummary.unacknowledged = Math.max(0, s.unacknowledged - 1);
+        } else if (
+          currentLog.status !== 'unacknowledged' &&
+          updates.status === 'unacknowledged'
+        ) {
+          newSummary.unacknowledged = s.unacknowledged + 1;
+        }
+        return newSummary;
+      });
     }
   };
 
+  // Realtime subscription
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel('realtime-intrusi')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'intrusi_logs' },
+        (payload) => {
+          const newLog = payload.new as IntrusiLog;
+          newRowIds.current.add(newLog.id);
+          setTimeout(() => newRowIds.current.delete(newLog.id), 2200);
+          setLogs((currentLogs) => [newLog, ...currentLogs]);
+          setLastDataTimestamp(new Date());
+          updateDeviceStatus(areaId, 'intrusi', true);
+          setSummary((s: any) => {
+            const newEvent = payload.new as IntrusiLog;
+            const newSummary = {
+              ...s,
+              total_events: s.total_events + 1
+            };
+            if (
+              newEvent.event_type === 'FORCED_ENTRY_ALARM' ||
+              newEvent.event_type === 'UNAUTHORIZED_OPEN'
+            ) {
+              newSummary.alarm_events = s.alarm_events + 1;
+              newSummary.unacknowledged = s.unacknowledged + 1;
+            }
+            if (newEvent.event_type === 'IMPACT_WARNING') {
+              newSummary.impact_warnings = s.impact_warnings + 1;
+              newSummary.unacknowledged = s.unacknowledged + 1;
+            }
+            return newSummary;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'intrusi_logs' },
+        (payload) => {
+          setLogs((currentLogs) =>
+            currentLogs.map((log) =>
+              log.id === (payload.new as IntrusiLog).id
+                ? (payload.new as IntrusiLog)
+                : log
+            )
+          );
+          setSummary((s: any) => {
+            const oldLog = payload.old as Partial<IntrusiLog>;
+            const newLog = payload.new as IntrusiLog;
+            const newSummary = { ...s };
+            if (
+              oldLog.status === 'unacknowledged' &&
+              newLog.status !== 'unacknowledged'
+            ) {
+              newSummary.unacknowledged = Math.max(0, s.unacknowledged - 1);
+            } else if (
+              oldLog.status !== 'unacknowledged' &&
+              newLog.status === 'unacknowledged'
+            ) {
+              newSummary.unacknowledged = s.unacknowledged + 1;
+            }
+            return newSummary;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [areaId, updateDeviceStatus]);
+
+  // Determine device online status based on recent data activity
+  const isDeviceOnline = lastDataTimestamp
+    ? Date.now() - lastDataTimestamp.getTime() < 5 * 60 * 1000
+    : (initialData.logs?.length ?? 0) > 0;
+
   return (
-    <div className="space-y-6">
-      {/* Header with Date Picker */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <ShieldAlert className="h-6 w-6" />
-            Sistem Deteksi Intrusi (TinyML)
-          </h2>
-          <p className="text-muted-foreground">
-            Monitoring keamanan berbasis AI Edge Computing
-          </p>
-        </div>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex justify-end">
         <DateRangePicker />
       </div>
 
-      {/* Summary Cards - TinyML Analytics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-red-200 dark:border-red-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Intrusi Terdeteksi
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-red-500" />
-              <span className="text-2xl font-bold text-red-500">
-                {summary.intrusions}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Dalam periode yang dipilih
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-blue-200 dark:border-blue-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Intrusi Terakhir
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-blue-500" />
-              <span className="text-lg font-semibold text-blue-600">
-                {summary.lastIntrusion 
-                  ? format(new Date(summary.lastIntrusion), "dd MMM HH:mm", { locale: localeID })
-                  : "Belum ada"
-                }
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Waktu deteksi terakhir
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-green-200 dark:border-green-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Rata-rata Confidence
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-green-500" />
-              <span className="text-2xl font-bold text-green-600">
-                {(summary.averageConfidence * 100).toFixed(1)}%
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Tingkat kepercayaan AI
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content: Real-time Monitor + History Table */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Real-time Monitor */}
-        <IntrusiMonitor deviceId={deviceId} />
-
-        {/* History Table */}
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Riwayat Event</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Total Event
+            </CardTitle>
+            <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px]">
-              {isLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <span className="text-muted-foreground">Memuat...</span>
-                </div>
-              ) : logs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                  <ShieldOff className="h-12 w-12 mb-2 opacity-50" />
-                  <p>Tidak ada event dalam rentang waktu ini.</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Event</TableHead>
-                      <TableHead>Confidence</TableHead>
-                      <TableHead>Waktu</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {logs.map((log) => (
-                      <TableRow key={log.id}>
-                        <TableCell>
-                          <Badge className={getEventClassName(log.event_class)}>
-                            {log.event_class}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {(log.confidence * 100).toFixed(1)}%
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {format(new Date(log.timestamp), "dd MMM HH:mm:ss", {
-                            locale: localeID,
-                          })}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </ScrollArea>
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold">
+              {Number(summary.total_events) || 0}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Alarm
+            </CardTitle>
+            <ShieldAlert className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-destructive" />
+          </CardHeader>
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold text-destructive">
+              {Number(summary.alarm_events) || 0}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Benturan
+            </CardTitle>
+            <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-500" />
+          </CardHeader>
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold text-yellow-600">
+              {Number(summary.impact_warnings) || 0}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Belum Ditinjau
+            </CardTitle>
+            <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+            <div className="text-xl sm:text-2xl font-bold text-orange-600">
+              {Number(summary.unacknowledged) || 0}
+            </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Device Controls */}
+      <IntrusiDeviceControls areaId={areaId} isDeviceOnline={isDeviceOnline} />
+
+      {/* Data Table */}
+      <IntrusiDataTable
+        data={logs}
+        pagination={pagination}
+        onLogUpdate={updateLogLocally}
+        highlightIds={newRowIds.current}
+      />
     </div>
   );
 };
-
-export default IntrusiView;

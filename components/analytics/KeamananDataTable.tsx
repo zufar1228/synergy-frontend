@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -11,9 +11,9 @@ import {
   useReactTable,
   // --- 1. Impor ExpandedState ---
   getExpandedRowModel,
-  ExpandedState,
-} from "@tanstack/react-table";
-import { format } from "date-fns";
+  ExpandedState
+} from '@tanstack/react-table';
+import { format } from 'date-fns';
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,34 +22,34 @@ import {
   Check,
   X,
   Camera,
-  ListTree,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+  ListTree
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  TableRow
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+  SelectValue
+} from '@/components/ui/select';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import {
   KeamananLog,
   UpdateIncidentStatusPayload,
-  updateKeamananLogStatus,
-} from "@/lib/api";
-import { Badge } from "@/components/ui/badge";
-import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
+  updateKeamananLogStatus
+} from '@/lib/api';
+import { Badge } from '@/components/ui/badge';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 // Import komponen untuk dialog review
 import {
@@ -59,25 +59,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  DialogTrigger
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+  FormMessage
+} from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { cn } from '@/lib/utils';
 
 // --- Form Review (sebelumnya Dialog, sekarang untuk baris 'expand') ---
 const formSchema = z.object({
-  status: z.enum(["acknowledged", "resolved", "false_alarm"]),
-  notes: z.string().optional(),
+  status: z.enum(['acknowledged', 'resolved', 'false_alarm']),
+  notes: z.string().optional()
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -86,7 +87,7 @@ type FormData = z.infer<typeof formSchema>;
 const ExpandableReviewForm = ({
   log,
   onSuccess,
-  onLogUpdate,
+  onLogUpdate
 }: {
   log: KeamananLog;
   onSuccess: () => void;
@@ -97,46 +98,46 @@ const ExpandableReviewForm = ({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      status: log.status as "acknowledged" | "resolved" | "false_alarm",
-      notes: log.notes || "",
-    },
+      status: log.status as 'acknowledged' | 'resolved' | 'false_alarm',
+      notes: log.notes || ''
+    }
   });
 
   // Reset form jika log berubah (misalnya data di-refresh)
   React.useEffect(() => {
     form.reset({
-      status: log.status as "acknowledged" | "resolved" | "false_alarm",
-      notes: log.notes || "",
+      status: log.status as 'acknowledged' | 'resolved' | 'false_alarm',
+      notes: log.notes || ''
     });
   }, [log.status, log.notes, form]);
 
   async function onSubmit(values: FormData) {
     const supabase = createClient();
     const {
-      data: { session },
+      data: { session }
     } = await supabase.auth.getSession();
-    if (!session) return toast.error("Sesi tidak valid.");
+    if (!session) return toast.error('Sesi tidak valid.');
     try {
-      console.log("Updating log status:", log.id, values);
+      console.log('Updating log status:', log.id, values);
       await updateKeamananLogStatus(
         log.id,
         values as UpdateIncidentStatusPayload,
         session.access_token
       );
-      console.log("Log status updated successfully");
+      console.log('Log status updated successfully');
 
       if (onLogUpdate) {
         onLogUpdate(log.id, {
           status: values.status,
-          notes: values.notes,
+          notes: values.notes
         });
       }
 
-      toast.success("Status log berhasil diperbarui.");
+      toast.success('Status log berhasil diperbarui.');
       // Hapus setOpen(false)
       onSuccess(); // Panggil onSuccess untuk menutup baris expand
     } catch (error) {
-      console.error("Error updating log status:", error);
+      console.error('Error updating log status:', error);
       toast.error((error as Error).message);
     }
   }
@@ -174,9 +175,11 @@ const ExpandableReviewForm = ({
                 <div className="space-y-3 max-h-40 overflow-y-auto">
                   {log.attributes.map((person: any, index: number) => {
                     // Handle both nested and flat attribute structures
-                    const isNested = person.attributes && Array.isArray(person.attributes);
+                    const isNested =
+                      person.attributes && Array.isArray(person.attributes);
                     const attributes = isNested ? person.attributes : [person];
-                    const personConfidence = person.confidence || log.confidence || 0.85;
+                    const personConfidence =
+                      person.confidence || log.confidence || 0.85;
 
                     return (
                       <div
@@ -184,7 +187,7 @@ const ExpandableReviewForm = ({
                         className="border-b border-gray-700 pb-2 last:border-b-0 last:pb-0"
                       >
                         <h5 className="text-xs font-medium text-gray-200 mb-1">
-                          Orang {index + 1} (Keyakinan:{" "}
+                          Orang {index + 1} (Keyakinan:{' '}
                           {(personConfidence * 100).toFixed(0)}%)
                         </h5>
                         <ul className="list-disc list-inside space-y-1 text-xs text-gray-200">
@@ -192,11 +195,15 @@ const ExpandableReviewForm = ({
                             <li key={i}>
                               <span className="capitalize">
                                 {attr.attribute
-                                  .replace("person wearing a ", "")
-                                  .replace("person not wearing a ", "")}
+                                  .replace('person wearing a ', '')
+                                  .replace('person not wearing a ', '')}
                               </span>
                               <span className="text-gray-200 ml-1">
-                                ({((attr.confidence || personConfidence) * 100).toFixed(0)}%)
+                                (
+                                {(
+                                  (attr.confidence || personConfidence) * 100
+                                ).toFixed(0)}
+                                %)
                               </span>
                             </li>
                           ))}
@@ -282,14 +289,15 @@ const AttributeDetails = ({ data }: { data: any[] | null }) => {
         <div className="py-4 space-y-4 max-h-[60vh] overflow-y-auto">
           {data.map((person, index) => {
             // Handle both nested and flat attribute structures
-            const isNested = person.attributes && Array.isArray(person.attributes);
+            const isNested =
+              person.attributes && Array.isArray(person.attributes);
             const attributes = isNested ? person.attributes : [person];
             const personConfidence = person.confidence || 0.85;
 
             return (
               <div key={index} className="border-b pb-4 last:border-b-0">
                 <h4 className="font-semibold mb-2">
-                  Orang {index + 1} (Keyakinan:{" "}
+                  Orang {index + 1} (Keyakinan:{' '}
                   {(personConfidence * 100).toFixed(0)}%)
                 </h4>
                 <ul className="list-disc list-inside space-y-1 text-sm">
@@ -298,12 +306,16 @@ const AttributeDetails = ({ data }: { data: any[] | null }) => {
                       {/* Membersihkan teks dari skrip Python */}
                       <span className="capitalize">
                         {attr.attribute
-                          .replace("person wearing a ", "")
-                          .replace("person not wearing a ", "")}
+                          .replace('person wearing a ', '')
+                          .replace('person not wearing a ', '')}
                       </span>
                       <span className="text-muted-foreground">
-                        {" "}
-                        ({((attr.confidence || personConfidence) * 100).toFixed(0)}%)
+                        {' '}
+                        (
+                        {((attr.confidence || personConfidence) * 100).toFixed(
+                          0
+                        )}
+                        %)
                       </span>
                     </li>
                   ))}
@@ -322,10 +334,12 @@ export function KeamananDataTable({
   data,
   pagination,
   onLogUpdate,
+  highlightIds
 }: {
   data: KeamananLog[];
   pagination: any;
   onLogUpdate?: (logId: string, updates: Partial<KeamananLog>) => void;
+  highlightIds?: Set<string>;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -339,35 +353,35 @@ export function KeamananDataTable({
   // Definisikan kolom di sini
   const columns: ColumnDef<KeamananLog>[] = [
     {
-      accessorKey: "status",
-      header: "Status",
+      accessorKey: 'status',
+      header: 'Status',
       cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+        const status = row.getValue('status') as string;
         const getBadgeClass = (status: string) => {
           switch (status) {
-            case "resolved":
-              return "bg-green-600 text-white";
-            case "acknowledged":
-              return "bg-blue-600 text-white";
-            case "false_alarm":
-              return "bg-gray-600 text-white";
+            case 'resolved':
+              return 'bg-green-600 text-white';
+            case 'acknowledged':
+              return 'bg-blue-600 text-white';
+            case 'false_alarm':
+              return 'bg-gray-600 text-white';
             default:
-              return "bg-red-600 text-white";
+              return 'bg-red-600 text-white';
           }
         };
         return (
           <Badge className={getBadgeClass(status)}>
-            {status.replace("_", " ")}
+            {status.replace('_', ' ')}
           </Badge>
         );
-      },
+      }
     },
     {
-      accessorKey: "image_url",
-      header: "Gambar",
+      accessorKey: 'image_url',
+      header: 'Gambar',
       cell: ({ row }) => {
-        const imageUrl = row.getValue("image_url") as string;
-        const deviceName = row.original.device?.name || "Unknown Device";
+        const imageUrl = row.getValue('image_url') as string;
+        const deviceName = row.original.device?.name || 'Unknown Device';
 
         return (
           <Dialog>
@@ -398,20 +412,20 @@ export function KeamananDataTable({
             </DialogContent>
           </Dialog>
         );
-      },
+      }
     },
     {
-      accessorKey: "detected",
-      header: "Terdeteksi?",
+      accessorKey: 'detected',
+      header: 'Terdeteksi?',
       cell: ({ row }) => {
-        const isDetected = row.getValue("detected");
+        const isDetected = row.getValue('detected');
 
         // Handle different data types that might come from backend
         if (
           isDetected === true ||
-          isDetected === "true" ||
+          isDetected === 'true' ||
           isDetected === 1 ||
-          isDetected === "1"
+          isDetected === '1'
         ) {
           return (
             <div className="w-6 h-6 bg-green-500 text-white flex items-center justify-center font-bold text-sm rounded">
@@ -422,9 +436,9 @@ export function KeamananDataTable({
 
         if (
           isDetected === false ||
-          isDetected === "false" ||
+          isDetected === 'false' ||
           isDetected === 0 ||
-          isDetected === "0"
+          isDetected === '0'
         ) {
           return (
             <div className="w-6 h-6 bg-red-500 text-white flex items-center justify-center font-bold text-sm rounded">
@@ -439,27 +453,28 @@ export function KeamananDataTable({
             -
           </div>
         );
-      },
+      }
     },
     {
-      accessorKey: "attributes",
-      header: "Atribut",
-      cell: ({ row }) => <AttributeDetails data={row.getValue("attributes")} />,
+      accessorKey: 'attributes',
+      header: 'Atribut',
+      meta: { className: 'hidden md:table-cell' },
+      cell: ({ row }) => <AttributeDetails data={row.getValue('attributes')} />
     },
     {
-      accessorKey: "created_at",
-      header: "Waktu",
+      accessorKey: 'created_at',
+      header: 'Waktu',
       cell: ({ row }) =>
-        format(new Date(row.getValue("created_at")), "dd MMM, HH:mm:ss"),
+        format(new Date(row.getValue('created_at')), 'dd MMM, HH:mm:ss')
     },
     {
-      id: "actions",
+      id: 'actions',
       cell: ({ row }) => (
         <Button size="sm" onClick={() => row.toggleExpanded()}>
-          {row.getIsExpanded() ? "Tutup" : "Review"}
+          {row.getIsExpanded() ? 'Tutup' : 'Review'}
         </Button>
-      ),
-    },
+      )
+    }
   ];
 
   const table = useReactTable({
@@ -474,20 +489,20 @@ export function KeamananDataTable({
     onExpandedChange: setExpanded,
     state: {
       columnFilters,
-      expanded, // Tambahkan state expanded di sini
-    },
+      expanded // Tambahkan state expanded di sini
+    }
   });
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", page.toString());
+    params.set('page', page.toString());
     router.push(`${pathname}?${params.toString()}`);
   };
 
   const handleRowsPerPageChange = (perPage: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set("per_page", perPage.toString());
-    params.set("page", "1"); // Reset to first page
+    params.set('per_page', perPage.toString());
+    params.set('page', '1'); // Reset to first page
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -497,21 +512,27 @@ export function KeamananDataTable({
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter status..."
-          value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn('status')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
-            table.getColumn("status")?.setFilterValue(event.target.value)
+            table.getColumn('status')?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
       </div>
 
-      <div className="rounded-md overflow-x-auto">
+      <div className="rounded-md overflow-x-auto -mx-2 px-2">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="whitespace-nowrap">
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      'whitespace-nowrap',
+                      (header.column.columnDef.meta as any)?.className
+                    )}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -529,9 +550,22 @@ export function KeamananDataTable({
               table.getRowModel().rows.map((row) => (
                 <React.Fragment key={row.id}>
                   {/* Baris data asli */}
-                  <TableRow data-state={row.getIsSelected() && "selected"}>
+                  <TableRow
+                    data-state={row.getIsSelected() && 'selected'}
+                    className={
+                      highlightIds?.has(row.original.id)
+                        ? 'animate-row-highlight'
+                        : ''
+                    }
+                  >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="whitespace-nowrap">
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          'whitespace-nowrap',
+                          (cell.column.columnDef.meta as any)?.className
+                        )}
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -623,7 +657,7 @@ export function KeamananDataTable({
               </Button>
 
               <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                Page {pagination?.current_page || 1} of{" "}
+                Page {pagination?.current_page || 1} of{' '}
                 {pagination?.total_pages || 1}
               </div>
 

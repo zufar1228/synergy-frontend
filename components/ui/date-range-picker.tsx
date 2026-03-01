@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { CalendarIcon } from "lucide-react";
-import { DateRange } from "react-day-picker";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
-import { useRouter, useSearchParams } from "next/navigation";
+import * as React from 'react';
+import { CalendarIcon } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  PopoverTrigger
+} from '@/components/ui/popover';
 
 interface DateRangePickerProps {
   className?: string;
@@ -25,11 +25,11 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
   const searchParams = useSearchParams();
 
   const [date, setDate] = React.useState<DateRange | undefined>(() => {
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
     return {
       from: from ? new Date(from) : undefined,
-      to: to ? new Date(to) : undefined,
+      to: to ? new Date(to) : undefined
     };
   });
 
@@ -39,41 +39,41 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
     const params = new URLSearchParams(searchParams.toString());
 
     if (range?.from) {
-      params.set("from", range.from.toISOString());
+      params.set('from', range.from.toISOString());
     } else {
-      params.delete("from");
+      params.delete('from');
     }
 
     if (range?.to) {
-      params.set("to", range.to.toISOString());
+      params.set('to', range.to.toISOString());
     } else {
-      params.delete("to");
+      params.delete('to');
     }
 
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn('grid gap-2', className)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             id="date"
-            variant={"default"}
+            variant={'default'}
             className={cn(
-              "w-[300px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              'w-full sm:w-[300px] justify-start text-left font-normal text-xs sm:text-sm',
+              !date && 'text-muted-foreground'
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from ? (
               date.to ? (
                 <>
-                  {format(date.from, "LLL dd, y", { locale: id })} -{" "}
-                  {format(date.to, "LLL dd, y", { locale: id })}
+                  {format(date.from, 'LLL dd, y', { locale: id })} -{' '}
+                  {format(date.to, 'LLL dd, y', { locale: id })}
                 </>
               ) : (
-                format(date.from, "LLL dd, y", { locale: id })
+                format(date.from, 'LLL dd, y', { locale: id })
               )
             ) : (
               <span>Pick a date</span>
@@ -87,7 +87,9 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
             defaultMonth={date?.from}
             selected={date}
             onSelect={handleSelect}
-            numberOfMonths={2}
+            numberOfMonths={
+              typeof window !== 'undefined' && window.innerWidth < 640 ? 1 : 2
+            }
           />
         </PopoverContent>
       </Popover>
