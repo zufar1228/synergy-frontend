@@ -205,7 +205,10 @@ function EventTypeBadge({ eventType }: { eventType: string }) {
       case 'ARM':
         return 'bg-green-600 text-white';
       case 'CALIB_SAVED':
+      case 'CALIB_NOISE_COMPLETE':
         return 'bg-blue-600 text-white';
+      case 'BATTERY_LEVEL_CHANGED':
+        return 'bg-orange-600 text-white';
       default:
         return 'bg-gray-600 text-white';
     }
@@ -215,6 +218,8 @@ function EventTypeBadge({ eventType }: { eventType: string }) {
     FORCED_ENTRY_ALARM: 'Alarm Paksa Masuk',
     UNAUTHORIZED_OPEN: 'Buka Tanpa Izin',
     POWER_SOURCE_CHANGED: 'Ganti Daya',
+    BATTERY_LEVEL_CHANGED: 'Level Baterai',
+    CALIB_NOISE_COMPLETE: 'Baseline Selesai',
     CALIB_SAVED: 'Kalibrasi Tersimpan',
     CALIB_ABORTED: 'Kalibrasi Dibatalkan',
     SIREN_SILENCED: 'Sirine Dimatikan',
@@ -309,18 +314,39 @@ function getColumns(
     },
     {
       accessorKey: 'hit_count',
-      header: 'Hit Count',
+      header: 'Threat Score',
       meta: { className: 'hidden lg:table-cell' },
       cell: ({ row }) => {
-        const val = row.original.hit_count;
-        if (val == null)
-          return <span className="text-muted-foreground">-</span>;
-        return (
-          <div className="flex items-center gap-1">
-            {val >= 2 && <AlertTriangle className="h-3 w-3 text-destructive" />}
-            <span>{val}</span>
-          </div>
-        );
+        // v19: read threat_score from payload (leaky bucket), fallback to hit_count
+        const payload = row.original.payload;
+        const threatScore = payload?.threat_score;
+        const hitCount = row.original.hit_count;
+
+        if (threatScore != null) {
+          const score = Number(threatScore);
+          return (
+            <div className="flex items-center gap-1">
+              {score >= 2.0 && (
+                <AlertTriangle className="h-3 w-3 text-destructive" />
+              )}
+              <span>{score.toFixed(2)}</span>
+            </div>
+          );
+        }
+
+        // Legacy fallback for old events with hit_count
+        if (hitCount != null) {
+          return (
+            <div className="flex items-center gap-1">
+              {hitCount >= 2 && (
+                <AlertTriangle className="h-3 w-3 text-destructive" />
+              )}
+              <span>{hitCount}</span>
+            </div>
+          );
+        }
+
+        return <span className="text-muted-foreground">-</span>;
       }
     },
     {

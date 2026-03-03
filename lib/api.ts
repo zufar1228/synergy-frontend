@@ -819,6 +819,8 @@ export type IntrusiEventType =
   | 'FORCED_ENTRY_ALARM'
   | 'UNAUTHORIZED_OPEN'
   | 'POWER_SOURCE_CHANGED'
+  | 'BATTERY_LEVEL_CHANGED'
+  | 'CALIB_NOISE_COMPLETE'
   | 'CALIB_SAVED'
   | 'CALIB_ABORTED'
   | 'SIREN_SILENCED'
@@ -971,11 +973,12 @@ export const updateIntrusiLogStatus = async (
   return res.json();
 };
 
-// === Intrusi Device Commands (Spec v18) ===
+// === Intrusi Device Commands (Spec v19) ===
 
 export type IntrusiCommandType =
   | 'ARM'
   | 'DISARM'
+  | 'CALIB_START'
   | 'CALIB_KNOCK_START'
   | 'SIREN_SILENCE'
   | 'STATUS';
