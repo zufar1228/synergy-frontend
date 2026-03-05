@@ -216,7 +216,8 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="temperature"
-                  stroke="var(--color-temperature)"
+                  stroke="#3b82f6"
+                  style={{ stroke: '#3b82f6' }}
                   strokeWidth={2}
                   name="Aktual (°C)"
                   dot={false}
@@ -225,7 +226,8 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="pred_temperature"
-                  stroke="var(--color-pred_temperature)"
+                  stroke="#22c55e"
+                  style={{ stroke: '#22c55e' }}
                   strokeWidth={2}
                   name="Prediksi (°C)"
                   dot={false}
@@ -262,7 +264,8 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="humidity"
-                  stroke="var(--color-humidity)"
+                  stroke="#3b82f6"
+                  style={{ stroke: '#3b82f6' }}
                   strokeWidth={2}
                   name="Aktual (%RH)"
                   dot={false}
@@ -271,7 +274,8 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="pred_humidity"
-                  stroke="var(--color-pred_humidity)"
+                  stroke="#22c55e"
+                  style={{ stroke: '#22c55e' }}
                   strokeWidth={2}
                   name="Prediksi (%RH)"
                   dot={false}
@@ -308,7 +312,8 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="co2"
-                  stroke="var(--color-co2)"
+                  stroke="#3b82f6"
+                  style={{ stroke: '#3b82f6' }}
                   strokeWidth={2}
                   name="Aktual (ppm)"
                   dot={false}
@@ -317,7 +322,8 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="pred_co2"
-                  stroke="var(--color-pred_co2)"
+                  stroke="#22c55e"
+                  style={{ stroke: '#22c55e' }}
                   strokeWidth={2}
                   name="Prediksi (ppm)"
                   dot={false}
