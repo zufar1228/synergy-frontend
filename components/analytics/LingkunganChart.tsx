@@ -216,7 +216,7 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="temperature"
-                  stroke="#3b82f6"
+                  stroke="var(--color-temperature)"
                   strokeWidth={2}
                   name="Aktual (°C)"
                   dot={false}
@@ -225,7 +225,7 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="pred_temperature"
-                  stroke="#22c55e"
+                  stroke="var(--color-pred_temperature)"
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   name="Prediksi (°C)"
@@ -263,7 +263,7 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="humidity"
-                  stroke="#3b82f6"
+                  stroke="var(--color-humidity)"
                   strokeWidth={2}
                   name="Aktual (%RH)"
                   dot={false}
@@ -272,7 +272,7 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="pred_humidity"
-                  stroke="#22c55e"
+                  stroke="var(--color-pred_humidity)"
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   name="Prediksi (%RH)"
@@ -310,7 +310,7 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="co2"
-                  stroke="#3b82f6"
+                  stroke="var(--color-co2)"
                   strokeWidth={2}
                   name="Aktual (ppm)"
                   dot={false}
@@ -319,7 +319,7 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="pred_co2"
-                  stroke="#22c55e"
+                  stroke="var(--color-pred_co2)"
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   name="Prediksi (ppm)"
