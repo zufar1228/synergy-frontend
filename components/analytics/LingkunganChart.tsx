@@ -227,7 +227,6 @@ export const LingkunganChart = ({
                   dataKey="pred_temperature"
                   stroke="var(--color-pred_temperature)"
                   strokeWidth={2}
-                  strokeDasharray="5 5"
                   name="Prediksi (°C)"
                   dot={false}
                   connectNulls
@@ -274,7 +273,6 @@ export const LingkunganChart = ({
                   dataKey="pred_humidity"
                   stroke="var(--color-pred_humidity)"
                   strokeWidth={2}
-                  strokeDasharray="5 5"
                   name="Prediksi (%RH)"
                   dot={false}
                   connectNulls
@@ -321,7 +319,6 @@ export const LingkunganChart = ({
                   dataKey="pred_co2"
                   stroke="var(--color-pred_co2)"
                   strokeWidth={2}
-                  strokeDasharray="5 5"
                   name="Prediksi (ppm)"
                   dot={false}
                   connectNulls

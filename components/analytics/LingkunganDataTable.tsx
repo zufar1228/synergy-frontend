@@ -110,7 +110,7 @@ export const LingkunganDataTable = ({
               </TableHead>
               <TableHead className="text-center">
                 <span className="inline-flex items-center gap-1">
-                  <Droplets className="h-3 w-3 text-blue-500" />
+                  <Droplets className="h-3 w-3" />
                   Kelembapan (%)
                 </span>
               </TableHead>
@@ -137,13 +137,7 @@ export const LingkunganDataTable = ({
                 const isNew = highlightIds.has(log.id);
 
                 return (
-                  <TableRow
-                    key={log.id}
-                    className={cn(
-                      'transition-colors duration-700',
-                      isNew && 'bg-green-50 dark:bg-green-950/30'
-                    )}
-                  >
+                  <TableRow key={log.id}>
                     <TableCell className="text-xs sm:text-sm whitespace-nowrap">
                       {new Date(log.timestamp).toLocaleString('id-ID', {
                         day: '2-digit',
@@ -168,15 +162,7 @@ export const LingkunganDataTable = ({
                       </span>
                     </TableCell>
                     <TableCell className="text-center font-mono">
-                      <span
-                        className={cn(
-                          log.humidity > 80
-                            ? 'text-blue-600 font-bold'
-                            : log.humidity > 75
-                              ? 'text-cyan-500'
-                              : ''
-                        )}
-                      >
+                      <span>
                         {log.humidity.toFixed(1)}
                       </span>
                     </TableCell>
