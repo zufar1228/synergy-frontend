@@ -43,6 +43,8 @@ interface Pagination {
   limit: number;
   offset: number;
   hasMore: boolean;
+  page?: number;
+  per_page?: number;
 }
 
 interface LingkunganDataTableProps {
@@ -97,20 +99,21 @@ export const LingkunganDataTable = ({
     }
   };
 
-  const currentPage = pagination
-    ? Math.floor(pagination.offset / pagination.limit) + 1
-    : 1;
+  // derive current page and total pages from API response (page & per_page)
+  const currentPage = pagination?.page || 1;
+  const perPageFromApi = pagination?.per_page || pagination?.limit || 25;
   const totalPages = pagination
-    ? Math.ceil(pagination.total / pagination.limit)
+    ? Math.ceil(pagination.total / perPageFromApi)
     : 1;
+
+  // ensure state sync with API per_page when first rendered
+  const [perPage, setPerPage] = useState(perPageFromApi);
 
   // --- pagination helpers copied from Intrusi/Keamanan tables ---
-  const [perPage, setPerPage] = useState(pagination?.limit || 25);
-
   const goToPage = (page: number) => {
     const params = new URLSearchParams(window.location.search);
     params.set('page', String(page));
-    params.set('limit', String(perPage));
+    params.set('per_page', String(perPage));
     window.history.pushState(
       null,
       '',
@@ -123,7 +126,7 @@ export const LingkunganDataTable = ({
     setPerPage(Number(value));
     const params = new URLSearchParams(window.location.search);
     params.set('page', '1');
-    params.set('limit', value);
+    params.set('per_page', value);
     window.history.pushState(
       null,
       '',
