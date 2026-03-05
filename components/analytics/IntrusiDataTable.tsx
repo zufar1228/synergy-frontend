@@ -517,71 +517,79 @@ export function IntrusiDataTable({
         </Table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="hidden sm:inline">Baris per halaman:</span>
-          <span className="sm:hidden">Rows:</span>
-          <Select
-            value={perPage.toString()}
-            onValueChange={handlePerPageChange}
-          >
-            <SelectTrigger className="h-8 w-[70px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {[10, 25, 50, 100].map((size) => (
-                <SelectItem key={size} value={size.toString()}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-            {currentPage}/{totalPages || 1}
-          </span>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="neutral"
-              size="icon"
-              className="hidden sm:flex h-8 w-8"
-              onClick={() => goToPage(1)}
-              disabled={currentPage <= 1}
-            >
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="neutral"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage <= 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="neutral"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage >= totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="neutral"
-              size="icon"
-              className="hidden sm:flex h-8 w-8"
-              onClick={() => goToPage(totalPages)}
-              disabled={currentPage >= totalPages}
-            >
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
+      {/* Pagination matching Keamanan style */}
+      {data.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
+          <div className="text-sm text-muted-foreground">
+            Total {pagination?.total || 0} events.
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+            <div className="flex items-center space-x-4">
+              {/* Rows per page */}
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium whitespace-nowrap">Rows</p>
+                <Select
+                  value={perPage.toString()}
+                  onValueChange={handlePerPageChange}
+                >
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 25, 50, 100].map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* navigation buttons */}
+              <div className="flex items-center space-x-2">
+                <Button
+                  className="hidden sm:flex h-8 w-8 p-0"
+                  onClick={() => goToPage(1)}
+                  disabled={currentPage <= 1}
+                  variant="neutral"
+                  size="icon"
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  className="h-8 w-8 p-0"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage <= 1}
+                  variant="neutral"
+                  size="icon"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                  Page {currentPage} of {totalPages || 1}
+                </div>
+                <Button
+                  className="h-8 w-8 p-0"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage >= totalPages}
+                  variant="neutral"
+                  size="icon"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  className="hidden sm:flex h-8 w-8 p-0"
+                  onClick={() => goToPage(totalPages)}
+                  disabled={currentPage >= totalPages}
+                  variant="neutral"
+                  size="icon"
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

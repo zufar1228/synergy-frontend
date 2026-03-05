@@ -609,78 +609,84 @@ export function KeamananDataTable({
       </div>
 
       {/* Footer Paginasi */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
-        <div className="text-sm text-muted-foreground">
-          Total {pagination?.total || 0} deteksi.
-        </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-          <div className="flex items-center space-x-4">
-            {/* Kontrol Baris per Halaman */}
-            <div className="flex items-center space-x-2">
-              <p className="text-sm font-medium whitespace-nowrap">Rows</p>
-              <Select
-                value={`${pagination?.per_page || 25}`}
-                onValueChange={(value) =>
-                  handleRowsPerPageChange(Number(value))
-                }
-              >
-                <SelectTrigger className="h-8 w-[70px]">
-                  <SelectValue placeholder={pagination?.per_page || 25} />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  {[10, 25, 50, 100].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Info Halaman & Tombol Navigasi */}
-            <div className="flex items-center space-x-2">
-              <Button
-                className="hidden h-8 w-8 p-0 lg:flex"
-                onClick={() => handlePageChange(1)}
-                disabled={pagination?.current_page === 1}
-              >
-                <ChevronsLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                className="h-8 w-8 p-0"
-                onClick={() =>
-                  handlePageChange((pagination?.current_page || 1) - 1)
-                }
-                disabled={pagination?.current_page === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-
-              <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                Page {pagination?.current_page || 1} of{' '}
-                {pagination?.total_pages || 1}
+      {data.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
+          <div className="text-sm text-muted-foreground">
+            Total {pagination?.total || 0} deteksi.
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+            <div className="flex items-center space-x-4">
+              {/* Kontrol Baris per Halaman */}
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium whitespace-nowrap">Rows</p>
+                <Select
+                  value={`${pagination?.per_page || 25}`}
+                  onValueChange={(value) =>
+                    handleRowsPerPageChange(Number(value))
+                  }
+                >
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue placeholder={pagination?.per_page || 25} />
+                  </SelectTrigger>
+                  <SelectContent side="top">
+                    {[10, 25, 50, 100].map((pageSize) => (
+                      <SelectItem key={pageSize} value={`${pageSize}`}>
+                        {pageSize}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <Button
-                className="h-8 w-8 p-0"
-                onClick={() =>
-                  handlePageChange((pagination?.current_page || 1) + 1)
-                }
-                disabled={pagination?.current_page === pagination?.total_pages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button
-                className="hidden h-8 w-8 p-0 lg:flex"
-                onClick={() => handlePageChange(pagination?.total_pages || 1)}
-                disabled={pagination?.current_page === pagination?.total_pages}
-              >
-                <ChevronsRight className="h-4 w-4" />
-              </Button>
+              {/* Info Halaman & Tombol Navigasi */}
+              <div className="flex items-center space-x-2">
+                <Button
+                  className="hidden h-8 w-8 p-0 lg:flex"
+                  onClick={() => handlePageChange(1)}
+                  disabled={pagination?.current_page === 1}
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  className="h-8 w-8 p-0"
+                  onClick={() =>
+                    handlePageChange((pagination?.current_page || 1) - 1)
+                  }
+                  disabled={pagination?.current_page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                  Page {pagination?.current_page || 1} of{' '}
+                  {pagination?.total_pages || 1}
+                </div>
+
+                <Button
+                  className="h-8 w-8 p-0"
+                  onClick={() =>
+                    handlePageChange((pagination?.current_page || 1) + 1)
+                  }
+                  disabled={
+                    pagination?.current_page === pagination?.total_pages
+                  }
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  className="hidden h-8 w-8 p-0 lg:flex"
+                  onClick={() => handlePageChange(pagination?.total_pages || 1)}
+                  disabled={
+                    pagination?.current_page === pagination?.total_pages
+                  }
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

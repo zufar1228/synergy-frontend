@@ -12,9 +12,9 @@ import {
   Building,
   HardDrive,
   AreaChart,
-  Thermometer,
   Camera,
-  DoorOpen
+  DoorOpen,
+  Thermometer
 } from 'lucide-react';
 import {
   Collapsible,
@@ -52,9 +52,9 @@ const managementLinks = [
 const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   const pathname = usePathname();
   const { selectedWarehouse } = useWarehouse();
-  const [environmentAreas, setEnvironmentAreas] = useState<NavArea[]>([]);
   const [securityAreas, setSecurityAreas] = useState<NavArea[]>([]);
   const [intrusiAreas, setIntrusiAreas] = useState<NavArea[]>([]);
+  const [lingkunganAreas, setLingkunganAreas] = useState<NavArea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -69,14 +69,14 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
       }
       try {
         // Fetch data for all systems simultaneously
-        const [environmentData, securityData, intrusiData] = await Promise.all([
-          getNavAreasBySystem('lingkungan', session.access_token),
+        const [securityData, intrusiData, lingkunganData] = await Promise.all([
           getNavAreasBySystem('keamanan', session.access_token),
-          getNavAreasBySystem('intrusi', session.access_token)
+          getNavAreasBySystem('intrusi', session.access_token),
+          getNavAreasBySystem('lingkungan', session.access_token)
         ]);
-        setEnvironmentAreas(environmentData);
         setSecurityAreas(securityData);
         setIntrusiAreas(intrusiData);
+        setLingkunganAreas(lingkunganData);
       } catch (error) {
         console.error('Failed to load navigation areas:', error);
         // Don't show toast on every render, just log the error
@@ -89,12 +89,6 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   }, []); // Only fetch once on mount
 
   // Memoize filtered environment areas to avoid recalculation on every render
-  const filteredEnvironmentAreas = useMemo(() => {
-    return environmentAreas.filter(
-      (area) =>
-        selectedWarehouse === 'all' || area.warehouse_id === selectedWarehouse
-    );
-  }, [environmentAreas, selectedWarehouse]);
 
   // Memoize filtered security areas to avoid recalculation on every render
   const filteredSecurityAreas = useMemo(() => {
@@ -112,6 +106,14 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
     );
   }, [intrusiAreas, selectedWarehouse]);
 
+  // Memoize filtered lingkungan areas
+  const filteredLingkunganAreas = useMemo(() => {
+    return lingkunganAreas.filter(
+      (area) =>
+        selectedWarehouse === 'all' || area.warehouse_id === selectedWarehouse
+    );
+  }, [lingkunganAreas, selectedWarehouse]);
+
   // Memoize the isActive function to avoid recreation on every render
   const isActive = useCallback(
     (href: string) => {
@@ -124,11 +126,6 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   );
 
   // Check if any environment sub-menu is active
-  const isEnvironmentActive = useMemo(() => {
-    return filteredEnvironmentAreas.some(
-      (area) => pathname === `/${area.warehouse_id}/${area.id}/lingkungan`
-    );
-  }, [filteredEnvironmentAreas, pathname]);
 
   // Check if any security sub-menu is active
   const isSecurityActive = useMemo(() => {
@@ -143,6 +140,13 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
       (area) => pathname === `/${area.warehouse_id}/${area.id}/intrusi`
     );
   }, [filteredIntrusiAreas, pathname]);
+
+  // Check if any lingkungan sub-menu is active
+  const isLingkunganActive = useMemo(() => {
+    return filteredLingkunganAreas.some(
+      (area) => pathname === `/${area.warehouse_id}/${area.id}/lingkungan`
+    );
+  }, [filteredLingkunganAreas, pathname]);
 
   // Memoize management links filtering
   const filteredManagementLinks = useMemo(() => {
@@ -177,52 +181,6 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
       <SidebarGroup className="mb-3">
         <SidebarGroupLabel>Monitoring</SidebarGroupLabel>
         <SidebarMenu>
-          {/* Collapsible Environment Menu */}
-          <Collapsible asChild>
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  suppressHydrationWarning
-                  isActive={isEnvironmentActive}
-                >
-                  <Thermometer />
-                  <span>Lingkungan</span>
-                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent suppressHydrationWarning>
-                <SidebarMenuSub>
-                  {isLoading
-                    ? // Show skeleton while loading
-                      Array.from({ length: 3 }).map((_, i) => (
-                        <SidebarMenuSubItem key={i}>
-                          <SidebarMenuSubButton>
-                            <Skeleton className="h-4 w-24" />
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))
-                    : filteredEnvironmentAreas.map((area) => (
-                        <SidebarMenuSubItem key={area.id}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={
-                              pathname ===
-                              `/${area.warehouse_id}/${area.id}/lingkungan`
-                            }
-                          >
-                            <Link
-                              href={`/${area.warehouse_id}/${area.id}/lingkungan`}
-                            >
-                              <span>{area.name}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-
           {/* Collapsible Security Menu */}
           <Collapsible asChild>
             <SidebarMenuItem>
@@ -258,6 +216,50 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
                           >
                             <Link
                               href={`/${area.warehouse_id}/${area.id}/keamanan`}
+                            >
+                              <span>{area.name}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+          {/* Collapsible Lingkungan Menu */}
+          <Collapsible asChild>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton
+                  suppressHydrationWarning
+                  isActive={isLingkunganActive}
+                >
+                  <Thermometer />
+                  <span>Lingkungan</span>
+                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent suppressHydrationWarning>
+                <SidebarMenuSub>
+                  {isLoading
+                    ? Array.from({ length: 3 }).map((_, i) => (
+                        <SidebarMenuSubItem key={i}>
+                          <SidebarMenuSubButton>
+                            <Skeleton className="h-4 w-24" />
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))
+                    : filteredLingkunganAreas.map((area) => (
+                        <SidebarMenuSubItem key={area.id}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={
+                              pathname ===
+                              `/${area.warehouse_id}/${area.id}/lingkungan`
+                            }
+                          >
+                            <Link
+                              href={`/${area.warehouse_id}/${area.id}/lingkungan`}
                             >
                               <span>{area.name}</span>
                             </Link>

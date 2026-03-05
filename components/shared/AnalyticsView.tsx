@@ -1,16 +1,16 @@
-"use client"; // Menandakan ini adalah Client Component
+'use client'; // Menandakan ini adalah Client Component
 
-import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+  TableRow
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import {
   LineChart,
   Line,
@@ -19,11 +19,11 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { format } from "date-fns";
-import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+  ResponsiveContainer
+} from 'recharts';
+import { format } from 'date-fns';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 // Definisikan tipe data yang diterima komponen ini
 // Ini harus cocok dengan response dari API analytics kita
@@ -54,7 +54,7 @@ interface AnalyticsViewProps {
 export const AnalyticsView = ({
   initialData,
   systemType,
-  areaId,
+  areaId
 }: AnalyticsViewProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -68,10 +68,10 @@ export const AnalyticsView = ({
     const channel = supabase
       .channel(`realtime-logs:${areaId}:${systemType}`)
       .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: `${systemType}_logs` },
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: `${systemType}_logs` },
         (payload) => {
-          console.log("New log received!", payload);
+          console.log('New log received!', payload);
           const newLog = payload.new as Log;
 
           // Tambahkan log baru ke awal array
@@ -92,15 +92,15 @@ export const AnalyticsView = ({
   // Siapkan data untuk grafik (reverse agar waktu berjalan dari kiri ke kanan)
   const chartData = logs
     .map((log) => ({
-      name: format(new Date(log.timestamp), "HH:mm:ss"),
+      name: format(new Date(log.timestamp), 'HH:mm:ss'),
       Suhu: log.temperature,
-      Kelembapan: log.humidity,
+      Kelembapan: log.humidity
     }))
     .reverse();
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", newPage.toString());
+    params.set('page', newPage.toString());
     router.push(`?${params.toString()}`);
   };
 
@@ -112,7 +112,7 @@ export const AnalyticsView = ({
           <Card key={key}>
             <CardHeader>
               <CardTitle className="text-sm font-medium capitalize">
-                {key.replace("_", " ")}
+                {key.replace('_', ' ')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -122,38 +122,8 @@ export const AnalyticsView = ({
         ))}
       </div>
 
-      {/* 2. Grafik Garis */}
-      {systemType === "lingkungan" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Grafik Sensor</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="Suhu"
-                  stroke="#ef4444"
-                  activeDot={{ r: 8 }}
-                />
-                <Line type="monotone" dataKey="Kelembapan" stroke="#3b82f6" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 3. Tabel Log */}
+      {/* 3. Tabel Log (title removed as requested) */}
       <Card>
-        <CardHeader>
-          <CardTitle>Detail Log</CardTitle>
-        </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
@@ -168,10 +138,10 @@ export const AnalyticsView = ({
               {logs.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell>
-                    {format(new Date(log.timestamp), "dd MMM, HH:mm:ss")}
+                    {format(new Date(log.timestamp), 'dd MMM, HH:mm:ss')}
                   </TableCell>
-                  <TableCell>{log.temperature ?? "N/A"}</TableCell>
-                  <TableCell>{log.humidity ?? "N/A"}</TableCell>
+                  <TableCell>{log.temperature ?? 'N/A'}</TableCell>
+                  <TableCell>{log.humidity ?? 'N/A'}</TableCell>
                   <TableCell className="font-mono text-xs">
                     {JSON.stringify(log.payload)}
                   </TableCell>

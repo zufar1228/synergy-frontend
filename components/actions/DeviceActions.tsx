@@ -60,7 +60,7 @@ import { PlusCircle, Copy } from 'lucide-react';
 // --- 1. Perbarui Skema Zod ---
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Nama minimal 3 karakter.' }),
-  system_type: z.enum(['lingkungan', 'keamanan', 'intrusi'], {
+  system_type: z.enum(['keamanan', 'intrusi', 'lingkungan'], {
     message: 'Tipe sistem wajib dipilih.'
   }),
   warehouse_id: z.string().min(1, 'Gudang harus dipilih.'),
@@ -272,9 +272,11 @@ const DeviceForm = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="lingkungan">Lingkungan (MQTT)</SelectItem>
                   <SelectItem value="keamanan">Keamanan (Kamera)</SelectItem>
                   <SelectItem value="intrusi">Intrusi Pintu (MQTT)</SelectItem>
+                  <SelectItem value="lingkungan">
+                    Lingkungan (Sensor)
+                  </SelectItem>
                 </SelectContent>
               </Select>
               {!!initialData && (

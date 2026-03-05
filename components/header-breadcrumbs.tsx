@@ -13,10 +13,13 @@ import {
 } from '@/components/ui/breadcrumb';
 import { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { getNavAreasBySystem, NavArea } from '@/lib/api';
+import {
+  getNavAreasBySystem,
+  NavArea,
+  getDeviceDetailsByArea
+} from '@/lib/api';
 
 const systemTypeLabels: Record<string, string> = {
-  lingkungan: 'Lingkungan',
   keamanan: 'Keamanan',
   intrusi: 'Keamanan Pintu'
 };
@@ -37,6 +40,7 @@ const managementSubRoutes: Record<string, string> = {
 export function HeaderBreadcrumbs() {
   const pathname = usePathname();
   const [navAreas, setNavAreas] = useState<NavArea[]>([]);
+  const [deviceName, setDeviceName] = useState<string | null>(null);
 
   // Fetch nav areas in one shot (all systems) for name resolution
   useEffect(() => {
@@ -48,18 +52,43 @@ export function HeaderBreadcrumbs() {
       if (!session) return;
 
       try {
-        const [env, sec, intr] = await Promise.all([
-          getNavAreasBySystem('lingkungan', session.access_token),
+        const [sec, intr] = await Promise.all([
           getNavAreasBySystem('keamanan', session.access_token),
           getNavAreasBySystem('intrusi', session.access_token)
         ]);
-        setNavAreas([...env, ...sec, ...intr]);
+        setNavAreas([...sec, ...intr]);
       } catch {
         // Silently fail — breadcrumbs will show IDs as fallback
       }
     };
     fetchAreas();
   }, []);
+
+  // fetch device name when pathname changes
+  useEffect(() => {
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length >= 3) {
+      const [, areaId, systemType] = segments;
+      (async () => {
+        try {
+          const supabase = createClient();
+          const {
+            data: { session }
+          } = await supabase.auth.getSession();
+          if (session) {
+            const dev = await getDeviceDetailsByArea(
+              session.access_token,
+              areaId,
+              systemType
+            );
+            if (dev) setDeviceName(dev.name);
+          }
+        } catch {}
+      })();
+    } else {
+      setDeviceName(null);
+    }
+  }, [pathname]);
 
   const crumbs = useMemo(() => {
     const segments = pathname.split('/').filter(Boolean);
@@ -119,8 +148,9 @@ export function HeaderBreadcrumbs() {
         href: `/${warehouseId}/${areaId}/${systemType}`,
         isLast: false
       });
+      // last crumb will be replaced with device name if we have it
       result.push({
-        label: systemLabel,
+        label: deviceName || systemLabel,
         href: `/${warehouseId}/${areaId}/${systemType}`,
         isLast: true
       });
@@ -139,7 +169,7 @@ export function HeaderBreadcrumbs() {
     }
 
     return [];
-  }, [pathname, navAreas]);
+  }, [pathname, navAreas, deviceName]);
 
   if (crumbs.length === 0) return null;
 

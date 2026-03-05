@@ -669,7 +669,7 @@ export const updateKeamananLogStatus = async (
   return res.json();
 };
 
-// Tipe BARU untuk status perangkat lingkungan
+// Tipe untuk status perangkat
 export interface EnvironmentDeviceStatus {
   id: string;
   name: string;
@@ -698,24 +698,6 @@ export const getDeviceDetailsByArea = async (
     }
   );
   if (!res.ok) throw new Error('Gagal mengambil status perangkat');
-  return res.json();
-};
-
-// Fungsi BARU untuk mengirim perintah manual
-export const sendManualFanCommand = async (
-  token: string,
-  deviceId: string,
-  action: 'On' | 'Off'
-): Promise<any> => {
-  const res = await fetch(`${API_BASE_URL}/devices/${deviceId}/command`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ action })
-  });
-  if (!res.ok) throw new Error('Gagal mengirim perintah');
   return res.json();
 };
 
@@ -1059,6 +1041,106 @@ export const testPushNotification = async (
   });
   if (!res.ok) {
     throw await buildApiError(res, 'Gagal mengirim test push notification');
+  }
+  return res.json();
+};
+
+// ============================================================================
+// LINGKUNGAN (Environmental Monitoring) API
+// ============================================================================
+
+export interface LingkunganLog {
+  id: string;
+  device_id: string;
+  timestamp: string;
+  temperature: number;
+  humidity: number;
+  co2: number;
+  status: 'unacknowledged' | 'acknowledged' | 'resolved' | 'false_alarm';
+  acknowledged_by: string | null;
+  acknowledged_at: string | null;
+  notes: string | null;
+  notification_sent_at: string | null;
+}
+
+export interface LingkunganStatus {
+  status: 'NORMAL' | 'WASPADA' | 'BAHAYA';
+  fan_state: string;
+  dehumidifier_state: string;
+  control_mode: string;
+  manual_override_until: string | null;
+  latest_reading: {
+    temperature: number;
+    humidity: number;
+    co2: number;
+    timestamp: string;
+  } | null;
+  latest_prediction: {
+    predicted_temperature: number;
+    predicted_humidity: number;
+    predicted_co2: number;
+    timestamp: string;
+  } | null;
+}
+
+/** Get current lingkungan device status */
+export const getLingkunganStatus = async (
+  token: string,
+  deviceId: string
+): Promise<LingkunganStatus> => {
+  const res = await fetch(
+    `${API_BASE_URL}/lingkungan/devices/${deviceId}/status`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store'
+    }
+  );
+  if (!res.ok) {
+    throw await buildApiError(res, 'Gagal mengambil status lingkungan');
+  }
+  const json = await res.json();
+  return json.data;
+};
+
+/** Send a control command (fan/dehumidifier/mode) to a lingkungan device */
+export const sendLingkunganControl = async (
+  token: string,
+  deviceId: string,
+  command: { fan?: string; dehumidifier?: string; mode?: string }
+): Promise<{ message: string }> => {
+  const res = await fetch(
+    `${API_BASE_URL}/lingkungan/devices/${deviceId}/control`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(command)
+    }
+  );
+  if (!res.ok) {
+    throw await buildApiError(res, 'Gagal mengirim perintah kontrol');
+  }
+  return res.json();
+};
+
+/** Update acknowledgement status for a lingkungan log */
+export const updateLingkunganLogStatus = async (
+  logId: string,
+  data: UpdateIncidentStatusPayload,
+  token: string
+): Promise<LingkunganLog> => {
+  const res = await fetch(`${API_BASE_URL}/lingkungan/logs/${logId}/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    throw await buildApiError(res, 'Gagal memperbarui status log lingkungan');
   }
   return res.json();
 };

@@ -1,9 +1,10 @@
 // frontend/app/(main)/[warehouseId]/[areaId]/[systemType]/page.tsx
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { LingkunganView } from '@/components/analytics/LingkunganView';
+
 import { KeamananView } from '@/components/analytics/KeamananView';
 import { IntrusiView } from '@/components/analytics/IntrusiView';
+import { LingkunganView } from '@/components/analytics/LingkunganView';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 // Update getAnalytics function definition
@@ -101,12 +102,12 @@ export default async function AnalyticsPage({
 
   const renderAnalyticsView = () => {
     switch (systemType) {
-      case 'lingkungan':
-        return <LingkunganView initialData={data} />;
       case 'keamanan':
         return <KeamananView initialData={data} />;
       case 'intrusi':
         return <IntrusiView initialData={data} />;
+      case 'lingkungan':
+        return <LingkunganView initialData={data} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -127,9 +128,7 @@ export default async function AnalyticsPage({
 
   return (
     <div className="w-full">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6 capitalize">
-        Analitik: {systemType.replace('_', ' ')}
-      </h1>
+      {/* page heading removed as per request */}
       {renderAnalyticsView()}
     </div>
   );
