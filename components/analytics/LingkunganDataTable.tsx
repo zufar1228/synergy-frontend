@@ -50,7 +50,6 @@ export const LingkunganDataTable = ({
   pagination,
   highlightIds
 }: LingkunganDataTableProps) => {
-
   // derive current page and total pages from API response (page & per_page)
   const currentPage = pagination?.page || 1;
   const perPageFromApi = pagination?.per_page || pagination?.limit || 25;
