@@ -649,7 +649,12 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
               ) : (
                 <div className="space-y-3">
                   {/* Fan Toggle */}
-                  <div className="flex items-center justify-between rounded-base border-2 border-border bg-secondary p-3">
+                  <div
+                    className={cn(
+                      'flex items-center justify-between rounded-base border-2 border-border bg-secondary p-3',
+                      !isManualMode && 'opacity-50'
+                    )}
+                  >
                     <div className="flex items-center gap-2">
                       <Fan className="h-4 w-4" />
                       <span className="text-sm font-medium">Kipas</span>
@@ -659,12 +664,17 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
                       onCheckedChange={(checked) =>
                         handleControl({ fan: checked ? 'ON' : 'OFF' })
                       }
-                      disabled={isSending}
+                      disabled={isSending || !isManualMode}
                     />
                   </div>
 
                   {/* Dehumidifier Toggle */}
-                  <div className="flex items-center justify-between rounded-base border-2 border-border bg-secondary p-3">
+                  <div
+                    className={cn(
+                      'flex items-center justify-between rounded-base border-2 border-border bg-secondary p-3',
+                      !isManualMode && 'opacity-50'
+                    )}
+                  >
                     <div className="flex items-center gap-2">
                       <Droplets className="h-4 w-4" />
                       <span className="text-sm font-medium">Dehumidifier</span>
@@ -676,9 +686,15 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
                           dehumidifier: checked ? 'ON' : 'OFF'
                         })
                       }
-                      disabled={isSending}
+                      disabled={isSending || !isManualMode}
                     />
                   </div>
+
+                  {!isManualMode && (
+                    <p className="text-xs text-center text-muted-foreground">
+                      Aktifkan mode manual untuk mengontrol aktuator.
+                    </p>
+                  )}
 
                   {/* Mode Toggle */}
                   <Button
