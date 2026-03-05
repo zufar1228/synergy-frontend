@@ -297,8 +297,10 @@ export const LingkunganDataTable = ({
       {/* Pagination matching Keamanan style */}
       {data.length > 0 && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
-          <div className="text-sm text-muted-foreground">
-            Total {pagination?.total || 0} data.
+          <div className="text-sm text-foreground">
+            <span className="text-sm text-foreground">
+              Total {pagination?.total || 0} data.
+            </span>
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
             <div className="flex items-center space-x-4">

@@ -491,20 +491,31 @@ export const getNavAreasBySystem = async (
 };
 
 // Fungsi BARU untuk mengambil data analitik
+export interface AnalyticsParams {
+  systemType: string;
+  areaId: string;
+  page?: string;
+  perPage?: string;
+  from?: string;
+  to?: string;
+}
+
 export const getAnalytics = async (
   accessToken: string,
-  systemType: string,
-  areaId: string,
-  page: string = '1'
+  params: AnalyticsParams
 ) => {
   try {
-    const res = await fetch(
-      `${API_BASE_URL}/analytics/${systemType}?area_id=${areaId}&page=${page}`,
-      {
-        cache: 'no-store',
-        headers: { Authorization: `Bearer ${accessToken}` }
-      }
-    );
+    const url = new URL(`${API_BASE_URL}/analytics/${params.systemType}`);
+    url.searchParams.set('area_id', params.areaId);
+    if (params.page) url.searchParams.set('page', params.page);
+    if (params.perPage) url.searchParams.set('per_page', params.perPage);
+    if (params.from) url.searchParams.set('from', params.from);
+    if (params.to) url.searchParams.set('to', params.to);
+
+    const res = await fetch(url.toString(), {
+      cache: 'no-store',
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
     if (!res.ok) return null;
     return res.json();
   } catch (error) {
