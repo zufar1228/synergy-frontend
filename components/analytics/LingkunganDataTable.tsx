@@ -162,9 +162,7 @@ export const LingkunganDataTable = ({
                       </span>
                     </TableCell>
                     <TableCell className="text-center font-mono">
-                      <span>
-                        {log.humidity.toFixed(1)}
-                      </span>
+                      <span>{log.humidity.toFixed(1)}</span>
                     </TableCell>
                     <TableCell className="text-center font-mono">
                       <span
