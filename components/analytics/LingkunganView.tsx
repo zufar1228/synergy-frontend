@@ -139,14 +139,21 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
 
   // Initialize from server data
   useEffect(() => {
-    setLogs(initialData.logs || []);
+    // make sure logs are newest-first (descending) before using them
+    const sortedLogs = (initialData.logs || [])
+      .slice()
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+    setLogs(sortedLogs);
     setSummary({
       total_readings: 0,
       unacknowledged: 0,
       ...initialData.summary
     });
-    if (initialData.logs?.length > 0) {
-      setLastDataTimestamp(new Date(initialData.logs[0].timestamp));
+    if (sortedLogs.length > 0) {
+      setLastDataTimestamp(new Date(sortedLogs[0].timestamp));
     }
   }, [initialData]);
 
@@ -177,7 +184,29 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
         if (!res || cancelled) return;
 
         // backend returns { data: { actual: [...], predictions: [...] } }
-        const { actual = [], predictions = [] } = res.data || {};
+        let { actual = [], predictions = [] } = res.data || {};
+
+        console.log('[LingkunganView] Chart data received:', {
+          actualCount: actual.length,
+          predictCount: predictions.length,
+          firstActual: actual[0]?.timestamp,
+          lastActual: actual[actual.length - 1]?.timestamp,
+          firstPred: predictions[0]?.timestamp,
+          lastPred: predictions[predictions.length - 1]?.timestamp
+        });
+
+        // ensure chronological order regardless of backend
+        const sortByTime = (arr: any[]) =>
+          arr
+            .slice()
+            .sort(
+              (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime()
+            );
+
+        actual = sortByTime(actual);
+        predictions = sortByTime(predictions);
 
         const toPoint = (a: any) => ({
           timestamp: a.timestamp,
@@ -200,8 +229,18 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
           predicted_co2: p.predicted_co2
         });
 
-        setChartActual(actual.map(toPoint).slice(-120));
-        setChartPredictions(predictions.map(toPred).slice(-120));
+        const chartsActual = actual.map(toPoint).slice(-120);
+        const chartsPred = predictions.map(toPred).slice(-120);
+
+        console.log('[LingkunganView] After sort+slice:', {
+          chartActualCount: chartsActual.length,
+          chartPredCount: chartsPred.length,
+          firstChartActual: chartsActual[0]?.timestamp,
+          lastChartActual: chartsActual[chartsActual.length - 1]?.timestamp
+        });
+
+        setChartActual(chartsActual);
+        setChartPredictions(chartsPred);
       } catch (err) {
         console.error('[LingkunganView] failed to fetch chart data', err);
       }

@@ -533,19 +533,32 @@ export const getLingkunganChart = async (
   limit: number = 100
 ) => {
   try {
-    const url = new URL(
-      `${API_BASE_URL}/lingkungan/devices/${deviceId}/chart`
-    );
+    const url = new URL(`${API_BASE_URL}/lingkungan/devices/${deviceId}/chart`);
     if (from) url.searchParams.set('from', from);
     if (to) url.searchParams.set('to', to);
     if (limit) url.searchParams.set('limit', limit.toString());
+
+    console.log('[getLingkunganChart] Fetching from URL:', url.toString(), {
+      deviceId,
+      from,
+      to,
+      limit
+    });
 
     const res = await fetch(url.toString(), {
       cache: 'no-store',
       headers: { Authorization: `Bearer ${accessToken}` }
     });
-    if (!res.ok) return null;
-    return res.json();
+    if (!res.ok) {
+      console.error('[getLingkunganChart] Response not OK:', res.status);
+      return null;
+    }
+    const json = await res.json();
+    console.log('[getLingkunganChart] Response received:', {
+      actualCount: json.data?.actual?.length,
+      predictionCount: json.data?.predictions?.length
+    });
+    return json;
   } catch (error) {
     console.error('Failed to fetch lingkungan chart data:', error);
     return null;

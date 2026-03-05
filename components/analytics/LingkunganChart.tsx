@@ -93,6 +93,12 @@ export const LingkunganChart = ({
 
   // Build chart data from logs if realtime data is empty
   const chartData = useMemo(() => {
+    console.log('[LingkunganChart] Building chart data:', {
+      actualDataCount: actualData.length,
+      predictionDataCount: predictionData.length,
+      logsCount: logs.length
+    });
+
     if (actualData.length > 0) {
       // Merge actual and prediction data by full timestamp to avoid HH:mm collisions.
       const merged: Record<string, any> = {};
@@ -115,10 +121,16 @@ export const LingkunganChart = ({
         merged[d.timestamp].pred_co2 = d.predicted_co2;
       });
 
-      return Object.values(merged).sort(
+      const sorted = Object.values(merged).sort(
         (a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       );
+
+      console.log(
+        '[LingkunganChart] Using actualData, merged count:',
+        sorted.length
+      );
+      return sorted;
     }
 
     // Fall back to logs data
@@ -128,6 +140,8 @@ export const LingkunganChart = ({
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       )
       .slice(-120);
+
+    console.log('[LingkunganChart] Using logs fallback, count:', sorted.length);
 
     return sorted.map((log) => ({
       timestamp: log.timestamp,
