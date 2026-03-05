@@ -419,28 +419,6 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
     }
   };
 
-  const updateLogLocally = (logId: string, updates: Partial<LingkunganLog>) => {
-    setLogs((currentLogs) =>
-      currentLogs.map((log) =>
-        log.id === logId ? { ...log, ...updates } : log
-      )
-    );
-    if (updates.status) {
-      setSummary((s: any) => {
-        const currentLog = logs.find((l) => l.id === logId);
-        if (!currentLog) return s;
-        const newSummary = { ...s };
-        if (
-          currentLog.status === 'unacknowledged' &&
-          updates.status !== 'unacknowledged'
-        ) {
-          newSummary.unacknowledged = Math.max(0, s.unacknowledged - 1);
-        }
-        return newSummary;
-      });
-    }
-  };
-
   const isDeviceOnline =
     deviceDbStatus === 'Online' ||
     (lastDataTimestamp
@@ -791,7 +769,6 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
       <LingkunganDataTable
         data={logs}
         pagination={pagination}
-        onLogUpdate={updateLogLocally}
         highlightIds={newRowIds.current}
       />
     </div>

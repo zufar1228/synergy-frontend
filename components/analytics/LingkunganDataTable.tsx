@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -19,23 +18,16 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { createClient } from '@/lib/supabase/client';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ListChecks,
   Thermometer,
   Droplets,
   Wind
 } from 'lucide-react';
-import {
-  updateLingkunganLogStatus,
-  type UpdateIncidentStatusPayload
-} from '@/lib/api';
 import type { LingkunganLog } from '@/lib/api';
 
 interface Pagination {
@@ -50,54 +42,14 @@ interface Pagination {
 interface LingkunganDataTableProps {
   data: LingkunganLog[];
   pagination?: Pagination;
-  onLogUpdate: (logId: string, updates: Partial<LingkunganLog>) => void;
   highlightIds: Set<string>;
 }
-
-const statusConfig: Record<
-  string,
-  { label: string; variant: 'default' | 'neutral' | null }
-> = {
-  unacknowledged: { label: 'Belum Ditinjau', variant: 'default' },
-  acknowledged: { label: 'Ditinjau', variant: 'neutral' },
-  resolved: { label: 'Selesai', variant: 'neutral' },
-  false_alarm: { label: 'Alarm Palsu', variant: 'neutral' }
-};
 
 export const LingkunganDataTable = ({
   data,
   pagination,
-  onLogUpdate,
   highlightIds
 }: LingkunganDataTableProps) => {
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const supabase = createClient();
-
-  const handleStatusChange = async (logId: string, newStatus: string) => {
-    setUpdatingId(logId);
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      toast.error('Sesi tidak valid.');
-      setUpdatingId(null);
-      return;
-    }
-
-    try {
-      const payload: UpdateIncidentStatusPayload = {
-        status: newStatus as UpdateIncidentStatusPayload['status']
-      };
-      await updateLingkunganLogStatus(logId, payload, session.access_token);
-      onLogUpdate(logId, { status: newStatus as LingkunganLog['status'] });
-      toast.success('Status berhasil diperbarui.');
-    } catch (error) {
-      toast.error('Gagal memperbarui status.');
-    } finally {
-      setUpdatingId(null);
-    }
-  };
 
   // derive current page and total pages from API response (page & per_page)
   const currentPage = pagination?.page || 1;
@@ -169,15 +121,13 @@ export const LingkunganDataTable = ({
                   CO₂ (ppm)
                 </span>
               </TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-center w-[140px]">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={4}
                   className="h-24 text-center text-muted-foreground"
                 >
                   Belum ada data lingkungan.
@@ -185,8 +135,6 @@ export const LingkunganDataTable = ({
               </TableRow>
             ) : (
               data.map((log) => {
-                const config =
-                  statusConfig[log.status] || statusConfig.unacknowledged;
                 const isNew = highlightIds.has(log.id);
 
                 return (
@@ -194,9 +142,7 @@ export const LingkunganDataTable = ({
                     key={log.id}
                     className={cn(
                       'transition-colors duration-700',
-                      isNew && 'bg-green-50 dark:bg-green-950/30',
-                      log.status === 'unacknowledged' &&
-                        'bg-red-50/50 dark:bg-red-950/20'
+                      isNew && 'bg-green-50 dark:bg-green-950/30'
                     )}
                   >
                     <TableCell className="text-xs sm:text-sm whitespace-nowrap">
@@ -247,47 +193,6 @@ export const LingkunganDataTable = ({
                       >
                         {log.co2.toFixed(0)}
                       </span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant={config.variant ?? 'default'}
-                        className={cn(
-                          'text-[10px] sm:text-xs',
-                          log.status === 'unacknowledged' &&
-                            'bg-red-500 text-white',
-                          log.status === 'resolved' &&
-                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-                          log.status === 'false_alarm' &&
-                            'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
-                        )}
-                      >
-                        {config.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {log.status === 'unacknowledged' ? (
-                        <Select
-                          onValueChange={(val) =>
-                            handleStatusChange(log.id, val)
-                          }
-                          disabled={updatingId === log.id}
-                        >
-                          <SelectTrigger className="h-7 w-[120px] text-xs mx-auto">
-                            <SelectValue placeholder="Ubah..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="acknowledged">
-                              Ditinjau
-                            </SelectItem>
-                            <SelectItem value="resolved">Selesai</SelectItem>
-                            <SelectItem value="false_alarm">
-                              Alarm Palsu
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
                     </TableCell>
                   </TableRow>
                 );
