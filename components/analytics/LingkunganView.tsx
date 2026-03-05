@@ -180,6 +180,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
         const { actual = [], predictions = [] } = res.data || {};
 
         const toPoint = (a: any) => ({
+          timestamp: a.timestamp,
           time: new Date(a.timestamp).toLocaleTimeString('id-ID', {
             hour: '2-digit',
             minute: '2-digit'
@@ -189,6 +190,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
           co2: a.co2
         });
         const toPred = (p: any) => ({
+          timestamp: p.timestamp,
           time: new Date(p.timestamp).toLocaleTimeString('id-ID', {
             hour: '2-digit',
             minute: '2-digit'
@@ -242,6 +244,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
             [
               ...prev,
               {
+                timestamp: newLog.timestamp,
                 time: new Date(newLog.timestamp).toLocaleTimeString('id-ID', {
                   hour: '2-digit',
                   minute: '2-digit'
@@ -294,6 +297,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
             [
               ...prev,
               {
+                timestamp: pred.timestamp,
                 time: new Date(pred.timestamp).toLocaleTimeString('id-ID', {
                   hour: '2-digit',
                   minute: '2-digit'

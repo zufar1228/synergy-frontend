@@ -2,21 +2,21 @@
 
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3 } from 'lucide-react';
 import type { LingkunganLog } from '@/lib/api';
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig
+} from '@/components/ui/chart';
 
 interface ChartDataPoint {
+  timestamp: string;
   time: string;
   temperature?: number;
   humidity?: number;
@@ -24,6 +24,7 @@ interface ChartDataPoint {
 }
 
 interface PredictionDataPoint {
+  timestamp: string;
   time: string;
   predicted_temperature?: number;
   predicted_humidity?: number;
@@ -41,27 +42,83 @@ export const LingkunganChart = ({
   predictionData,
   logs
 }: LingkunganChartProps) => {
+  const chartConfig: ChartConfig = {
+    temperature: {
+      label: 'Aktual (°C)',
+      color: '#3b82f6'
+    },
+    pred_temperature: {
+      label: 'Prediksi (°C)',
+      color: '#22c55e'
+    },
+    humidity: {
+      label: 'Aktual (%RH)',
+      color: '#3b82f6'
+    },
+    pred_humidity: {
+      label: 'Prediksi (%RH)',
+      color: '#22c55e'
+    },
+    co2: {
+      label: 'Aktual (ppm)',
+      color: '#3b82f6'
+    },
+    pred_co2: {
+      label: 'Prediksi (ppm)',
+      color: '#22c55e'
+    }
+  };
+
+  const formatTick = (isoTimestamp: string) => {
+    const dt = new Date(isoTimestamp);
+    if (Number.isNaN(dt.getTime())) return isoTimestamp;
+    return dt.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatTooltipTimestamp = (isoTimestamp: string) => {
+    const dt = new Date(isoTimestamp);
+    if (Number.isNaN(dt.getTime())) return isoTimestamp;
+    return dt.toLocaleString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
   // Build chart data from logs if realtime data is empty
   const chartData = useMemo(() => {
     if (actualData.length > 0) {
-      // Merge actual and prediction data by time
+      // Merge actual and prediction data by full timestamp to avoid HH:mm collisions.
       const merged: Record<string, any> = {};
 
       actualData.forEach((d) => {
-        if (!merged[d.time]) merged[d.time] = { time: d.time };
-        merged[d.time].temperature = d.temperature;
-        merged[d.time].humidity = d.humidity;
-        merged[d.time].co2 = d.co2;
+        if (!merged[d.timestamp]) {
+          merged[d.timestamp] = { timestamp: d.timestamp, time: d.time };
+        }
+        merged[d.timestamp].temperature = d.temperature;
+        merged[d.timestamp].humidity = d.humidity;
+        merged[d.timestamp].co2 = d.co2;
       });
 
       predictionData.forEach((d) => {
-        if (!merged[d.time]) merged[d.time] = { time: d.time };
-        merged[d.time].pred_temperature = d.predicted_temperature;
-        merged[d.time].pred_humidity = d.predicted_humidity;
-        merged[d.time].pred_co2 = d.predicted_co2;
+        if (!merged[d.timestamp]) {
+          merged[d.timestamp] = { timestamp: d.timestamp, time: d.time };
+        }
+        merged[d.timestamp].pred_temperature = d.predicted_temperature;
+        merged[d.timestamp].pred_humidity = d.predicted_humidity;
+        merged[d.timestamp].pred_co2 = d.predicted_co2;
       });
 
-      return Object.values(merged).sort((a, b) => a.time.localeCompare(b.time));
+      return Object.values(merged).sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
     }
 
     // Fall back to logs data
@@ -73,6 +130,7 @@ export const LingkunganChart = ({
       .slice(-120);
 
     return sorted.map((log) => ({
+      timestamp: log.timestamp,
       time: new Date(log.timestamp).toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit'
@@ -118,17 +176,33 @@ export const LingkunganChart = ({
           </TabsList>
 
           <TabsContent value="temperature">
-            <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" fontSize={12} />
+                <XAxis
+                  dataKey="timestamp"
+                  fontSize={12}
+                  tickFormatter={formatTick}
+                  minTickGap={24}
+                />
                 <YAxis fontSize={12} domain={['auto', 'auto']} unit="°C" />
-                <Tooltip />
-                <Legend />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      labelFormatter={(_, payload) => {
+                        const first = payload?.[0]?.payload as
+                          | { timestamp?: string }
+                          | undefined;
+                        return formatTooltipTimestamp(first?.timestamp || '');
+                      }}
+                    />
+                  }
+                />
+                <ChartLegend content={<ChartLegendContent />} />
                 <Line
                   type="monotone"
                   dataKey="temperature"
-                  stroke="#3b82f6"
+                  stroke="var(--color-temperature)"
                   strokeWidth={2}
                   name="Aktual (°C)"
                   dot={false}
@@ -137,7 +211,7 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="pred_temperature"
-                  stroke="#22c55e"
+                  stroke="var(--color-pred_temperature)"
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   name="Prediksi (°C)"
@@ -145,21 +219,37 @@ export const LingkunganChart = ({
                   connectNulls
                 />
               </LineChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </TabsContent>
 
           <TabsContent value="humidity">
-            <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" fontSize={12} />
+                <XAxis
+                  dataKey="timestamp"
+                  fontSize={12}
+                  tickFormatter={formatTick}
+                  minTickGap={24}
+                />
                 <YAxis fontSize={12} domain={['auto', 'auto']} unit="%" />
-                <Tooltip />
-                <Legend />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      labelFormatter={(_, payload) => {
+                        const first = payload?.[0]?.payload as
+                          | { timestamp?: string }
+                          | undefined;
+                        return formatTooltipTimestamp(first?.timestamp || '');
+                      }}
+                    />
+                  }
+                />
+                <ChartLegend content={<ChartLegendContent />} />
                 <Line
                   type="monotone"
                   dataKey="humidity"
-                  stroke="#3b82f6"
+                  stroke="var(--color-humidity)"
                   strokeWidth={2}
                   name="Aktual (%RH)"
                   dot={false}
@@ -168,7 +258,7 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="pred_humidity"
-                  stroke="#22c55e"
+                  stroke="var(--color-pred_humidity)"
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   name="Prediksi (%RH)"
@@ -176,21 +266,37 @@ export const LingkunganChart = ({
                   connectNulls
                 />
               </LineChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </TabsContent>
 
           <TabsContent value="co2">
-            <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" fontSize={12} />
+                <XAxis
+                  dataKey="timestamp"
+                  fontSize={12}
+                  tickFormatter={formatTick}
+                  minTickGap={24}
+                />
                 <YAxis fontSize={12} domain={['auto', 'auto']} unit=" ppm" />
-                <Tooltip />
-                <Legend />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      labelFormatter={(_, payload) => {
+                        const first = payload?.[0]?.payload as
+                          | { timestamp?: string }
+                          | undefined;
+                        return formatTooltipTimestamp(first?.timestamp || '');
+                      }}
+                    />
+                  }
+                />
+                <ChartLegend content={<ChartLegendContent />} />
                 <Line
                   type="monotone"
                   dataKey="co2"
-                  stroke="#3b82f6"
+                  stroke="var(--color-co2)"
                   strokeWidth={2}
                   name="Aktual (ppm)"
                   dot={false}
@@ -199,7 +305,7 @@ export const LingkunganChart = ({
                 <Line
                   type="monotone"
                   dataKey="pred_co2"
-                  stroke="#22c55e"
+                  stroke="var(--color-pred_co2)"
                   strokeWidth={2}
                   strokeDasharray="5 5"
                   name="Prediksi (ppm)"
@@ -207,7 +313,7 @@ export const LingkunganChart = ({
                   connectNulls
                 />
               </LineChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </TabsContent>
         </Tabs>
       </CardContent>
