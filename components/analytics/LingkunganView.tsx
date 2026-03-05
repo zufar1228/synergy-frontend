@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ import {
   getDeviceDetailsByArea,
   sendLingkunganControl,
   getLingkunganStatus,
+  getLingkunganChart,
   type LingkunganStatus
 } from '@/lib/api';
 import { LingkunganChart } from './LingkunganChart';
@@ -85,6 +86,10 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
   // Chart data
   const [chartActual, setChartActual] = useState<any[]>([]);
   const [chartPredictions, setChartPredictions] = useState<any[]>([]);
+
+  const searchParams = useSearchParams();
+  const fromParam = searchParams.get('from');
+  const toParam = searchParams.get('to');
 
   const supabase = createClient();
 
@@ -144,6 +149,66 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
       setLastDataTimestamp(new Date(initialData.logs[0].timestamp));
     }
   }, [initialData]);
+
+  // fetch chart data when device or date range changes
+  useEffect(() => {
+    if (!deviceId) return;
+    let cancelled = false;
+
+    // clear previous chart while loading new range
+    setChartActual([]);
+    setChartPredictions([]);
+
+    (async () => {
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+      if (!session) return;
+
+      try {
+        // request limit 100 (chart will slice to 50 anyway)
+        const res = await getLingkunganChart(
+          session.access_token,
+          deviceId,
+          fromParam || undefined,
+          toParam || undefined,
+          100
+        );
+        if (!res || cancelled) return;
+
+        // backend returns { data: { actual: [...], predictions: [...] } }
+        const { actual = [], predictions = [] } = res.data || {};
+
+        const toPoint = (a: any) => ({
+          time: new Date(a.timestamp).toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          temperature: a.temperature,
+          humidity: a.humidity,
+          co2: a.co2
+        });
+        const toPred = (p: any) => ({
+          time: new Date(p.timestamp).toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          predicted_temperature: p.predicted_temperature,
+          predicted_humidity: p.predicted_humidity,
+          predicted_co2: p.predicted_co2
+        });
+
+        setChartActual(actual.map(toPoint).slice(-50));
+        setChartPredictions(predictions.map(toPred).slice(-50));
+      } catch (err) {
+        console.error('[LingkunganView] failed to fetch chart data', err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [deviceId, fromParam, toParam, supabase]);
 
   // Realtime subscription for sensor data
   useEffect(() => {

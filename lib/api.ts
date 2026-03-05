@@ -524,6 +524,34 @@ export const getAnalytics = async (
   }
 };
 
+// helper for retrieving chart points from lingkungan service
+export const getLingkunganChart = async (
+  accessToken: string,
+  deviceId: string,
+  from?: string,
+  to?: string,
+  limit: number = 100
+) => {
+  try {
+    const url = new URL(
+      `${API_BASE_URL}/lingkungan/devices/${deviceId}/chart`
+    );
+    if (from) url.searchParams.set('from', from);
+    if (to) url.searchParams.set('to', to);
+    if (limit) url.searchParams.set('limit', limit.toString());
+
+    const res = await fetch(url.toString(), {
+      cache: 'no-store',
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch (error) {
+    console.error('Failed to fetch lingkungan chart data:', error);
+    return null;
+  }
+};
+
 // Fungsi BARU untuk mengambil data analitik dengan filter tanggal
 export const getAnalyticsDataForSystem = async (
   systemType: string,
@@ -685,7 +713,7 @@ export interface EnvironmentDeviceStatus {
   id: string;
   name: string;
   status: 'Online' | 'Offline';
-  fan_status: 'On' | 'Off';
+  fan_state: 'ON' | 'OFF';
   // Intrusi-specific fields (nullable, only present for intrusi devices)
   door_state?: 'OPEN' | 'CLOSED' | null;
   intrusi_system_state?: 'ARMED' | 'DISARMED' | null;
