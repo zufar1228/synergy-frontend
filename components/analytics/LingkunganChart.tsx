@@ -70,7 +70,7 @@ export const LingkunganChart = ({
         (a, b) =>
           new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       )
-      .slice(-50);
+      .slice(-120);
 
     return sorted.map((log) => ({
       time: new Date(log.timestamp).toLocaleTimeString('id-ID', {

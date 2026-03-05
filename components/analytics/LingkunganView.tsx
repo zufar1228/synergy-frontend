@@ -166,13 +166,13 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
       if (!session) return;
 
       try {
-        // request limit 100 (chart will slice to 50 anyway)
+        // request limit 200 to give us room for trimming to 120 later
         const res = await getLingkunganChart(
           session.access_token,
           deviceId,
           fromParam || undefined,
           toParam || undefined,
-          100
+          200
         );
         if (!res || cancelled) return;
 
@@ -198,8 +198,8 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
           predicted_co2: p.predicted_co2
         });
 
-        setChartActual(actual.map(toPoint).slice(-50));
-        setChartPredictions(predictions.map(toPred).slice(-50));
+        setChartActual(actual.map(toPoint).slice(-120));
+        setChartPredictions(predictions.map(toPred).slice(-120));
       } catch (err) {
         console.error('[LingkunganView] failed to fetch chart data', err);
       }
@@ -250,7 +250,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
                 humidity: newLog.humidity,
                 co2: newLog.co2
               }
-            ].slice(-50)
+            ].slice(-120)
           );
         }
       )
@@ -302,7 +302,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
                 predicted_humidity: pred.predicted_humidity,
                 predicted_co2: pred.predicted_co2
               }
-            ].slice(-50)
+            ].slice(-120)
           );
         }
       )
