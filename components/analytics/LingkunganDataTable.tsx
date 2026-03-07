@@ -197,7 +197,7 @@ export const LingkunganDataTable = ({
             <div className="flex items-center space-x-4">
               {/* Rows per page */}
               <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium whitespace-nowrap">Rows</p>
+                <p className="text-sm font-medium whitespace-nowrap">Baris</p>
                 <Select
                   value={perPage.toString()}
                   onValueChange={handlePerPageChange}
@@ -235,7 +235,7 @@ export const LingkunganDataTable = ({
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                  Page {currentPage}/{totalPages || 1}
+                  Halaman {currentPage}/{totalPages || 1}
                 </div>
                 <Button
                   className="h-8 w-8 p-0"

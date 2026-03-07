@@ -78,7 +78,7 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
                   format(date.from, 'LLL dd, y', { locale: id })
                 )
               ) : (
-                'Pick a date'
+                'Pilih tanggal'
               )}
             </span>
           </Button>

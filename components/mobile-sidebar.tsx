@@ -40,7 +40,7 @@ export const MobileSidebar = ({
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="p-0 flex flex-col w-72"
+        className="p-0 flex flex-col w-72 bg-background/40 backdrop-blur-sm border-r border-foreground/10"
         suppressHydrationWarning
       >
         <SheetHeader className="sr-only">

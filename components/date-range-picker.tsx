@@ -4,6 +4,7 @@
 import * as React from "react";
 import { CalendarIcon } from "lucide-react";
 import { addDays, format } from "date-fns";
+import { id } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -65,11 +66,11 @@ export function DateRangePicker({
             {date?.from ? (
               date.to ? (
                 <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
+                  {format(date.from, "LLL dd, y", { locale: id })} -{" "}
+                  {format(date.to, "LLL dd, y", { locale: id })}
                 </>
               ) : (
-                format(date.from, "LLL dd, y")
+                format(date.from, "LLL dd, y", { locale: id })
               )
             ) : (
               <span>Pilih rentang tanggal</span>

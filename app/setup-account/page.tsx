@@ -66,7 +66,7 @@ export default function SetupAccountPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!supabase) {
-      toast.error("Supabase client not initialized. Please refresh the page.");
+      toast.error("Klien Supabase belum siap. Silakan muat ulang halaman.");
       return;
     }
 

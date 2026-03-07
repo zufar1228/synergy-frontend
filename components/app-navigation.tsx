@@ -284,7 +284,7 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
 
       {showManagement && (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
+          <SidebarGroupLabel>Manajemen</SidebarGroupLabel>
           <SidebarMenu>
             {filteredManagementLinks.map((link) => (
               <SidebarMenuItem key={link.title}>

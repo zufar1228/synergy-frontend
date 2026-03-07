@@ -685,13 +685,13 @@ export function IntrusiDataTable({
       {data.length > 0 && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
           <div className="text-sm text-muted-foreground">
-            Total {pagination?.total || 0} events.
+            Total {pagination?.total || 0} event.
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
             <div className="flex items-center space-x-4">
               {/* Rows per page */}
               <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium whitespace-nowrap">Rows</p>
+                <p className="text-sm font-medium whitespace-nowrap">Baris</p>
                 <Select
                   value={perPage.toString()}
                   onValueChange={handlePerPageChange}
@@ -729,7 +729,7 @@ export function IntrusiDataTable({
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                  Page {currentPage} of {totalPages || 1}
+                  Halaman {currentPage} dari {totalPages || 1}
                 </div>
                 <Button
                   className="h-8 w-8 p-0"

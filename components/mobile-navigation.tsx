@@ -250,7 +250,7 @@ export function MobileNavigation({
       {['admin', 'super_admin'].includes(userRole) && (
         <>
           <div className="text-sm font-semibold text-muted-foreground mt-4 px-2">
-            Management
+            Manajemen
           </div>
           {managementLinks.map((link) => (
             <Link

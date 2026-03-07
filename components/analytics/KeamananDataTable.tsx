@@ -618,7 +618,7 @@ export function KeamananDataTable({
             <div className="flex items-center space-x-4">
               {/* Kontrol Baris per Halaman */}
               <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium whitespace-nowrap">Rows</p>
+                <p className="text-sm font-medium whitespace-nowrap">Baris</p>
                 <Select
                   value={`${pagination?.per_page || 25}`}
                   onValueChange={(value) =>
@@ -658,7 +658,7 @@ export function KeamananDataTable({
                 </Button>
 
                 <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                  Page {pagination?.current_page || 1} of{' '}
+                  Halaman {pagination?.current_page || 1} dari{' '}
                   {pagination?.total_pages || 1}
                 </div>
 

@@ -79,7 +79,7 @@ export function LoginForm() {
                 />
               </svg>
             )}
-            {isGoogleLoading ? "Logging in..." : "Login dengan Google"}
+            {isGoogleLoading ? "Memproses..." : "Masuk dengan Google"}
           </Button>
 
           {/* Separator */}
@@ -125,10 +125,10 @@ export function LoginForm() {
                     size={16}
                     aria-hidden="true"
                   />
-                  Logging in...
+                  Memproses...
                 </>
               ) : (
-                "Login"
+                "Masuk"
               )}
             </Button>
           </form>

@@ -155,7 +155,7 @@ export function NavUser({ user }: NavUserProps) {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  <UserProfileDisplay fallbackName="Loading..." />
+                  <UserProfileDisplay fallbackName="Memuat..." />
                 </span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
@@ -185,7 +185,7 @@ export function NavUser({ user }: NavUserProps) {
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    <UserProfileDisplay fallbackName="Loading..." />
+                    <UserProfileDisplay fallbackName="Memuat..." />
                   </span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
@@ -232,7 +232,7 @@ export function NavUser({ user }: NavUserProps) {
                   className="w-full text-left flex items-center gap-2"
                 >
                   <LogOut />
-                  <span>Log out</span>
+                  <span>Keluar</span>
                 </button>
               </form>
             </DropdownMenuItem>
