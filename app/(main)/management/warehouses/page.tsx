@@ -36,7 +36,7 @@ export default async function ManageWarehousesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold">Manajemen Gudang</h1>
         <AddWarehouseButton />
       </div>

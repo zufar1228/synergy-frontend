@@ -127,7 +127,7 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
 
   return (
     <>
-      <SidebarGroup className="mb-3">
+      <SidebarGroup className="mb-3 pt-0 border-t-0">
         <SidebarGroupLabel>Platform</SidebarGroupLabel>
         <SidebarMenu>
           {mainLinks.map((link) => (
@@ -311,7 +311,7 @@ export function AppNavigationSkeleton({ userRole }: { userRole: string }) {
   return (
     <>
       {/* Platform Section */}
-      <SidebarGroup className="mb-3">
+      <SidebarGroup className="mb-3 pt-0 border-t-0">
         <SidebarGroupLabel>
           <Skeleton className="h-4 w-16" />
         </SidebarGroupLabel>

@@ -43,8 +43,8 @@
 }
 
 .dark {
-  --background: oklch(20% 0.02 90); /* Deep olive/warm dark background */
-  --secondary-background: oklch(25% 0.02 90); /* Lighter olive/warm dark for cards */
+  --background: oklch(14% 0.01 90); /* Deep olive/warm dark background, mostly black */
+  --secondary-background: oklch(18% 0.01 90); /* Lighter olive/warm dark for cards */
   --foreground: oklch(95% 0.01 90); /* Off-white text */
   --main-foreground: oklch(15% 0.01 90); /* Dark text on main buttons */
   --main: oklch(70% 0.15 150); /* Lighter, punchy Emerald for dark mode */
@@ -148,7 +148,7 @@
 }
 
 .dark .bg-grid-pattern::before {
-  opacity: 0.06;
+  opacity: 0.18;
 }
 
 @keyframes wave {

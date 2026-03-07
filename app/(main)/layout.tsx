@@ -65,11 +65,14 @@ export default async function MainAppLayout({
 
               {/* Main Content Area */}
               <SidebarInset>
-                {/* Mobile Header with Sidebar */}
-                <SiteHeader userRole={userRole} user={userData} />
-                <main className="flex-1 overflow-y-auto p-4 md:p-8 max-w-full relative bg-grid-pattern">
-                  <div className="mx-auto max-w-full md:max-w-7xl relative z-10">
-                    {children}
+                <main className="flex-1 relative bg-grid-pattern overflow-hidden flex flex-col w-full">
+                  <div className="absolute top-0 inset-x-0 z-50">
+                    <SiteHeader userRole={userRole} user={userData} />
+                  </div>
+                  <div className="flex-1 overflow-y-auto pt-[72px] px-4 pb-4 md:pt-[88px] md:px-8 md:pb-8 w-full max-w-full">
+                    <div className="mx-auto max-w-full md:max-w-7xl relative z-10">
+                      {children}
+                    </div>
                   </div>
                 </main>
               </SidebarInset>

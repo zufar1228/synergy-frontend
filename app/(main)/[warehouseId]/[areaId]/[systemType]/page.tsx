@@ -17,6 +17,10 @@ async function getAnalytics(
     perPage?: string;
     from?: string;
     to?: string;
+    status?: string;
+    event_type?: string;
+    system_state?: string;
+    door_state?: string;
   }
 ) {
   try {
@@ -26,6 +30,10 @@ async function getAnalytics(
     if (params.perPage) query.append('per_page', params.perPage);
     if (params.from) query.append('from', params.from);
     if (params.to) query.append('to', params.to);
+    if (params.status) query.append('status', params.status);
+    if (params.event_type) query.append('event_type', params.event_type);
+    if (params.system_state) query.append('system_state', params.system_state);
+    if (params.door_state) query.append('door_state', params.door_state);
 
     const url =
       process.env.NEXT_PUBLIC_API_URL +
@@ -53,7 +61,11 @@ export default async function AnalyticsPage({
     per_page?: string;
     from?: string;
     to?: string;
-  }; // <-- Add from/to
+    status?: string;
+    event_type?: string;
+    system_state?: string;
+    door_state?: string;
+  }; // <-- Add from/to and filters
 }) {
   const supabase = await createClient();
   const {
@@ -77,7 +89,11 @@ export default async function AnalyticsPage({
     page: page,
     perPage: perPage,
     from: awaitedSearchParams.from,
-    to: awaitedSearchParams.to
+    to: awaitedSearchParams.to,
+    status: awaitedSearchParams.status,
+    event_type: awaitedSearchParams.event_type,
+    system_state: awaitedSearchParams.system_state,
+    door_state: awaitedSearchParams.door_state
   });
 
   if (!data) {

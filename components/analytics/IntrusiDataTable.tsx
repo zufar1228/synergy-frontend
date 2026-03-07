@@ -22,7 +22,8 @@ import {
   DoorClosed,
   ShieldCheck,
   ShieldOff,
-  AlertTriangle
+  AlertTriangle,
+  Filter
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,13 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import {
   IntrusiLog,
@@ -395,6 +403,44 @@ export function IntrusiDataTable({
   );
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
+  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>(searchParams.get('status') ? searchParams.get('status')!.split(',') : []);
+  const [selectedEvents, setSelectedEvents] = React.useState<string[]>(searchParams.get('event_type') ? searchParams.get('event_type')!.split(',') : []);
+  const [selectedSystemStates, setSelectedSystemStates] = React.useState<string[]>(searchParams.get('system_state') ? searchParams.get('system_state')!.split(',') : []);
+  const [selectedDoorStates, setSelectedDoorStates] = React.useState<string[]>(searchParams.get('door_state') ? searchParams.get('door_state')!.split(',') : []);
+
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    setSelectedStatuses(searchParams.get('status') ? searchParams.get('status')!.split(',') : []);
+    setSelectedEvents(searchParams.get('event_type') ? searchParams.get('event_type')!.split(',') : []);
+    setSelectedSystemStates(searchParams.get('system_state') ? searchParams.get('system_state')!.split(',') : []);
+    setSelectedDoorStates(searchParams.get('door_state') ? searchParams.get('door_state')!.split(',') : []);
+  }, [searchParams]);
+
+  const toggleSelection = (val: string, list: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+     setter(list.includes(val) ? list.filter(item => item !== val) : [...list, val]);
+  };
+
+  const applyFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', '1');
+    
+    if (selectedStatuses.length > 0) params.set('status', selectedStatuses.join(','));
+    else params.delete('status');
+
+    if (selectedEvents.length > 0) params.set('event_type', selectedEvents.join(','));
+    else params.delete('event_type');
+
+    if (selectedSystemStates.length > 0) params.set('system_state', selectedSystemStates.join(','));
+    else params.delete('system_state');
+
+    if (selectedDoorStates.length > 0) params.set('door_state', selectedDoorStates.join(','));
+    else params.delete('door_state');
+
+    router.push(`${pathname}?${params.toString()}`);
+    setIsFilterOpen(false);
+  };
+
   const currentPage = Number(searchParams.get('page') || '1');
   const perPage = Number(searchParams.get('per_page') || '25');
   const totalPages = Math.ceil((pagination?.total || 0) / perPage);
@@ -431,18 +477,142 @@ export function IntrusiDataTable({
 
   return (
     <div className="w-full space-y-4">
-      {/* Filter */}
+      {/* Filter Menu */}
       <div className="flex items-center gap-2">
-        <Input
-          placeholder="Filter jenis event..."
-          value={
-            (table.getColumn('event_type')?.getFilterValue() as string) ?? ''
-          }
-          onChange={(event) =>
-            table.getColumn('event_type')?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+        <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="default" size="sm" className="h-8">
+              <Filter className="mr-2 h-4 w-4" />
+              Filter Data
+              {(selectedStatuses.length + selectedEvents.length + selectedSystemStates.length + selectedDoorStates.length) > 0 && (
+                <Badge variant="neutral" className="ml-2 px-1 font-normal text-xs rounded-sm">
+                  {selectedStatuses.length + selectedEvents.length + selectedSystemStates.length + selectedDoorStates.length}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0 bg-secondary/80 backdrop-blur-md border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" align="start">
+            <ScrollArea className="h-[400px]">
+              <div className="grid gap-4 p-4">
+                <div className="space-y-2 pb-2 border-b border-black/10">
+                  <h4 className="font-bold leading-none">Filter Data</h4>
+                  <p className="text-sm text-foreground/80">
+                    Pilih kriteria untuk menyaring log intrusi.
+                  </p>
+                </div>
+                <div className="grid gap-4 mt-2">
+                  {/* Status Filter */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium">Status</span>
+                    {[
+                      { label: 'Belum Ditinjau', value: 'unacknowledged' },
+                      { label: 'Dikonfirmasi', value: 'acknowledged' },
+                      { label: 'Teratasi', value: 'resolved' },
+                      { label: 'Alarm Palsu', value: 'false_alarm' },
+                    ].map((opt) => (
+                      <div key={opt.value} className="flex flex-row items-center gap-2">
+                        <Checkbox 
+                          id={`status-${opt.value}`}
+                          checked={selectedStatuses.includes(opt.value)} 
+                          onCheckedChange={() => toggleSelection(opt.value, selectedStatuses, setSelectedStatuses)} 
+                        />
+                        <label htmlFor={`status-${opt.value}`} className="text-sm cursor-pointer">{opt.label}</label>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Jenis Event Filter */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium">Jenis Event</span>
+                    {[
+                      { label: 'Peringatan Benturan', value: 'IMPACT_WARNING' },
+                      { label: 'Alarm Paksa Masuk', value: 'FORCED_ENTRY_ALARM' },
+                      { label: 'Buka Tanpa Izin', value: 'UNAUTHORIZED_OPEN' },
+                      { label: 'Level Baterai', value: 'BATTERY_LEVEL_CHANGED' },
+                      { label: 'Dipersenjatai', value: 'ARM' },
+                      { label: 'Dilucuti', value: 'DISARM' },
+                    ].map((opt) => (
+                      <div key={opt.value} className="flex flex-row items-center gap-2">
+                        <Checkbox 
+                          id={`event-${opt.value}`}
+                          checked={selectedEvents.includes(opt.value)} 
+                          onCheckedChange={() => toggleSelection(opt.value, selectedEvents, setSelectedEvents)} 
+                        />
+                        <label htmlFor={`event-${opt.value}`} className="text-sm cursor-pointer">{opt.label}</label>
+                      </div>
+                    ))}
+                  </div>
+                  {/* State Sistem Filter */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium">State Sistem</span>
+                    {[
+                      { label: 'ARMED', value: 'ARMED' },
+                      { label: 'DISARMED', value: 'DISARMED' },
+                    ].map((opt) => (
+                      <div key={opt.value} className="flex flex-row items-center gap-2">
+                        <Checkbox 
+                          id={`system-${opt.value}`}
+                          checked={selectedSystemStates.includes(opt.value)} 
+                          onCheckedChange={() => toggleSelection(opt.value, selectedSystemStates, setSelectedSystemStates)} 
+                        />
+                        <label htmlFor={`system-${opt.value}`} className="text-sm cursor-pointer">{opt.label}</label>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Pintu Column */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium">State Pintu</span>
+                    {[
+                      { label: 'Tertutup', value: 'CLOSED' },
+                      { label: 'Terbuka', value: 'OPEN' },
+                    ].map((opt) => (
+                      <div key={opt.value} className="flex flex-row items-center gap-2">
+                        <Checkbox 
+                          id={`door-${opt.value}`}
+                          checked={selectedDoorStates.includes(opt.value)} 
+                          onCheckedChange={() => toggleSelection(opt.value, selectedDoorStates, setSelectedDoorStates)} 
+                        />
+                        <label htmlFor={`door-${opt.value}`} className="text-sm cursor-pointer border-b-transparent">{opt.label}</label>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Buttons */}
+                  <div className="flex gap-2 pt-3 mt-1 border-t border-black/10">
+                    <Button 
+                      variant="neutral" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => {
+                        setSelectedStatuses([]);
+                        setSelectedEvents([]);
+                        setSelectedSystemStates([]);
+                        setSelectedDoorStates([]);
+                        
+                        const params = new URLSearchParams(searchParams.toString());
+                        params.set('page', '1');
+                        params.delete('status');
+                        params.delete('event_type');
+                        params.delete('system_state');
+                        params.delete('door_state');
+                        router.push(`${pathname}?${params.toString()}`);
+                        setIsFilterOpen(false);
+                      }}
+                    >
+                      Reset
+                    </Button>
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={applyFilters}
+                    >
+                      Terapkan
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Table */}

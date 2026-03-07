@@ -83,8 +83,9 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
             </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 border-0" align="start">
+        <PopoverContent className="w-auto p-0 border-[2px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-secondary/80 backdrop-blur-md [&_.text-main-foreground]:!text-foreground [&_[aria-selected]]:!bg-black [&_[aria-selected]]:!text-white" align="end">
           <Calendar
+            className="!bg-transparent !border-0 !shadow-none"
             initialFocus
             mode="range"
             defaultMonth={date?.from}

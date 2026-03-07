@@ -29,13 +29,13 @@ const AppSidebarComponent = ({
 }) => {
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="border-b-0">
+      <SidebarHeader className="border-b-0 pb-0">
         <WarehouseSelector />
       </SidebarHeader>
       <SidebarContent>
         <AppNavigation userRole={userRole} />
       </SidebarContent>
-      <SidebarFooter className="border-t-0">
+      <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
@@ -50,7 +50,7 @@ export const AppSidebar = React.memo(AppSidebarComponent);
 const AppSidebarSkeletonComponent = ({ userRole }: { userRole: string }) => {
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="border-b-2">
+      <SidebarHeader className="border-b-0 pb-0">
         <div className="px-3 py-2">
           <Skeleton className="h-8 w-full" />
         </div>
