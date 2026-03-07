@@ -1,7 +1,7 @@
 // frontend/components/app-navigation.tsx
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -32,8 +32,7 @@ import {
   SidebarMenuSubItem
 } from '@/components/ui/sidebar';
 import { useWarehouse } from '@/contexts/WarehouseContext';
-import { createClient } from '@/lib/supabase/client';
-import { getNavAreasBySystem, NavArea } from '@/lib/api';
+import { useNavAreas } from '@/hooks/use-nav-areas';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Define navigation data
@@ -52,41 +51,7 @@ const managementLinks = [
 const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   const pathname = usePathname();
   const { selectedWarehouse } = useWarehouse();
-  const [securityAreas, setSecurityAreas] = useState<NavArea[]>([]);
-  const [intrusiAreas, setIntrusiAreas] = useState<NavArea[]>([]);
-  const [lingkunganAreas, setLingkunganAreas] = useState<NavArea[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchNavData = async () => {
-      const supabase = createClient();
-      const {
-        data: { session }
-      } = await supabase.auth.getSession();
-      if (!session) {
-        setIsLoading(false);
-        return;
-      }
-      try {
-        // Fetch data for all systems simultaneously
-        const [securityData, intrusiData, lingkunganData] = await Promise.all([
-          getNavAreasBySystem('keamanan', session.access_token),
-          getNavAreasBySystem('intrusi', session.access_token),
-          getNavAreasBySystem('lingkungan', session.access_token)
-        ]);
-        setSecurityAreas(securityData);
-        setIntrusiAreas(intrusiData);
-        setLingkunganAreas(lingkunganData);
-      } catch (error) {
-        console.error('Failed to load navigation areas:', error);
-        // Don't show toast on every render, just log the error
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchNavData();
-  }, []); // Only fetch once on mount
+  const { securityAreas, intrusiAreas, lingkunganAreas, isLoading } = useNavAreas();
 
   // Memoize filtered environment areas to avoid recalculation on every render
 

@@ -2,9 +2,10 @@
 
 import {
   createContext,
-  useState,
+  useReducer,
   useContext,
   useEffect,
+  useCallback,
   ReactNode,
 } from "react";
 
@@ -16,9 +17,50 @@ interface DeviceStatus {
   lastActivity: Date | null;
 }
 
+interface DeviceStatusState {
+  statuses: Map<string, DeviceStatus>;
+}
+
+type DeviceStatusAction =
+  | { type: "UPDATE"; key: string; payload: DeviceStatus }
+  | { type: "CLEANUP" };
+
+const OFFLINE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+const ONLINE_CHECK_MS = 5 * 60 * 1000; // 5 minutes
+
+function deviceStatusReducer(
+  state: DeviceStatusState,
+  action: DeviceStatusAction
+): DeviceStatusState {
+  switch (action.type) {
+    case "UPDATE": {
+      const newMap = new Map(state.statuses);
+      newMap.set(action.key, action.payload);
+      return { statuses: newMap };
+    }
+    case "CLEANUP": {
+      const now = Date.now();
+      const newMap = new Map(state.statuses);
+      let hasChanges = false;
+      for (const [key, status] of newMap) {
+        if (
+          status.lastActivity &&
+          status.isOnline &&
+          now - status.lastActivity.getTime() > OFFLINE_THRESHOLD_MS
+        ) {
+          newMap.set(key, { ...status, isOnline: false });
+          hasChanges = true;
+        }
+      }
+      return hasChanges ? { statuses: newMap } : state; // no re-render if nothing changed
+    }
+    default:
+      return state;
+  }
+}
+
 interface DeviceStatusContextType {
-  deviceStatuses: Map<string, DeviceStatus>; // key: `${areaId}-${systemType}`
-  updateCounter: number; // Counter to trigger re-renders
+  deviceStatuses: Map<string, DeviceStatus>;
   updateDeviceStatus: (
     areaId: string,
     systemType: string,
@@ -33,86 +75,66 @@ const DeviceStatusContext = createContext<DeviceStatusContextType | undefined>(
 );
 
 export const DeviceStatusProvider = ({ children }: { children: ReactNode }) => {
-  const [deviceStatuses, setDeviceStatuses] = useState<
-    Map<string, DeviceStatus>
-  >(new Map());
-  const [updateCounter, setUpdateCounter] = useState(0); // Counter to trigger re-renders
+  const [state, dispatch] = useReducer(deviceStatusReducer, {
+    statuses: new Map(),
+  });
 
-  // Clean up old statuses periodically (devices inactive for more than 10 minutes)
+  // Clean up old statuses periodically
   useEffect(() => {
-    const cleanup = () => {
-      const now = Date.now();
-      setDeviceStatuses((prev) => {
-        const newMap = new Map(prev);
-        let hasChanges = false;
-        for (const [key, status] of newMap) {
-          if (
-            status.lastActivity &&
-            now - status.lastActivity.getTime() > 10 * 60 * 1000
-          ) {
-            // Device hasn't been active for 10 minutes, mark as offline
-            newMap.set(key, { ...status, isOnline: false });
-            hasChanges = true;
-          }
-        }
-        if (hasChanges) {
-          setUpdateCounter((prev) => prev + 1);
-        }
-        return newMap;
-      });
-    };
-
-    const interval = setInterval(cleanup, 60000); // Check every minute
+    const interval = setInterval(() => {
+      dispatch({ type: "CLEANUP" });
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const updateDeviceStatus = (
-    areaId: string,
-    systemType: string,
-    isOnline: boolean
-  ) => {
-    const key = `${areaId}-${systemType}`;
-    setDeviceStatuses((prev) => {
-      const newMap = new Map(prev);
-      const existing = newMap.get(key);
-      newMap.set(key, {
-        deviceId: existing?.deviceId || "",
-        areaId,
-        systemType,
-        isOnline,
-        lastActivity: new Date(),
+  const updateDeviceStatus = useCallback(
+    (areaId: string, systemType: string, isOnline: boolean) => {
+      const key = `${areaId}-${systemType}`;
+      dispatch({
+        type: "UPDATE",
+        key,
+        payload: {
+          deviceId: "",
+          areaId,
+          systemType,
+          isOnline,
+          lastActivity: new Date(),
+        },
       });
-      return newMap;
-    });
-    setUpdateCounter((prev) => prev + 1); // Trigger re-render
-  };
+    },
+    []
+  );
 
-  const getDeviceStatus = (areaId: string, systemType: string): boolean => {
-    const key = `${areaId}-${systemType}`;
-    const status = deviceStatuses.get(key);
-    return status?.isOnline || false;
-  };
+  const getDeviceStatus = useCallback(
+    (areaId: string, systemType: string): boolean => {
+      const key = `${areaId}-${systemType}`;
+      const status = state.statuses.get(key);
+      return status?.isOnline || false;
+    },
+    [state.statuses]
+  );
 
-  const isDeviceOnline = (areaId: string, systemType: string): boolean => {
-    const key = `${areaId}-${systemType}`;
-    const status = deviceStatuses.get(key);
+  const isDeviceOnline = useCallback(
+    (areaId: string, systemType: string): boolean => {
+      const key = `${areaId}-${systemType}`;
+      const status = state.statuses.get(key);
 
-    if (!status) return false; // No status means we don't know, assume offline
+      if (!status) return false;
 
-    // Check if device has been active within last 5 minutes
-    if (status.lastActivity) {
-      const timeSinceActivity = Date.now() - status.lastActivity.getTime();
-      return timeSinceActivity < 5 * 60 * 1000; // 5 minutes
-    }
+      if (status.lastActivity) {
+        const timeSinceActivity = Date.now() - status.lastActivity.getTime();
+        return timeSinceActivity < ONLINE_CHECK_MS;
+      }
 
-    return status.isOnline;
-  };
+      return status.isOnline;
+    },
+    [state.statuses]
+  );
 
   return (
     <DeviceStatusContext.Provider
       value={{
-        deviceStatuses,
-        updateCounter,
+        deviceStatuses: state.statuses,
         updateDeviceStatus,
         getDeviceStatus,
         isDeviceOnline,

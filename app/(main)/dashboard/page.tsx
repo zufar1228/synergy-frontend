@@ -6,13 +6,13 @@ import Link from 'next/link';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import { useDeviceStatus } from '@/contexts/DeviceStatusContext';
 import { createClient } from '@/lib/supabase/client';
-import { toast } from 'sonner';
 import {
   getWarehouses,
   getWarehouseDetails,
   getActiveAlerts,
   ActiveAlert
-} from '@/lib/api'; // <-- Import getActiveAlerts
+} from '@/lib/api';
+import { useApiSWR } from '@/hooks/use-swr-api';
 import WarehouseCard from '@/components/shared/WarehouseCard'; // <-- Import WarehouseCard sebagai default
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -90,89 +90,69 @@ const AreaCard = ({
 
 export default function DashboardPage() {
   const { selectedWarehouse, setSelectedWarehouse } = useWarehouse();
-  const { isDeviceOnline, updateCounter } = useDeviceStatus();
-  const [data, setData] = React.useState<any>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const { isDeviceOnline } = useDeviceStatus();
 
-  // Fungsi fetch data sekarang bisa dipanggil ulang
-  const fetchData = React.useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const supabase = createClient();
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
-    if (!session) {
-      setError('Sesi login telah berakhir. Silakan login kembali.');
-      setLoading(false);
-      return;
+  // SWR: fetch all warehouses when 'all' is selected
+  const allWarehousesFetcher = React.useCallback(
+    (token: string) => getWarehouses(token),
+    []
+  );
+  const {
+    data: warehouses,
+    error: allError,
+    isLoading: allLoading
+  } = useApiSWR(
+    selectedWarehouse === 'all' || !selectedWarehouse ? 'dashboard-all' : null,
+    allWarehousesFetcher
+  );
+
+  // SWR: fetch single warehouse details + alerts when a specific warehouse is selected
+  const singleFetcher = React.useCallback(
+    async (token: string) => {
+      const [details, alerts] = await Promise.all([
+        getWarehouseDetails(selectedWarehouse!, token),
+        getActiveAlerts(selectedWarehouse!, token)
+      ]);
+      return { details, alerts };
+    },
+    [selectedWarehouse]
+  );
+  const {
+    data: singleData,
+    error: singleError,
+    isLoading: singleLoading,
+    mutate: mutateSingle
+  } = useApiSWR(
+    selectedWarehouse && selectedWarehouse !== 'all'
+      ? ['dashboard-single', selectedWarehouse]
+      : null,
+    singleFetcher
+  );
+
+  const loading = allLoading || singleLoading;
+  const error = allError || singleError;
+
+  // Build unified data shape for rendering
+  const data = React.useMemo(() => {
+    if (selectedWarehouse === 'all' || !selectedWarehouse) {
+      return warehouses ? { type: 'all' as const, warehouses } : null;
     }
-
-    try {
-      if (selectedWarehouse === 'all' || !selectedWarehouse) {
-        const warehouses = await getWarehouses(session.access_token);
-        setData({ type: 'all', warehouses });
-      } else {
-        // Ambil detail gudang dan peringatan aktif secara bersamaan
-        const [details, alerts] = await Promise.all([
-          getWarehouseDetails(selectedWarehouse, session.access_token),
-          getActiveAlerts(selectedWarehouse, session.access_token)
-        ]);
-        setData({ type: 'single', details, alerts });
-      }
-    } catch (error: any) {
-      console.error('Dashboard fetch error:', error);
-
-      // Handle different error types
-      let errorMessage = 'Gagal memuat data dashboard.';
-
-      if (error?.message) {
-        if (error.message.includes('500')) {
-          errorMessage =
-            'Server mengalami kesalahan internal. Silakan coba lagi nanti.';
-        } else if (error.message.includes('404')) {
-          errorMessage = 'Data gudang tidak ditemukan.';
-        } else if (error.message.includes('403')) {
-          errorMessage = 'Anda tidak memiliki akses ke data ini.';
-        } else if (error.message.includes('401')) {
-          errorMessage = 'Sesi login telah berakhir. Silakan login kembali.';
-        } else if (
-          error.message.includes('network') ||
-          error.message.includes('fetch')
-        ) {
-          errorMessage =
-            'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
-        }
-      }
-
-      setError(errorMessage);
-      toast.error(errorMessage);
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedWarehouse]);
-
-  // Efek untuk fetch data awal
-  React.useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    return singleData
+      ? { type: 'single' as const, details: singleData.details, alerts: singleData.alerts }
+      : null;
+  }, [selectedWarehouse, warehouses, singleData]);
 
   // --- EFEK BARU UNTUK REAL-TIME SUBSCRIPTION ---
   React.useEffect(() => {
     const supabase = createClient();
-    // Buat fungsi debounced untuk re-fetch agar tidak memanggil API berlebihan
     let debounceTimer: NodeJS.Timeout;
     const handleDbChange = () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
-        console.log('Database changed, re-fetching dashboard stats...');
-        fetchData();
-      }, 500); // Tunggu 500ms setelah perubahan terakhir
+        mutateSingle(); // SWR revalidation
+      }, 500);
     };
 
-    // Dengarkan perubahan pada tabel 'devices' dan 'areas'
     const channel = supabase
       .channel('dashboard-updates')
       .on(
@@ -187,17 +167,10 @@ export default function DashboardPage() {
       )
       .subscribe();
 
-    // Cleanup subscription saat komponen unmount
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchData]);
-
-  // Force re-render when device status changes
-  React.useEffect(() => {
-    // This effect will run whenever updateCounter changes, forcing a re-render
-    console.log('Device status updated, re-rendering dashboard');
-  }, [updateCounter]);
+  }, [mutateSingle]);
 
   if (loading) {
     return <Skeleton className="h-64 w-full" />;
@@ -210,10 +183,7 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
             Terjadi Kesalahan
           </h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Button onClick={fetchData} className="mr-2">
-            Coba Lagi
-          </Button>
+          <p className="text-gray-600 mb-4">{error.message || 'Gagal memuat data dashboard.'}</p>
           <Button variant="neutral" onClick={() => setSelectedWarehouse('all')}>
             Kembali ke Semua Gudang
           </Button>

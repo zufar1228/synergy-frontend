@@ -7,6 +7,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { getMyProfile } from "@/lib/api";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/site-header";
+import { SWRProvider } from "@/components/providers/swr-provider";
 import { SessionRefresh } from "@/components/session-refresh";
 import { redirect } from "next/navigation";
 export default async function MainAppLayout({
@@ -53,26 +54,28 @@ export default async function MainAppLayout({
   return (
     <WarehouseProvider>
       <DeviceStatusProvider>
-        <SessionRefresh />
-        <SidebarProvider>
-          <div className="flex h-screen w-full bg-secondary">
-            {/* Desktop Sidebar - hidden on mobile */}
-            <div className="hidden lg:block">
-              <AppSidebar userRole={userRole} user={userData} />
-            </div>
+        <SWRProvider>
+          <SessionRefresh />
+          <SidebarProvider>
+            <div className="flex h-screen w-full bg-secondary">
+              {/* Desktop Sidebar - hidden on mobile */}
+              <div className="hidden lg:block">
+                <AppSidebar userRole={userRole} user={userData} />
+              </div>
 
-            {/* Main Content Area */}
-            <SidebarInset>
-              {/* Mobile Header with Sidebar */}
-              <SiteHeader userRole={userRole} user={userData} />
-              <main className="flex-1 overflow-y-auto p-4 md:p-8 max-w-full">
-                <div className="mx-auto max-w-full md:max-w-7xl">
-                  {children}
-                </div>
-              </main>
-            </SidebarInset>
-          </div>
-        </SidebarProvider>
+              {/* Main Content Area */}
+              <SidebarInset>
+                {/* Mobile Header with Sidebar */}
+                <SiteHeader userRole={userRole} user={userData} />
+                <main className="flex-1 overflow-y-auto p-4 md:p-8 max-w-full relative bg-grid-pattern">
+                  <div className="mx-auto max-w-full md:max-w-7xl relative z-10">
+                    {children}
+                  </div>
+                </main>
+              </SidebarInset>
+            </div>
+          </SidebarProvider>
+        </SWRProvider>
       </DeviceStatusProvider>
     </WarehouseProvider>
   );

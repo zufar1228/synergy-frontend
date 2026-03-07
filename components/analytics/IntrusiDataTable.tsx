@@ -204,9 +204,6 @@ function EventTypeBadge({ eventType }: { eventType: string }) {
         return 'bg-yellow-600 text-white';
       case 'ARM':
         return 'bg-green-600 text-white';
-      case 'CALIB_SAVED':
-      case 'CALIB_NOISE_COMPLETE':
-        return 'bg-blue-600 text-white';
       case 'BATTERY_LEVEL_CHANGED':
         return 'bg-orange-600 text-white';
       default:
@@ -219,9 +216,6 @@ function EventTypeBadge({ eventType }: { eventType: string }) {
     UNAUTHORIZED_OPEN: 'Buka Tanpa Izin',
     POWER_SOURCE_CHANGED: 'Ganti Daya',
     BATTERY_LEVEL_CHANGED: 'Level Baterai',
-    CALIB_NOISE_COMPLETE: 'Baseline Selesai',
-    CALIB_SAVED: 'Kalibrasi Tersimpan',
-    CALIB_ABORTED: 'Kalibrasi Dibatalkan',
     SIREN_SILENCED: 'Sirine Dimatikan',
     ARM: 'Dipersenjatai',
     DISARM: 'Dilucuti'

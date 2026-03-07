@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
   getDeviceDetailsByArea,
@@ -27,24 +27,20 @@ import {
   Zap,
   Battery,
   BatteryCharging,
-  Settings2,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Mic,
-  Hand
+  Clock
 } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
 interface IntrusiDeviceControlsProps {
   areaId: string;
   isDeviceOnline?: boolean;
+  onDeviceLoaded?: (name: string) => void;
 }
 
 export const IntrusiDeviceControls = ({
   areaId,
-  isDeviceOnline: isDeviceOnlineProp
+  isDeviceOnline: isDeviceOnlineProp,
+  onDeviceLoaded
 }: IntrusiDeviceControlsProps) => {
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [deviceName, setDeviceName] = useState<string>('');
@@ -68,49 +64,7 @@ export const IntrusiDeviceControls = ({
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [isCalibrating, setIsCalibrating] = useState(false);
-  const [calibStage, setCalibStage] = useState<'IDLE' | 'NOISE' | 'KNOCK'>(
-    'IDLE'
-  );
-  const [calibElapsedSec, setCalibElapsedSec] = useState(0);
-  const [calibKnockCount, setCalibKnockCount] = useState(0);
-  const [calibN995, setCalibN995] = useState<number | null>(null);
-  const [calibResult, setCalibResult] = useState<{
-    type: 'saved' | 'aborted';
-    th_hit?: number;
-    stage?: string;
-  } | null>(null);
-  const calibTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const supabase = createClient();
-
-  // Calibration constants (must match firmware)
-  const NOISE_DURATION_SEC = 120;
-  const N_CALIB_KNOCKS = 9;
-  const CALIB_KNOCK_TIMEOUT_SEC = 60;
-
-  // Start calibration timer
-  const startCalibTimer = useCallback(() => {
-    if (calibTimerRef.current) clearInterval(calibTimerRef.current);
-    setCalibElapsedSec(0);
-    calibTimerRef.current = setInterval(() => {
-      setCalibElapsedSec((prev) => prev + 1);
-    }, 1000);
-  }, []);
-
-  // Stop calibration timer
-  const stopCalibTimer = useCallback(() => {
-    if (calibTimerRef.current) {
-      clearInterval(calibTimerRef.current);
-      calibTimerRef.current = null;
-    }
-  }, []);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (calibTimerRef.current) clearInterval(calibTimerRef.current);
-    };
-  }, []);
 
   // Fetch device details + intrusi status
   const fetchData = useCallback(async () => {
@@ -129,6 +83,7 @@ export const IntrusiDeviceControls = ({
       if (device) {
         setDeviceId(device.id);
         setDeviceName(device.name);
+        if (onDeviceLoaded) onDeviceLoaded(device.name);
         setDeviceDbStatus(device.status);
         if (device.door_state) setDoorState(device.door_state);
         if (device.intrusi_system_state)
@@ -291,39 +246,6 @@ export const IntrusiDeviceControls = ({
                 } else if (newLog.event_type === 'SIREN_SILENCED') {
                   // Operator silenced the siren → clear BAHAYA
                   updated.status = 'AMAN';
-                } else if (newLog.event_type === 'CALIB_SAVED') {
-                  setIsCalibrating(false);
-                  setCalibStage('IDLE');
-                  stopCalibTimer();
-                  const pl = newLog.payload as Record<string, any> | null;
-                  setCalibResult({ type: 'saved', th_hit: pl?.th_hit });
-                  toast.success(
-                    'Kalibrasi berhasil! TH_HIT=' +
-                      (pl?.th_hit?.toFixed(4) ?? '?')
-                  );
-                } else if (newLog.event_type === 'CALIB_ABORTED') {
-                  setIsCalibrating(false);
-                  setCalibStage('IDLE');
-                  stopCalibTimer();
-                  const pl = newLog.payload as Record<string, any> | null;
-                  setCalibResult({ type: 'aborted', stage: pl?.stage });
-                  toast.error(
-                    'Kalibrasi dibatalkan pada tahap ' +
-                      (pl?.stage ?? 'unknown')
-                  );
-                } else if (newLog.event_type === 'CALIB_NOISE_COMPLETE') {
-                  // Two-stage calibration: noise baseline done, knock stage starting
-                  const pl = newLog.payload as Record<string, any> | null;
-                  setCalibN995(pl?.n995 ?? null);
-                  setCalibStage('KNOCK');
-                  setCalibKnockCount(0);
-                  startCalibTimer();
-                  toast.success(
-                    'Tahap A selesai! Silakan ketuk pintu ' +
-                      N_CALIB_KNOCKS +
-                      ' kali.'
-                  );
-                  // Keep isCalibrating = true
                 } else if (newLog.event_type === 'BATTERY_LEVEL_CHANGED') {
                   // Update battery info from event payload
                   const pl = newLog.payload as Record<string, any> | null;
@@ -362,18 +284,6 @@ export const IntrusiDeviceControls = ({
     try {
       await sendIntrusiCommand(session.access_token, deviceId, command);
       toast.success(`Perintah '${command.cmd}' berhasil dikirim.`);
-
-      if (
-        command.cmd === 'CALIB_START' ||
-        command.cmd === 'CALIB_KNOCK_START'
-      ) {
-        setIsCalibrating(true);
-        setCalibStage(command.cmd === 'CALIB_START' ? 'NOISE' : 'KNOCK');
-        setCalibKnockCount(0);
-        setCalibN995(null);
-        setCalibResult(null);
-        startCalibTimer();
-      }
     } catch (error) {
       toast.error((error as Error).message);
     } finally {
@@ -674,157 +584,6 @@ export const IntrusiDeviceControls = ({
                 >
                   <VolumeX className="mr-2 h-4 w-4" /> Matikan Sirine
                 </Button>
-
-                {/* Calibration */}
-                <Button
-                  className="w-full"
-                  variant="neutral"
-                  onClick={() => {
-                    setCalibResult(null);
-                    handleCommand({ cmd: 'CALIB_START' });
-                  }}
-                  disabled={isSending || isCalibrating}
-                >
-                  <Settings2 className="mr-2 h-4 w-4" />
-                  {isCalibrating
-                    ? 'Kalibrasi Berjalan...'
-                    : 'Mulai Kalibrasi (2 Tahap)'}
-                </Button>
-
-                {/* Calibration Status Panel */}
-                {(isCalibrating || calibResult) && (
-                  <div className="rounded-base border-2 border-border bg-secondary/50 p-3 space-y-3">
-                    {/* Active Calibration */}
-                    {isCalibrating && calibStage === 'NOISE' && (
-                      <>
-                        <div className="flex items-center gap-2">
-                          <Mic className="h-4 w-4 text-blue-500 animate-pulse" />
-                          <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
-                            Tahap A: Pengukuran Noise
-                          </span>
-                        </div>
-                        <Progress
-                          value={Math.min(
-                            (calibElapsedSec / NOISE_DURATION_SEC) * 100,
-                            100
-                          )}
-                          className="h-2"
-                        />
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>
-                            {Math.min(calibElapsedSec, NOISE_DURATION_SEC)}s /{' '}
-                            {NOISE_DURATION_SEC}s
-                          </span>
-                          <span>
-                            {Math.max(NOISE_DURATION_SEC - calibElapsedSec, 0)}s
-                            tersisa
-                          </span>
-                        </div>
-                        <div className="rounded-base bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 p-2">
-                          <p className="text-xs text-blue-700 dark:text-blue-300">
-                            <strong>Instruksi:</strong> Jaga lingkungan tetap
-                            tenang. Sistem sedang mengukur noise floor selama{' '}
-                            {NOISE_DURATION_SEC} detik. Jangan sentuh pintu.
-                          </p>
-                        </div>
-                      </>
-                    )}
-
-                    {isCalibrating && calibStage === 'KNOCK' && (
-                      <>
-                        <div className="flex items-center gap-2">
-                          <Hand className="h-4 w-4 text-orange-500 animate-bounce" />
-                          <span className="text-sm font-semibold text-orange-700 dark:text-orange-400">
-                            Tahap B: Ketukan Pintu
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1">
-                            <div className="flex gap-1">
-                              {Array.from({ length: N_CALIB_KNOCKS }).map(
-                                (_, i) => (
-                                  <div
-                                    key={i}
-                                    className={cn(
-                                      'h-3 flex-1 rounded-sm border transition-colors',
-                                      i < calibKnockCount
-                                        ? 'bg-orange-500 border-orange-600'
-                                        : 'bg-muted border-border'
-                                    )}
-                                  />
-                                )
-                              )}
-                            </div>
-                          </div>
-                          <span className="text-sm font-mono font-semibold text-orange-600">
-                            {calibKnockCount}/{N_CALIB_KNOCKS}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>
-                            Timeout:{' '}
-                            {Math.max(
-                              CALIB_KNOCK_TIMEOUT_SEC - calibElapsedSec,
-                              0
-                            )}
-                            s tersisa
-                          </span>
-                          {calibN995 !== null && (
-                            <span>N995: {calibN995.toFixed(4)}g</span>
-                          )}
-                        </div>
-                        <div className="rounded-base bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 p-2">
-                          <p className="text-xs text-orange-700 dark:text-orange-300">
-                            <strong>Instruksi:</strong> Ketuk pintu dari LUAR
-                            sebanyak {N_CALIB_KNOCKS} kali dengan kekuatan
-                            normal. Beri jeda minimal 0.3 detik antar ketukan.
-                          </p>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Calibration Result */}
-                    {!isCalibrating && calibResult && (
-                      <div
-                        className={cn(
-                          'flex items-start gap-2 p-2 rounded-base border',
-                          calibResult.type === 'saved'
-                            ? 'bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800'
-                            : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800'
-                        )}
-                      >
-                        {calibResult.type === 'saved' ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
-                        )}
-                        <div className="text-xs">
-                          {calibResult.type === 'saved' ? (
-                            <>
-                              <p className="font-semibold text-green-700 dark:text-green-400">
-                                Kalibrasi Berhasil
-                              </p>
-                              <p className="text-green-600 dark:text-green-300">
-                                Threshold baru: TH_HIT ={' '}
-                                {calibResult.th_hit?.toFixed(4) ?? '?'}g
-                              </p>
-                            </>
-                          ) : (
-                            <>
-                              <p className="font-semibold text-red-700 dark:text-red-400">
-                                Kalibrasi Gagal
-                              </p>
-                              <p className="text-red-600 dark:text-red-300">
-                                Dibatalkan pada tahap:{' '}
-                                {calibResult.stage ?? 'unknown'}
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
             )}
           </div>

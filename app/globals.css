@@ -4,28 +4,28 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(95.31% 0.0496 169.04);
-  --secondary-background: oklch(100% 0 0);
-  --foreground: oklch(0% 0 0);
-  --main-foreground: oklch(0% 0 0);
-  --main: oklch(77.54% 0.1681 162.78);
-  --border: oklch(0% 0 0);
-  --sidebar-border: oklch(0% 0 0); /* Black border for light theme */
-  --ring: oklch(0% 0 0);
+  --background: oklch(96% 0.02 90); /* Warm cream/beige background */
+  --secondary-background: oklch(98.5% 0.01 90); /* Slightly lighter cream for cards/sidebar */
+  --foreground: oklch(15% 0.01 90); /* Very dark brown/black text */
+  --main-foreground: oklch(98% 0.01 90); /* Light text on main green buttons */
+  --main: oklch(63% 0.14 150); /* Bold Emerald/Forest Green */
+  --border: oklch(15% 0.01 90); /* Hard dark borders */
+  --sidebar-border: oklch(15% 0.01 90); /* Hard dark sidebar border */
+  --ring: oklch(15% 0.01 90);
   --overlay: oklch(0% 0 0 / 0.8);
   --shadow: 4px 4px 0px 0px var(--border);
 
   /* Standard Tailwind theme colors */
-  --muted: oklch(96.53% 0.0088 169.04);
-  --muted-foreground: oklch(45.71% 0.0286 169.04);
-  --accent: oklch(94.51% 0.0555 169.04);
-  --accent-foreground: oklch(9.02% 0.0078 169.04);
-  --secondary: oklch(96.53% 0.0088 169.04);
-  --secondary-foreground: oklch(9.02% 0.0078 169.04);
+  --muted: oklch(92% 0.02 90);
+  --muted-foreground: oklch(50% 0.02 90);
+  --accent: oklch(82% 0.14 55); /* Terracotta / Clay Orange for highlights */
+  --accent-foreground: oklch(15% 0.01 90);
+  --secondary: oklch(88% 0.08 135); /* Soft Sage Green for secondary blocks */
+  --secondary-foreground: oklch(15% 0.01 90);
   --destructive: oklch(63.56% 0.2371 15.89);
   --destructive-foreground: oklch(100% 0 0);
-  --primary: oklch(77.54% 0.1681 162.78);
-  --primary-foreground: oklch(100% 0 0);
+  --primary: oklch(63% 0.14 150);
+  --primary-foreground: oklch(98% 0.01 90);
 
   --chart-1: #00d696;
   --chart-2: #7a83ff;
@@ -43,27 +43,27 @@
 }
 
 .dark {
-  --background: oklch(22.71% 0.0252 182.05);
-  --secondary-background: oklch(30.919% 0.00004 271.152);
-  --foreground: oklch(92.49% 0 0);
-  --main-foreground: oklch(0% 0 0);
-  --main: oklch(70.54% 0.1525 162.97);
-  --border: oklch(40% 0 0); /* Softer border for dark theme (#9) */
-  --sidebar-border: oklch(40% 0 0); /* Softer sidebar border (#9) */
-  --ring: oklch(100% 0 0);
-  --shadow: 4px 4px 0px 0px oklch(18% 0 0); /* Subtler shadow (#9) */
+  --background: oklch(20% 0.02 90); /* Deep olive/warm dark background */
+  --secondary-background: oklch(25% 0.02 90); /* Lighter olive/warm dark for cards */
+  --foreground: oklch(95% 0.01 90); /* Off-white text */
+  --main-foreground: oklch(15% 0.01 90); /* Dark text on main buttons */
+  --main: oklch(70% 0.15 150); /* Lighter, punchy Emerald for dark mode */
+  --border: oklch(40% 0.02 90); /* Warm earth-toned border for dark theme */
+  --sidebar-border: oklch(40% 0.02 90);
+  --ring: oklch(95% 0.01 90);
+  --shadow: 4px 4px 0px 0px oklch(15% 0.02 90); /* Deeper warm shadow */
 
   /* Standard Tailwind theme colors for dark mode */
-  --muted: oklch(23.93% 0 0);
-  --muted-foreground: oklch(63.56% 0.0286 182.05);
-  --accent: oklch(26.47% 0.0252 182.05);
-  --accent-foreground: oklch(92.49% 0 0);
-  --secondary: oklch(29.313% 0.00003 271.152);
-  --secondary-foreground: oklch(92.49% 0 0);
+  --muted: oklch(30% 0.02 90);
+  --muted-foreground: oklch(70% 0.01 90);
+  --accent: oklch(45% 0.12 45); /* Deep Rust/Clay for dark highlights */
+  --accent-foreground: oklch(95% 0.01 90);
+  --secondary: oklch(35% 0.1 140); /* Deep Pine/Sage Green for cards */
+  --secondary-foreground: oklch(95% 0.01 90);
   --destructive: oklch(63.56% 0.2371 15.89);
   --destructive-foreground: oklch(100% 0 0);
-  --primary: oklch(70.54% 0.1525 162.97);
-  --primary-foreground: oklch(100% 0 0);
+  --primary: oklch(70% 0.15 150);
+  --primary-foreground: oklch(15% 0.01 90);
 
   --chart-1: #00bd84;
   --chart-2: #7a83ff;
@@ -115,6 +115,8 @@
   body {
     @apply text-foreground font-base bg-background;
     overflow: hidden;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   h1,
@@ -124,7 +126,29 @@
   h5,
   h6 {
     @apply font-heading;
+    font-family: var(--font-space-grotesk), sans-serif;
   }
+}
+
+/* Base utility for a technical "engineering grid" background */
+.bg-grid-pattern {
+  position: relative;
+}
+
+.bg-grid-pattern::before {
+  content: "";
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+  opacity: 0.04;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.dark .bg-grid-pattern::before {
+  opacity: 0.06;
 }
 
 @keyframes wave {

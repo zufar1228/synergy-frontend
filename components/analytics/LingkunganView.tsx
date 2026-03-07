@@ -35,6 +35,7 @@ import {
 import { LingkunganChart } from './LingkunganChart';
 import { LingkunganDataTable } from './LingkunganDataTable';
 import type { LingkunganLog } from '@/lib/api';
+import { AnimatedPageTitle } from './AnimatedPageTitle';
 
 export const LingkunganView = ({ initialData }: { initialData: any }) => {
   const params = useParams();
@@ -429,7 +430,12 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex justify-end">
+      <div className="flex flex-row justify-between items-center gap-2 pb-2 md:pb-3">
+        {deviceName ? (
+          <AnimatedPageTitle systemType="lingkungan" areaId={areaId} deviceName={deviceName} />
+        ) : (
+          <div /> // Placeholder to keep DatePicker aligned right
+        )}
         <DateRangePicker />
       </div>
 

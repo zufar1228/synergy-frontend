@@ -1,43 +1,34 @@
 // frontend/hooks/use-user-profile.ts
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useApiSWR } from "./use-swr-api";
 import { getMyProfile } from "@/lib/api";
-import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
+import type { Profile } from "@/lib/api";
 
+/**
+ * SWR hook for the current user's profile.
+ * Cached globally — used by header, sidebar, profile page.
+ */
 export function useUserProfile() {
-  const [profile, setProfile] = useState<{ username: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const fetcher = useCallback(
+    (token: string) => getMyProfile(token),
+    []
+  );
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const supabase = createClient();
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (!session) {
-          setError("No session");
-          return;
-        }
+  const { data, error, isLoading, mutate } = useApiSWR<Profile>(
+    "user-profile",
+    fetcher,
+    {
+      revalidateOnFocus: false, // Profile rarely changes
+      dedupingInterval: 60000,  // Cache for 60s
+    }
+  );
 
-        const userProfile = await getMyProfile(session.access_token);
-        setProfile(userProfile);
-      } catch (err: any) {
-        console.error("Failed to fetch user profile:", err);
-        setError(err.message || "Failed to load profile");
-        toast.error(
-          "Failed to load user profile. Some features may be limited."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  return { profile, loading, error };
+  return {
+    profile: data ?? null,
+    loading: isLoading,
+    error: error?.message ?? null,
+    mutate,
+  };
 }

@@ -2,12 +2,17 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KeamananDataTable } from './KeamananDataTable';
 import { createClient } from '@/lib/supabase/client';
-import { DateRangePicker } from '@/components/ui/date-range-picker'; // <-- 1. IMPORT
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { AnimatedPageTitle } from './AnimatedPageTitle';
 
 export const KeamananView = ({ initialData }: { initialData: any }) => {
+  const params = useParams();
+  const areaId = params.areaId as string;
+
   const [logs, setLogs] = useState(initialData.logs);
   const newRowIds = useRef<Set<string>>(new Set());
   const [summary, setSummary] = useState(initialData.summary);
@@ -132,7 +137,8 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
   return (
     <div className="space-y-4 sm:space-y-6 md:space-y-8">
       {/* 2. TAMBAHKAN DATE RANGE PICKER DI SINI */}
-      <div className="flex justify-end">
+      <div className="flex flex-row justify-between items-center gap-2 pb-2 md:pb-3">
+        <AnimatedPageTitle systemType="keamanan" areaId={areaId} />
         <DateRangePicker />
       </div>
 

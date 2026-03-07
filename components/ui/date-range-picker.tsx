@@ -61,23 +61,26 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
             id="date"
             variant={'default'}
             className={cn(
-              'w-full sm:w-[300px] justify-start text-left font-normal text-xs sm:text-sm',
+              'w-full max-w-[160px] sm:max-w-none sm:w-[300px] justify-start text-left font-normal text-xs sm:text-sm h-auto py-2.5 sm:py-2 px-3 sm:px-4 shrink',
               !date && 'text-muted-foreground'
             )}
+            style={{ maxWidth: '100%' }}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, 'LLL dd, y', { locale: id })} -{' '}
-                  {format(date.to, 'LLL dd, y', { locale: id })}
-                </>
+            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+            <span className="truncate block flex-1">
+              {date?.from ? (
+                date.to ? (
+                  <>
+                    {format(date.from, 'LLL dd, y', { locale: id })} -{' '}
+                    {format(date.to, 'LLL dd, y', { locale: id })}
+                  </>
+                ) : (
+                  format(date.from, 'LLL dd, y', { locale: id })
+                )
               ) : (
-                format(date.from, 'LLL dd, y', { locale: id })
-              )
-            ) : (
-              <span>Pick a date</span>
-            )}
+                'Pick a date'
+              )}
+            </span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 border-0" align="start">

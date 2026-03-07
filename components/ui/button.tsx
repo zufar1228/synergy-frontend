@@ -1,3 +1,5 @@
+"use client";
+
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -11,18 +13,19 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "text-main-foreground bg-main border-2 border-black shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
-        noShadow: "text-main-foreground bg-main border-2 border-black",
+          "text-main-foreground bg-main border-2 border-black shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] data-[clicked=true]:!translate-x-boxShadowX data-[clicked=true]:!translate-y-boxShadowY data-[clicked=true]:!shadow-none data-[clicked=true]:md:!translate-x-0 data-[clicked=true]:md:!translate-y-0 data-[clicked=true]:md:!shadow-shadow",
+        noShadow: 
+          "text-main-foreground bg-main border-2 border-black active:scale-[0.98] data-[clicked=true]:!scale-[0.98] data-[clicked=true]:md:!scale-100",
         neutral:
-          "bg-secondary-background text-foreground border-2 border-black shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none",
+          "bg-secondary-background text-foreground border-2 border-black shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] data-[clicked=true]:!translate-x-boxShadowX data-[clicked=true]:!translate-y-boxShadowY data-[clicked=true]:!shadow-none data-[clicked=true]:md:!translate-x-0 data-[clicked=true]:md:!translate-y-0 data-[clicked=true]:md:!shadow-shadow",
         reverse:
-          "text-main-foreground bg-main border-2 border-black hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow",
+          "text-main-foreground bg-main border-2 border-black hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] data-[clicked=true]:!translate-x-reverseBoxShadowX data-[clicked=true]:!translate-y-reverseBoxShadowY data-[clicked=true]:!shadow-shadow data-[clicked=true]:md:!translate-x-0 data-[clicked=true]:md:!translate-y-0 data-[clicked=true]:md:!shadow-none",
         destructive:
-          "bg-red-600 text-white border-2 border-black shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none hover:bg-red-700",
+          "bg-red-600 text-white border-2 border-black shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none hover:bg-red-700 active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] data-[clicked=true]:!translate-x-boxShadowX data-[clicked=true]:!translate-y-boxShadowY data-[clicked=true]:!shadow-none data-[clicked=true]:md:!translate-x-0 data-[clicked=true]:md:!translate-y-0 data-[clicked=true]:md:!shadow-shadow",
         muted:
-          "bg-gray-400 text-gray-800 border-2 border-black shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none hover:bg-gray-500",
+          "bg-gray-400 text-gray-800 border-2 border-black shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none hover:bg-gray-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] data-[clicked=true]:!translate-x-boxShadowX data-[clicked=true]:!translate-y-boxShadowY data-[clicked=true]:!shadow-none data-[clicked=true]:md:!translate-x-0 data-[clicked=true]:md:!translate-y-0 data-[clicked=true]:md:!shadow-shadow",
         alert:
-          "bg-red-600 text-destructive-foreground border-2 border-black shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none hover:bg-destructive/90 animate-pulse",
+          "bg-[#ff00ff] text-white font-bold border-2 border-black shadow-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-[#ff00ff]/90 animate-pulse active:translate-x-[4px] active:translate-y-[4px] active:shadow-none data-[clicked=true]:!translate-x-[2px] data-[clicked=true]:!translate-y-[2px] data-[clicked=true]:!shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] data-[clicked=true]:md:!translate-x-0 data-[clicked=true]:md:!translate-y-0 data-[clicked=true]:md:!shadow-shadow",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -43,17 +46,30 @@ function Button({
   variant,
   size,
   asChild = false,
+  onClick,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
   }) {
+  const [clicked, setClicked] = React.useState(false);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setClicked(true);
+    setTimeout(() => setClicked(false), 300);
+    if (onClick) {
+      onClick(e);
+    }
+  };
+
   const Comp = asChild ? Slot : "button";
 
   return (
     <Comp
       data-slot="button"
+      data-clicked={clicked}
       className={cn(buttonVariants({ variant, size, className }))}
+      onClick={handleClick}
       {...props}
     />
   );

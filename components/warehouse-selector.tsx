@@ -4,8 +4,8 @@
 import * as React from "react";
 import { ChevronsUpDown, Building2, Globe } from "lucide-react";
 import { useWarehouse } from "@/contexts/WarehouseContext";
-import { getWarehouses, Warehouse } from "@/lib/api";
-import { createClient } from "@/lib/supabase/client";
+import { useWarehouses } from "@/hooks/use-warehouses";
+import type { Warehouse } from "@/lib/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,30 +20,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { toast } from "sonner";
 
 export function WarehouseSelector() {
   const { selectedWarehouse, setSelectedWarehouse } = useWarehouse();
   const { isMobile } = useSidebar();
-  const [warehouses, setWarehouses] = React.useState<Warehouse[]>([]);
-
-  React.useEffect(() => {
-    const fetchWarehouses = async () => {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) return;
-
-      try {
-        const data = await getWarehouses(session.access_token);
-        setWarehouses(data);
-      } catch {
-        toast.error("Gagal memuat daftar gudang.");
-      }
-    };
-    fetchWarehouses();
-  }, []);
+  const { warehouses } = useWarehouses();
 
   const currentWarehouse =
     selectedWarehouse === "all"

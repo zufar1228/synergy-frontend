@@ -10,6 +10,7 @@ import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { IntrusiLog } from '@/lib/api';
 import { useDeviceStatus } from '@/contexts/DeviceStatusContext';
 import { ShieldAlert, AlertTriangle, Bell, Activity } from 'lucide-react';
+import { AnimatedPageTitle } from './AnimatedPageTitle';
 
 export const IntrusiView = ({ initialData }: { initialData: any }) => {
   const params = useParams();
@@ -17,6 +18,7 @@ export const IntrusiView = ({ initialData }: { initialData: any }) => {
   const { updateDeviceStatus } = useDeviceStatus();
 
   const [logs, setLogs] = useState<IntrusiLog[]>(initialData.logs || []);
+  const [deviceName, setDeviceName] = useState<string>('');
   const newRowIds = useRef<Set<string>>(new Set());
   const [summary, setSummary] = useState({
     total_events: 0,
@@ -149,7 +151,12 @@ export const IntrusiView = ({ initialData }: { initialData: any }) => {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex justify-end">
+      <div className="flex flex-row justify-between items-center gap-2 pb-2 md:pb-3">
+        {deviceName ? (
+          <AnimatedPageTitle systemType="intrusi" areaId={areaId} deviceName={deviceName} />
+        ) : (
+          <div /> // Placeholder to keep DatePicker aligned right
+        )}
         <DateRangePicker />
       </div>
 
@@ -213,7 +220,11 @@ export const IntrusiView = ({ initialData }: { initialData: any }) => {
       </div>
 
       {/* Device Controls */}
-      <IntrusiDeviceControls areaId={areaId} isDeviceOnline={isDeviceOnline} />
+      <IntrusiDeviceControls 
+        areaId={areaId} 
+        isDeviceOnline={isDeviceOnline} 
+        onDeviceLoaded={setDeviceName}
+      />
 
       {/* Data Table */}
       <IntrusiDataTable

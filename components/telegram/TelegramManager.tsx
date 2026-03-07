@@ -1,15 +1,15 @@
 // frontend/components/telegram/TelegramManager.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
-  getTelegramMembers,
   generateTelegramInvite,
   kickTelegramMember,
   sendTelegramTestAlert,
   TelegramSubscriber,
 } from "@/lib/api";
+import { useTelegramMembers } from "@/hooks/use-telegram-members";
 import {
   Card,
   CardContent,
@@ -45,8 +45,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
 export const TelegramManager = () => {
-  const [members, setMembers] = useState<TelegramSubscriber[]>([]);
-  const [loading, setLoading] = useState(true);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [inviteLoading, setInviteLoading] = useState(false);
   const [testAlertLoading, setTestAlertLoading] = useState(false);
@@ -55,28 +53,8 @@ export const TelegramManager = () => {
   const [kickingUserId, setKickingUserId] = useState<string | null>(null);
   const supabase = createClient();
 
-  // --- Fetch Data Member ---
-  const fetchMembers = useCallback(async () => {
-    try {
-      setLoading(true);
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const data = await getTelegramMembers(session.access_token, showInactive);
-      setMembers(data);
-    } catch (error) {
-      toast.error("Gagal memuat member Telegram");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [showInactive, supabase.auth]);
-
-  useEffect(() => {
-    fetchMembers();
-  }, [fetchMembers]);
+  // SWR hook for member data
+  const { members, isLoading: loading, mutate: refreshMembers } = useTelegramMembers(showInactive);
 
   // --- Handler Generate Link ---
   const handleGenerateLink = async () => {
@@ -144,7 +122,7 @@ export const TelegramManager = () => {
 
       await kickTelegramMember(session.access_token, userId);
       toast.success(`${name} berhasil dikeluarkan dari grup.`);
-      fetchMembers(); // Refresh list
+      refreshMembers(); // Refresh list via SWR
     } catch (error) {
       toast.error("Gagal mengeluarkan member");
       console.error(error);
@@ -249,7 +227,7 @@ export const TelegramManager = () => {
               <Button
                 variant="neutral"
                 size="sm"
-                onClick={fetchMembers}
+                onClick={() => refreshMembers()}
                 disabled={loading}
               >
                 <RefreshCw

@@ -1,5 +1,5 @@
-// frontend/components/shared/WarehouseCard.tsx
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -30,6 +30,7 @@ const WarehouseCard = ({
   deviceCount,
   onlineDeviceCount,
 }: WarehouseCardProps) => {
+  const [clicked, setClicked] = useState(false);
   let overall_status: Status = "Operational";
   let statusText = "Semua perangkat online";
 
@@ -41,18 +42,25 @@ const WarehouseCard = ({
     statusText = `${deviceCount - onlineDeviceCount} perangkat offline`;
   }
 
-  const statusConfig: { [key in Status]: { color: string; text: string } } = {
+  const statusConfig: { [key in Status]: { variant: "success" | "warning" | "destructive" | "neutral"; text: string } } = {
     Operational: {
-      color: "bg-green-500 hover:bg-green-600",
+      variant: "success",
       text: "Operational",
     },
-    Warning: { color: "bg-yellow-500 hover:bg-yellow-600", text: "Warning" },
-    Critical: { color: "bg-red-500 hover:bg-red-600", text: "Critical" },
-    Empty: { color: "bg-gray-400 hover:bg-gray-500", text: "Empty" },
+    Warning: { variant: "warning", text: "Warning" },
+    Critical: { variant: "destructive", text: "Critical" },
+    Empty: { variant: "neutral", text: "Empty" },
   };
 
   return (
-    <Card className="border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none transition-all h-full flex flex-col">
+    <Card 
+      onClick={() => {
+        setClicked(true);
+        setTimeout(() => setClicked(false), 300);
+      }}
+      data-clicked={clicked}
+      className="border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none transition-all h-full flex flex-col data-[clicked=true]:!translate-x-boxShadowX data-[clicked=true]:!translate-y-boxShadowY data-[clicked=true]:!shadow-none data-[clicked=true]:md:!translate-x-0 data-[clicked=true]:md:!translate-y-0 data-[clicked=true]:md:!shadow-shadow"
+    >
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
@@ -67,7 +75,7 @@ const WarehouseCard = ({
               </CardDescription>
             )}
           </div>
-          <Badge className={statusConfig[overall_status].color}>
+          <Badge variant={statusConfig[overall_status].variant as any}>
             {statusConfig[overall_status].text}
           </Badge>
         </div>
