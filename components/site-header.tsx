@@ -22,7 +22,7 @@ export function SiteHeader({
   userRole: string;
 }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 bg-secondary-background/80 backdrop-blur-sm px-4 lg:px-6 border-b-3 border-b-sidebar-border">
+    <header className="flex h-12 shrink-0 items-center gap-2 bg-secondary-background/80 backdrop-blur-sm px-4 lg:px-6 border-b-3 border-b-sidebar-border">
       {/* Sidebar Trigger for Desktop */}
       <div className="hidden lg:flex">
         <SidebarTrigger className="-ml-1" suppressHydrationWarning />
@@ -56,7 +56,7 @@ export function SiteHeader({
 
 export function SiteHeaderSkeleton() {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 bg-secondary-background/80 backdrop-blur-sm px-4 lg:px-6 border-b-3 border-b-sidebar-border">
+    <header className="flex h-12 shrink-0 items-center gap-2 bg-secondary-background/80 backdrop-blur-sm px-4 lg:px-6 border-b-3 border-b-sidebar-border">
       {/* Sidebar Trigger Placeholder */}
       <div className="hidden lg:flex">
         <Skeleton className="h-6 w-6 rounded" />

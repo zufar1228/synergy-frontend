@@ -33,8 +33,8 @@ export const MobileSidebar = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild suppressHydrationWarning>
-        <Button variant="default" size="icon" suppressHydrationWarning>
-          <Menu className="h-5 w-5" />
+        <Button variant="default" size="sm" className="h-8 w-8 px-0" suppressHydrationWarning>
+          <Menu className="h-4 w-4" />
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>

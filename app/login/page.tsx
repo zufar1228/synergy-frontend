@@ -3,6 +3,7 @@ import { LoginForm } from '@/components/login-form';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { FlickeringGrid } from '@/components/ui/shadcn-io/flickering-grid';
+import { ContainerTextFlip } from '@/components/ui/container-text-flip';
 
 export default async function LoginPage({
   searchParams
@@ -31,9 +32,9 @@ export default async function LoginPage({
         flickerChance={0.3}
         maxOpacity={0.2}
       />
-      <div className="relative z-10 flex w-full max-w-sm flex-col gap-4 sm:gap-6">
+      <div className="relative z-10 flex w-full max-w-md flex-col gap-3 sm:gap-4">
         {/* Branding (#5) */}
-        <div className="flex flex-col items-center gap-2 sm:gap-3">
+        <div className="flex flex-col items-center gap-1 sm:gap-2">
           <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-base overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -41,14 +42,16 @@ export default async function LoginPage({
               alt="Synergy IoT"
               width={64}
               height={64}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           </div>
-          <div className="text-center">
-            <h1 className="text-xl sm:text-2xl font-heading">Synergy IoT</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Sistem Monitoring IoT Gudang Anda
-            </p>
+          <div className="text-center flex items-center justify-center w-full overflow-visible">
+            <ContainerTextFlip
+              words={['Synergy IoT', 'Sistem Monitoring IoT Gudang Anda']}
+              interval={5000}
+              className="text-base sm:text-lg md:text-xl font-heading font-bold px-4 py-2 border-2 border-border shadow-sm rounded-base bg-secondary [font-family:var(--font-space-grotesk)]"
+              textClassName="font-heading font-bold [font-family:var(--font-space-grotesk)]"
+            />
           </div>
         </div>
         <LoginForm />

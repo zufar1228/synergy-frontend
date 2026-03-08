@@ -91,13 +91,8 @@ export const LingkunganDataTable = ({
       {/* header outside card */}
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-base font-medium">Riwayat Data Lingkungan</h3>
-        {pagination && (
-          <span className="text-xs font-normal text-muted-foreground">
-            {pagination.total} total data
-          </span>
-        )}
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-visible pb-2 mb-2 pr-2">
         <Table>
           <TableHeader>
             <TableRow>
@@ -235,7 +230,7 @@ export const LingkunganDataTable = ({
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                  Halaman {currentPage}/{totalPages || 1}
+                {currentPage} / {totalPages || 1}
                 </div>
                 <Button
                   className="h-8 w-8 p-0"

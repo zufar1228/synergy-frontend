@@ -16,7 +16,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     // Tampilkan placeholder dengan ukuran yang sama untuk menghindari layout shift
-    return <div className="h-9 w-[76px] rounded-base border-2 border-border" />;
+    return <div className="h-8 w-[72px] rounded-base border-2 border-border" />;
   }
 
   const currentTheme =
@@ -26,7 +26,7 @@ export function ThemeToggle() {
 
   return (
     // Bungkus ThemeSwitcher dengan Button menggunakan asChild
-    <Button variant="neutral" size="sm" asChild>
+    <Button variant="neutral" size="sm" className="h-8 px-1.5" asChild>
       <ThemeSwitcher
         value={currentTheme}
         onChange={(newTheme) =>

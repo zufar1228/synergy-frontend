@@ -27,16 +27,16 @@ export function AnimatedPageTitle({ systemType, areaId, deviceName }: AnimatedPa
     const list: string[] = [];
     
     // Add Warehouse Name
-    if (area?.warehouse_name) list.push(area.warehouse_name);
+    if (area?.warehouse_name) list.push(`Gudang: ${area.warehouse_name}`);
     
     // Add Area Name
     if (area?.name) list.push(`Area: ${area.name}`);
     
     // Add Device / System Type Name
     if (systemType === 'keamanan') {
-      list.push("Sistem Keamanan Pusat");
+      list.push("Kamera Keamanan");
     } else if (deviceName) {
-      list.push(`Perangkat: ${deviceName}`);
+      list.push(deviceName);
     } else {
         list.push("Sistem " + systemType)
     }
@@ -50,7 +50,7 @@ export function AnimatedPageTitle({ systemType, areaId, deviceName }: AnimatedPa
   return (
     <ContainerTextFlip 
       words={words} 
-      interval={5000} 
+      interval={2600} 
     />
   );
 }

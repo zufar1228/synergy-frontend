@@ -58,7 +58,7 @@ export const ThemeSwitcher = ({
         return (
           <button
             aria-label={label}
-            className="relative h-6 w-6 rounded-full"
+            className="relative h-5 w-5 rounded-full"
             key={key}
             onClick={() => handleThemeClick(key as "light" | "dark" | "system")}
             type="button"
@@ -73,7 +73,7 @@ export const ThemeSwitcher = ({
             )}
             <Icon
               className={cn(
-                "relative z-10 m-auto h-4 w-4",
+                "relative z-10 m-auto h-3.5 w-3.5",
                 isActive ? "text-foreground" : "text-muted-foreground"
               )}
             />

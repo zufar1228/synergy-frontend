@@ -729,7 +729,7 @@ export function IntrusiDataTable({
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                  Halaman {currentPage} dari {totalPages || 1}
+                {currentPage} / {totalPages || 1}
                 </div>
                 <Button
                   className="h-8 w-8 p-0"

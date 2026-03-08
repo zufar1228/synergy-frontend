@@ -61,7 +61,7 @@ export function ContainerTextFlip({
       animate={{ width }}
       className={cn(
         "relative inline-block text-center rounded-base px-2 py-1.5 min-w-[120px]",
-        "text-lg sm:text-xl font-heading font-bold text-foreground",
+        "text-lg sm:text-xl font-heading font-bold text-foreground [font-family:var(--font-space-grotesk)]",
         "border-2 border-border bg-secondary shadow-sm",
         className,
       )}

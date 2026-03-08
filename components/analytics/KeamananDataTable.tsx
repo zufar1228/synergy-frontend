@@ -145,13 +145,13 @@ const ExpandableReviewForm = ({
   // Render form secara langsung, tanpa Dialog/DialogTrigger
   return (
     // Tambahkan padding dan background untuk membedakannya, dengan max-width constraint
-    <div className="p-4 sm:p-6 bg-gray-900/50 rounded-md max-w-full overflow-hidden animate-in fade-in-0 slide-in-from-top-2 duration-300">
+    <div className="p-4 sm:p-6 bg-secondary border-y-2 border-border max-w-full overflow-hidden animate-in fade-in-0 slide-in-from-top-2 duration-300 font-base text-foreground">
       {/* Ganti DialogHeader dengan div biasa */}
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-lg font-heading font-bold text-foreground">
           Review Deteksi Keamanan
         </h3>
-        <p className="text-sm text-gray-300">
+        <p className="text-sm text-muted-foreground">
           Lihat gambar dan perbarui status deteksi ini.
         </p>
       </div>
@@ -168,8 +168,8 @@ const ExpandableReviewForm = ({
           {log.attributes &&
             Array.isArray(log.attributes) &&
             log.attributes.length > 0 && (
-              <div className="mt-4 p-3 bg-gray-800/50 rounded-md">
-                <h4 className="text-sm font-medium text-white mb-2">
+              <div className="mt-4 p-3 bg-secondary-background border-2 border-border rounded-base shadow-[2px_2px_0px_0px_var(--border)]">
+                <h4 className="text-sm font-heading font-bold text-foreground mb-2">
                   Atribut Terdeteksi ({log.attributes.length} orang)
                 </h4>
                 <div className="space-y-3 max-h-40 overflow-y-auto">
@@ -184,13 +184,13 @@ const ExpandableReviewForm = ({
                     return (
                       <div
                         key={index}
-                        className="border-b border-gray-700 pb-2 last:border-b-0 last:pb-0"
+                        className="border-b-2 border-border pb-2 last:border-b-0 last:pb-0"
                       >
-                        <h5 className="text-xs font-medium text-gray-200 mb-1">
+                        <h5 className="text-xs font-bold text-foreground mb-1">
                           Orang {index + 1} (Keyakinan:{' '}
                           {(personConfidence * 100).toFixed(0)}%)
                         </h5>
-                        <ul className="list-disc list-inside space-y-1 text-xs text-gray-200">
+                        <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground font-medium">
                           {attributes.map((attr: any, i: number) => (
                             <li key={i}>
                               <span className="capitalize">
@@ -198,7 +198,7 @@ const ExpandableReviewForm = ({
                                   .replace('person wearing a ', '')
                                   .replace('person not wearing a ', '')}
                               </span>
-                              <span className="text-gray-200 ml-1">
+                              <span className="text-muted-foreground ml-1">
                                 (
                                 {(
                                   (attr.confidence || personConfidence) * 100
@@ -222,7 +222,7 @@ const ExpandableReviewForm = ({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Status</FormLabel>
+                  <FormLabel className="text-foreground font-bold">Status</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -247,7 +247,7 @@ const ExpandableReviewForm = ({
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Notes</FormLabel>
+                  <FormLabel className="text-foreground font-bold">Notes</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Tambahkan catatan..." {...field} />
                   </FormControl>
@@ -360,13 +360,13 @@ export function KeamananDataTable({
         const getBadgeClass = (status: string) => {
           switch (status) {
             case 'resolved':
-              return 'bg-green-600 text-white';
+              return 'bg-green-600 text-white border-2 border-border shadow-[2px_2px_0px_0px_var(--border)]';
             case 'acknowledged':
-              return 'bg-blue-600 text-white';
+              return 'bg-blue-600 text-white border-2 border-border shadow-[2px_2px_0px_0px_var(--border)]';
             case 'false_alarm':
-              return 'bg-gray-600 text-white';
+              return 'bg-gray-600 text-white border-2 border-border shadow-[2px_2px_0px_0px_var(--border)]';
             default:
-              return 'bg-red-600 text-white';
+              return 'bg-red-600 text-white border-2 border-border shadow-[2px_2px_0px_0px_var(--border)]';
           }
         };
         return (
@@ -520,7 +520,7 @@ export function KeamananDataTable({
         />
       </div>
 
-      <div className="rounded-md overflow-x-auto -mx-2 px-2">
+      <div className="rounded-base overflow-visible -mx-2 px-2 pb-2 mb-2 pr-2">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -658,7 +658,7 @@ export function KeamananDataTable({
                 </Button>
 
                 <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                  Halaman {pagination?.current_page || 1} dari{' '}
+                  {pagination?.current_page || 1} /{' '}
                   {pagination?.total_pages || 1}
                 </div>
 
