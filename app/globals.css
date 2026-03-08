@@ -51,7 +51,7 @@
   --border: oklch(40% 0.02 90); /* Warm earth-toned border for dark theme */
   --sidebar-border: oklch(40% 0.02 90);
   --ring: oklch(95% 0.01 90);
-  --shadow: 4px 4px 0px 0px oklch(15% 0.02 90); /* Deeper warm shadow */
+  --shadow: 4px 4px 0px 0px var(--border); /* Deeper warm shadow */
 
   /* Standard Tailwind theme colors for dark mode */
   --muted: oklch(30% 0.02 90);
