@@ -27,7 +27,8 @@ import { Button } from '@/components/ui/button';
 // Definisikan sistem yang bisa di-subscribe pengguna
 const availableSystems = [
   { id: 'keamanan', label: 'Keamanan (Gerakan)' },
-  { id: 'intrusi', label: 'Intrusi (Keamanan Pintu Gudang)' }
+  { id: 'intrusi', label: 'Intrusi (Keamanan Pintu Gudang)' },
+  { id: 'lingkungan', label: 'Lingkungan (Suhu, Kelembapan, CO2)' }
 ];
 
 // Skema validasi untuk form
