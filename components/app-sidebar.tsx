@@ -1,18 +1,18 @@
 // frontend/components/app-sidebar.tsx
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarRail,
-} from "@/components/ui/sidebar";
-import { WarehouseSelector } from "./warehouse-selector";
-import { NavUser } from "./nav-user";
-import { AppNavigation } from "./app-navigation";
-import { Skeleton } from "@/components/ui/skeleton";
+  SidebarRail
+} from '@/components/ui/sidebar';
+import { WarehouseSelector } from './warehouse-selector';
+import { NavUser } from './nav-user';
+import { AppNavigation } from './app-navigation';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface UserData {
   username?: string;
@@ -22,11 +22,26 @@ interface UserData {
 
 const AppSidebarComponent = ({
   userRole,
-  user,
+  user
 }: {
   userRole: string;
   user: UserData;
 }) => {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Render simple placeholder on server and during hydration to avoid
+  // rendering the actual <Sidebar> (which produces different classnames
+  // once JS runs and causes the white overlay + hydration mismatches).
+  if (!mounted) {
+    return (
+      <div className="hidden lg:block w-[var(--sidebar-width)] bg-secondary-background" />
+    );
+  }
+
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="border-b-0 pb-0">
@@ -43,7 +58,7 @@ const AppSidebarComponent = ({
   );
 };
 
-AppSidebarComponent.displayName = "AppSidebar";
+AppSidebarComponent.displayName = 'AppSidebar';
 
 export const AppSidebar = React.memo(AppSidebarComponent);
 
@@ -78,11 +93,11 @@ const AppSidebarSkeletonComponent = ({ userRole }: { userRole: string }) => {
         </div>
 
         {/* Management Section - only for admin/super_admin */}
-        {["admin", "super_admin"].includes(userRole) && (
+        {['admin', 'super_admin'].includes(userRole) && (
           <div className="px-3 py-2">
             <Skeleton className="h-4 w-24 mb-2" />
             <div className="space-y-2">
-              {Array.from({ length: userRole === "super_admin" ? 4 : 3 }).map(
+              {Array.from({ length: userRole === 'super_admin' ? 4 : 3 }).map(
                 (_, i) => (
                   <Skeleton key={i} className="h-8 w-full" />
                 )
@@ -107,6 +122,6 @@ const AppSidebarSkeletonComponent = ({ userRole }: { userRole: string }) => {
   );
 };
 
-AppSidebarSkeletonComponent.displayName = "AppSidebarSkeleton";
+AppSidebarSkeletonComponent.displayName = 'AppSidebarSkeleton';
 
 export const AppSidebarSkeleton = React.memo(AppSidebarSkeletonComponent);

@@ -1,19 +1,19 @@
 // frontend/components/mobile-sidebar.tsx
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
-import { WarehouseSelector } from "./warehouse-selector";
-import { NavUser } from "./nav-user";
-import { MobileNavigation } from "./mobile-navigation";
+  SheetTrigger
+} from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
+import { WarehouseSelector } from './warehouse-selector';
+import { NavUser } from './nav-user';
+import { MobileNavigation } from './mobile-navigation';
 
 interface UserData {
   username?: string;
@@ -23,7 +23,7 @@ interface UserData {
 
 export const MobileSidebar = ({
   user,
-  userRole,
+  userRole
 }: {
   user: UserData;
   userRole: string;
@@ -33,7 +33,12 @@ export const MobileSidebar = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild suppressHydrationWarning>
-        <Button variant="default" size="sm" className="h-8 w-8 px-0" suppressHydrationWarning>
+        <Button
+          variant="default"
+          size="sm"
+          className="h-8 w-8 px-0"
+          suppressHydrationWarning
+        >
           <Menu className="h-4 w-4" />
           <span className="sr-only">Toggle Menu</span>
         </Button>
@@ -49,7 +54,7 @@ export const MobileSidebar = ({
         <div className="p-2">
           <WarehouseSelector />
         </div>
-        <div className="flex-1 py-4 overflow-y-auto">
+        <div className="flex-1 pb-4 overflow-y-auto">
           {/* Kirim onLinkClick untuk menutup sheet saat link diklik */}
           <MobileNavigation
             userRole={userRole}

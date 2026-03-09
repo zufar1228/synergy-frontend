@@ -5,7 +5,9 @@
 
 :root {
   --background: oklch(96% 0.02 90); /* Warm cream/beige background */
-  --secondary-background: oklch(98.5% 0.01 90); /* Slightly lighter cream for cards/sidebar */
+  --secondary-background: oklch(
+    98.5% 0.01 90
+  ); /* Slightly lighter cream for cards/sidebar */
   --foreground: oklch(15% 0.01 90); /* Very dark brown/black text */
   --main-foreground: oklch(98% 0.01 90); /* Light text on main green buttons */
   --main: oklch(63% 0.14 150); /* Bold Emerald/Forest Green */
@@ -43,8 +45,12 @@
 }
 
 .dark {
-  --background: oklch(14% 0.01 90); /* Deep olive/warm dark background, mostly black */
-  --secondary-background: oklch(18% 0.01 90); /* Lighter olive/warm dark for cards */
+  --background: oklch(
+    14% 0.01 90
+  ); /* Deep olive/warm dark background, mostly black */
+  --secondary-background: oklch(
+    18% 0.01 90
+  ); /* Lighter olive/warm dark for cards */
   --foreground: oklch(95% 0.01 90); /* Off-white text */
   --main-foreground: oklch(15% 0.01 90); /* Dark text on main buttons */
   --main: oklch(70% 0.15 150); /* Lighter, punchy Emerald for dark mode */
@@ -136,9 +142,10 @@
 }
 
 .bg-grid-pattern::before {
-  content: "";
+  content: '';
   background-size: 40px 40px;
-  background-image: linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+  background-image:
+    linear-gradient(to right, var(--color-border) 1px, transparent 1px),
     linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
   opacity: 0.04;
   pointer-events: none;
@@ -196,4 +203,18 @@
 
 .dark .animate-row-highlight {
   animation: row-highlight-dark 2s ease-out forwards;
+}
+
+/* Marquee animation for scrolling text */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 10s linear infinite;
 }

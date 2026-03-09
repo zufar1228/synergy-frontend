@@ -35,6 +35,26 @@ import { useWarehouse } from '@/contexts/WarehouseContext';
 import { useNavAreas } from '@/hooks/use-nav-areas';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Helper function to render area name with warehouse info when needed
+const renderAreaName = (
+  area: { name: string; warehouse_name?: string },
+  selectedWarehouse: string | null
+) => {
+  const displayText =
+    selectedWarehouse === 'all' && area.warehouse_name
+      ? `${area.warehouse_name} - ${area.name}`
+      : area.name;
+
+  return (
+    <span
+      className="inline-block whitespace-nowrap overflow-hidden text-ellipsis max-w-full"
+      title={displayText} // Show full text on hover
+    >
+      {displayText}
+    </span>
+  );
+};
+
 // Define navigation data
 const mainLinks = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -51,7 +71,14 @@ const managementLinks = [
 const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
   const pathname = usePathname();
   const { selectedWarehouse } = useWarehouse();
-  const { securityAreas, intrusiAreas, lingkunganAreas, isLoading } = useNavAreas();
+  const { securityAreas, intrusiAreas, lingkunganAreas, isLoading } =
+    useNavAreas();
+
+  // track the very first render (used for hydration consistency)
+  const [initialLoad, setInitialLoad] = React.useState(true);
+  React.useEffect(() => {
+    setInitialLoad(false);
+  }, []);
 
   // Memoize filtered environment areas to avoid recalculation on every render
 
@@ -89,6 +116,16 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
     },
     [pathname]
   );
+
+  // determine which monitoring groups actually have items after warehouse filter
+  // section visibility: show when data exists **or** during the initial load to
+  // keep server and client markup identical. Switching off after hydration
+  // prevents hydration mismatches when async data arrives.
+  const hasSecurity = initialLoad || filteredSecurityAreas.length > 0;
+  const hasIntrusi = initialLoad || filteredIntrusiAreas.length > 0;
+  const hasLingkungan = initialLoad || filteredLingkunganAreas.length > 0;
+  const hasMonitoring = hasSecurity || hasIntrusi || hasLingkungan;
+  const showMonitoringHeader = initialLoad || hasMonitoring;
 
   // Check if any environment sub-menu is active
 
@@ -129,7 +166,7 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
     <>
       <SidebarGroup className="mb-3 pt-0 border-t-0">
         <SidebarGroupLabel>Platform</SidebarGroupLabel>
-        <SidebarMenu>
+        <SidebarMenu className="gap-3 my-2">
           {mainLinks.map((link) => (
             <SidebarMenuItem key={link.title}>
               <SidebarMenuButton asChild isActive={isActive(link.href)}>
@@ -143,149 +180,158 @@ const AppNavigationComponent = ({ userRole }: { userRole: string }) => {
         </SidebarMenu>
       </SidebarGroup>
 
-      <SidebarGroup className="mb-3">
-        <SidebarGroupLabel>Monitoring</SidebarGroupLabel>
-        <SidebarMenu>
-          {/* Collapsible Security Menu */}
-          <Collapsible asChild>
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  suppressHydrationWarning
-                  isActive={isSecurityActive}
-                >
-                  <Camera />
-                  <span>Keamanan</span>
-                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent suppressHydrationWarning>
-                <SidebarMenuSub>
-                  {isLoading
-                    ? // Show skeleton while loading
-                      Array.from({ length: 3 }).map((_, i) => (
-                        <SidebarMenuSubItem key={i}>
-                          <SidebarMenuSubButton>
-                            <Skeleton className="h-4 w-24" />
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))
-                    : filteredSecurityAreas.map((area) => (
-                        <SidebarMenuSubItem key={area.id}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={
-                              pathname ===
-                              `/${area.warehouse_id}/${area.id}/keamanan`
-                            }
-                          >
-                            <Link
-                              href={`/${area.warehouse_id}/${area.id}/keamanan`}
-                            >
-                              <span>{area.name}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-          {/* Collapsible Lingkungan Menu */}
-          <Collapsible asChild>
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  suppressHydrationWarning
-                  isActive={isLingkunganActive}
-                >
-                  <Thermometer />
-                  <span>Lingkungan</span>
-                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent suppressHydrationWarning>
-                <SidebarMenuSub>
-                  {isLoading
-                    ? Array.from({ length: 3 }).map((_, i) => (
-                        <SidebarMenuSubItem key={i}>
-                          <SidebarMenuSubButton>
-                            <Skeleton className="h-4 w-24" />
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))
-                    : filteredLingkunganAreas.map((area) => (
-                        <SidebarMenuSubItem key={area.id}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={
-                              pathname ===
-                              `/${area.warehouse_id}/${area.id}/lingkungan`
-                            }
-                          >
-                            <Link
-                              href={`/${area.warehouse_id}/${area.id}/lingkungan`}
-                            >
-                              <span>{area.name}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-          {/* Collapsible Intrusi Menu */}
-          <Collapsible asChild>
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  suppressHydrationWarning
-                  isActive={isIntrusiActive}
-                >
-                  <DoorOpen />
-                  <span>Intrusi Pintu</span>
-                  <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent suppressHydrationWarning>
-                <SidebarMenuSub>
-                  {isLoading
-                    ? Array.from({ length: 3 }).map((_, i) => (
-                        <SidebarMenuSubItem key={i}>
-                          <SidebarMenuSubButton>
-                            <Skeleton className="h-4 w-24" />
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))
-                    : filteredIntrusiAreas.map((area) => (
-                        <SidebarMenuSubItem key={area.id}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={
-                              pathname ===
-                              `/${area.warehouse_id}/${area.id}/intrusi`
-                            }
-                          >
-                            <Link
-                              href={`/${area.warehouse_id}/${area.id}/intrusi`}
-                            >
-                              <span>{area.name}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-        </SidebarMenu>
-      </SidebarGroup>
+      {/* Monitoring group header shown during initial load or if any section exists */}
+      {showMonitoringHeader && (
+        <SidebarGroup className="mb-3">
+          <SidebarGroupLabel>Monitoring</SidebarGroupLabel>
+          <SidebarMenu className="gap-3 my-2">
+            {/* Collapsible Security Menu (render during initialLoad or if data) */}
+            {hasSecurity && (
+              <Collapsible asChild>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      suppressHydrationWarning
+                      isActive={isSecurityActive}
+                    >
+                      <Camera />
+                      <span>Keamanan</span>
+                      <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent suppressHydrationWarning>
+                    <SidebarMenuSub>
+                      {isLoading
+                        ? // Show skeleton while loading
+                          Array.from({ length: 3 }).map((_, i) => (
+                            <SidebarMenuSubItem key={i}>
+                              <SidebarMenuSubButton>
+                                <Skeleton className="h-4 w-24" />
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))
+                        : filteredSecurityAreas.map((area) => (
+                            <SidebarMenuSubItem key={area.id}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={
+                                  pathname ===
+                                  `/${area.warehouse_id}/${area.id}/keamanan`
+                                }
+                              >
+                                <Link
+                                  href={`/${area.warehouse_id}/${area.id}/keamanan`}
+                                >
+                                  {renderAreaName(area, selectedWarehouse)}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )}
+            {/* Collapsible Lingkungan Menu */}
+            {hasLingkungan && (
+              <Collapsible asChild>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      suppressHydrationWarning
+                      isActive={isLingkunganActive}
+                    >
+                      <Thermometer />
+                      <span>Lingkungan</span>
+                      <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent suppressHydrationWarning>
+                    <SidebarMenuSub>
+                      {isLoading
+                        ? Array.from({ length: 3 }).map((_, i) => (
+                            <SidebarMenuSubItem key={i}>
+                              <SidebarMenuSubButton>
+                                <Skeleton className="h-4 w-24" />
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))
+                        : filteredLingkunganAreas.map((area) => (
+                            <SidebarMenuSubItem key={area.id}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={
+                                  pathname ===
+                                  `/${area.warehouse_id}/${area.id}/lingkungan`
+                                }
+                              >
+                                <Link
+                                  href={`/${area.warehouse_id}/${area.id}/lingkungan`}
+                                >
+                                  {renderAreaName(area, selectedWarehouse)}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )}
+            {/* Collapsible Intrusi Menu */}
+            {hasIntrusi && (
+              <Collapsible asChild>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      suppressHydrationWarning
+                      isActive={isIntrusiActive}
+                    >
+                      <DoorOpen />
+                      <span>Intrusi Pintu</span>
+                      <ChevronRight className="ml-auto transition-transform duration-150 ease-out group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent suppressHydrationWarning>
+                    <SidebarMenuSub>
+                      {isLoading
+                        ? Array.from({ length: 3 }).map((_, i) => (
+                            <SidebarMenuSubItem key={i}>
+                              <SidebarMenuSubButton>
+                                <Skeleton className="h-4 w-24" />
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))
+                        : filteredIntrusiAreas.map((area) => (
+                            <SidebarMenuSubItem key={area.id}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={
+                                  pathname ===
+                                  `/${area.warehouse_id}/${area.id}/intrusi`
+                                }
+                              >
+                                <Link
+                                  href={`/${area.warehouse_id}/${area.id}/intrusi`}
+                                >
+                                  {renderAreaName(area, selectedWarehouse)}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )}
+          </SidebarMenu>
+        </SidebarGroup>
+      )}
 
       {showManagement && (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>Manajemen</SidebarGroupLabel>
-          <SidebarMenu>
+          <SidebarMenu className="gap-3 my-2">
             {filteredManagementLinks.map((link) => (
               <SidebarMenuItem key={link.title}>
                 <SidebarMenuButton asChild isActive={isActive(link.href)}>
@@ -332,7 +378,7 @@ export function AppNavigationSkeleton({ userRole }: { userRole: string }) {
         <SidebarGroupLabel>
           <Skeleton className="h-4 w-20" />
         </SidebarGroupLabel>
-        <SidebarMenu>
+        <SidebarMenu className="gap-3 my-2">
           {/* Environment Menu Skeleton */}
           <SidebarMenuItem>
             <SidebarMenuButton>

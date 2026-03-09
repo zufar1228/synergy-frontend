@@ -1,5 +1,5 @@
 // lib/supabase/client.ts
-import { createBrowserClient } from "@supabase/ssr";
+import { createBrowserClient } from '@supabase/ssr';
 
 export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -7,7 +7,7 @@ export function createClient() {
 
   if (!supabaseUrl || !supabaseKey) {
     throw new Error(
-      "Missing Supabase environment variables. Please check your .env.local file and Vercel environment variables."
+      'Missing Supabase environment variables. Please check your .env.local file and Vercel environment variables.'
     );
   }
 
@@ -15,7 +15,7 @@ export function createClient() {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true,
-    },
+      detectSessionInUrl: true
+    }
   });
 }

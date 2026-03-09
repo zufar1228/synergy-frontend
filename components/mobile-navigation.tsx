@@ -26,6 +26,26 @@ import { createClient } from '@/lib/supabase/client';
 import { getNavAreasBySystem, NavArea } from '@/lib/api';
 import { toast } from 'sonner';
 
+// Helper function to render area name with warehouse info when needed
+const renderAreaName = (
+  area: { name: string; warehouse_name?: string },
+  selectedWarehouse: string | null
+) => {
+  const displayText =
+    selectedWarehouse === 'all' && area.warehouse_name
+      ? `${area.warehouse_name} - ${area.name}`
+      : area.name;
+
+  return (
+    <span
+      className="inline-block whitespace-nowrap overflow-hidden text-ellipsis max-w-full"
+      title={displayText} // Show full text on hover
+    >
+      {displayText}
+    </span>
+  );
+};
+
 // Define navigation data
 const mainLinks = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -76,8 +96,15 @@ export function MobileNavigation({
     fetchNavData();
   }, []);
 
-  // Filter areas based on selected warehouse
+  // Filter management links based on user role
+  const filteredManagementLinks = managementLinks.filter((link) => {
+    if (link.href === '/management/users') {
+      return userRole === 'super_admin';
+    }
+    return true;
+  });
 
+  // Filter areas based on selected warehouse
   const filteredSecurityAreas = securityAreas.filter(
     (area) =>
       selectedWarehouse === 'all' || area.warehouse_id === selectedWarehouse
@@ -125,7 +152,10 @@ export function MobileNavigation({
 
   return (
     <nav className="flex flex-col space-y-1 px-2">
-      {/* Platform Links */}
+      {/* Platform Section */}
+      <div className="text-sm font-semibold text-muted-foreground px-2">
+        Platform
+      </div>
       {mainLinks.map((link) => (
         <Link
           key={link.title}
@@ -143,108 +173,120 @@ export function MobileNavigation({
       ))}
 
       {/* Monitoring Section */}
-      <div className="text-sm font-semibold text-muted-foreground mt-4 px-2">
-        Monitoring
-      </div>
-
-      {/* Collapsible Security Menu */}
-      <Collapsible>
-        <CollapsibleTrigger asChild>
-          <div
-            className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
-              isSecurityActive()
-                ? 'bg-main text-main-foreground'
-                : 'hover:bg-accent hover:text-accent-foreground'
-            }`}
-          >
-            <Camera className="h-5 w-5 flex-shrink-0" />
-            <span className="flex-1">Keamanan</span>
-            <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+      {(filteredSecurityAreas.length > 0 ||
+        filteredIntrusiAreas.length > 0 ||
+        filteredLingkunganAreas.length > 0) && (
+        <>
+          <div className="text-sm font-semibold text-muted-foreground mt-4 px-2">
+            Monitoring
           </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pl-5 pt-1 space-y-1">
-          {filteredSecurityAreas.map((area) => (
-            <Link
-              key={area.id}
-              href={`/${area.warehouse_id}/${area.id}/keamanan`}
-              onClick={onLinkClick}
-              className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
-                pathname === `/${area.warehouse_id}/${area.id}/keamanan`
-                  ? 'bg-main text-main-foreground'
-                  : 'hover:bg-accent hover:text-accent-foreground'
-              }`}
-            >
-              <span>{area.name}</span>
-            </Link>
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
 
-      {/* Collapsible Intrusi Menu */}
-      <Collapsible>
-        <CollapsibleTrigger asChild>
-          <div
-            className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
-              isIntrusiActive()
-                ? 'bg-main text-main-foreground'
-                : 'hover:bg-accent hover:text-accent-foreground'
-            }`}
-          >
-            <DoorOpen className="h-5 w-5 flex-shrink-0" />
-            <span className="flex-1">Intrusi Pintu</span>
-            <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pl-5 pt-1 space-y-1">
-          {filteredIntrusiAreas.map((area) => (
-            <Link
-              key={area.id}
-              href={`/${area.warehouse_id}/${area.id}/intrusi`}
-              onClick={onLinkClick}
-              className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
-                pathname === `/${area.warehouse_id}/${area.id}/intrusi`
-                  ? 'bg-main text-main-foreground'
-                  : 'hover:bg-accent hover:text-accent-foreground'
-              }`}
-            >
-              <span>{area.name}</span>
-            </Link>
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
+          {/* Collapsible Security Menu */}
+          {filteredSecurityAreas.length > 0 && (
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <div
+                  className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
+                    isSecurityActive()
+                      ? 'bg-main text-main-foreground'
+                      : 'hover:bg-accent hover:text-accent-foreground'
+                  }`}
+                >
+                  <Camera className="h-5 w-5 flex-shrink-0" />
+                  <span className="flex-1">Keamanan</span>
+                  <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pl-5 pt-1 space-y-1">
+                {filteredSecurityAreas.map((area) => (
+                  <Link
+                    key={area.id}
+                    href={`/${area.warehouse_id}/${area.id}/keamanan`}
+                    onClick={onLinkClick}
+                    className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                      pathname === `/${area.warehouse_id}/${area.id}/keamanan`
+                        ? 'bg-main text-main-foreground'
+                        : 'hover:bg-accent hover:text-accent-foreground'
+                    }`}
+                  >
+                    {renderAreaName(area, selectedWarehouse)}
+                  </Link>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
 
-      {/* Collapsible Lingkungan Menu */}
-      <Collapsible>
-        <CollapsibleTrigger asChild>
-          <div
-            className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
-              isLingkunganActive()
-                ? 'bg-main text-main-foreground'
-                : 'hover:bg-accent hover:text-accent-foreground'
-            }`}
-          >
-            <Thermometer className="h-5 w-5 flex-shrink-0" />
-            <span className="flex-1">Lingkungan</span>
-            <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pl-5 pt-1 space-y-1">
-          {filteredLingkunganAreas.map((area) => (
-            <Link
-              key={area.id}
-              href={`/${area.warehouse_id}/${area.id}/lingkungan`}
-              onClick={onLinkClick}
-              className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
-                pathname === `/${area.warehouse_id}/${area.id}/lingkungan`
-                  ? 'bg-main text-main-foreground'
-                  : 'hover:bg-accent hover:text-accent-foreground'
-              }`}
-            >
-              <span>{area.name}</span>
-            </Link>
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
+          {/* Collapsible Intrusi Menu */}
+          {filteredIntrusiAreas.length > 0 && (
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <div
+                  className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
+                    isIntrusiActive()
+                      ? 'bg-main text-main-foreground'
+                      : 'hover:bg-accent hover:text-accent-foreground'
+                  }`}
+                >
+                  <DoorOpen className="h-5 w-5 flex-shrink-0" />
+                  <span className="flex-1">Intrusi Pintu</span>
+                  <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pl-5 pt-1 space-y-1">
+                {filteredIntrusiAreas.map((area) => (
+                  <Link
+                    key={area.id}
+                    href={`/${area.warehouse_id}/${area.id}/intrusi`}
+                    onClick={onLinkClick}
+                    className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                      pathname === `/${area.warehouse_id}/${area.id}/intrusi`
+                        ? 'bg-main text-main-foreground'
+                        : 'hover:bg-accent hover:text-accent-foreground'
+                    }`}
+                  >
+                    {renderAreaName(area, selectedWarehouse)}
+                  </Link>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
+          {/* Collapsible Lingkungan Menu */}
+          {filteredLingkunganAreas.length > 0 && (
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <div
+                  className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
+                    isLingkunganActive()
+                      ? 'bg-main text-main-foreground'
+                      : 'hover:bg-accent hover:text-accent-foreground'
+                  }`}
+                >
+                  <Thermometer className="h-5 w-5 flex-shrink-0" />
+                  <span className="flex-1">Lingkungan</span>
+                  <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pl-5 pt-1 space-y-1">
+                {filteredLingkunganAreas.map((area) => (
+                  <Link
+                    key={area.id}
+                    href={`/${area.warehouse_id}/${area.id}/lingkungan`}
+                    onClick={onLinkClick}
+                    className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
+                      pathname === `/${area.warehouse_id}/${area.id}/lingkungan`
+                        ? 'bg-main text-main-foreground'
+                        : 'hover:bg-accent hover:text-accent-foreground'
+                    }`}
+                  >
+                    {renderAreaName(area, selectedWarehouse)}
+                  </Link>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+        </>
+      )}
 
       {/* Management Links */}
       {['admin', 'super_admin'].includes(userRole) && (
@@ -252,7 +294,7 @@ export function MobileNavigation({
           <div className="text-sm font-semibold text-muted-foreground mt-4 px-2">
             Manajemen
           </div>
-          {managementLinks.map((link) => (
+          {filteredManagementLinks.map((link) => (
             <Link
               key={link.title}
               href={link.href}
