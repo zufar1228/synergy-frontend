@@ -44,6 +44,10 @@ export async function apiFetch<T>(
   });
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined') {
+      // Trigger global logout handle
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    }
     throw await buildApiError(res, 'Request failed');
   }
 

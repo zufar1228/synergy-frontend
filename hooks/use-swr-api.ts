@@ -21,6 +21,9 @@ export function useAuthFetcher() {
       } = await supabaseRef.current.auth.getSession();
 
       if (!session) {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+        }
         throw new Error("No session");
       }
 
@@ -61,6 +64,9 @@ export function useApiSWR<T>(
     } = await supabaseRef.current.auth.getSession();
 
     if (!session) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+      }
       throw new Error("No session");
     }
 
