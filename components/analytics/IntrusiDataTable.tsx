@@ -47,7 +47,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
+  PopoverTrigger
 } from '@/components/ui/popover';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import {
@@ -316,22 +316,25 @@ function getColumns(
     },
     {
       accessorKey: 'hit_count',
-      header: 'Threat Score',
+      header: 'Anomali (Window)',
       meta: { className: 'hidden lg:table-cell' },
       cell: ({ row }) => {
-        // v19: read threat_score from payload (leaky bucket), fallback to hit_count
+        // Windowed threshold: read anomaly_count from payload
         const payload = row.original.payload;
-        const threatScore = payload?.threat_score;
+        const anomalyCount = payload?.anomaly_count;
+        const windowThreshold = payload?.window_threshold ?? 3;
         const hitCount = row.original.hit_count;
 
-        if (threatScore != null) {
-          const score = Number(threatScore);
+        if (anomalyCount != null) {
+          const count = Number(anomalyCount);
           return (
             <div className="flex items-center gap-1">
-              {score >= 2.0 && (
+              {count >= windowThreshold && (
                 <AlertTriangle className="h-3 w-3 text-destructive" />
               )}
-              <span>{score.toFixed(2)}</span>
+              <span>
+                {count} / {windowThreshold}
+              </span>
             </div>
           );
         }
@@ -340,7 +343,7 @@ function getColumns(
         if (hitCount != null) {
           return (
             <div className="flex items-center gap-1">
-              {hitCount >= 2 && (
+              {hitCount >= 3 && (
                 <AlertTriangle className="h-3 w-3 text-destructive" />
               )}
               <span>{hitCount}</span>
@@ -403,38 +406,78 @@ export function IntrusiDataTable({
   );
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
-  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>(searchParams.get('status') ? searchParams.get('status')!.split(',') : []);
-  const [selectedEvents, setSelectedEvents] = React.useState<string[]>(searchParams.get('event_type') ? searchParams.get('event_type')!.split(',') : []);
-  const [selectedSystemStates, setSelectedSystemStates] = React.useState<string[]>(searchParams.get('system_state') ? searchParams.get('system_state')!.split(',') : []);
-  const [selectedDoorStates, setSelectedDoorStates] = React.useState<string[]>(searchParams.get('door_state') ? searchParams.get('door_state')!.split(',') : []);
+  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>(
+    searchParams.get('status') ? searchParams.get('status')!.split(',') : []
+  );
+  const [selectedEvents, setSelectedEvents] = React.useState<string[]>(
+    searchParams.get('event_type')
+      ? searchParams.get('event_type')!.split(',')
+      : []
+  );
+  const [selectedSystemStates, setSelectedSystemStates] = React.useState<
+    string[]
+  >(
+    searchParams.get('system_state')
+      ? searchParams.get('system_state')!.split(',')
+      : []
+  );
+  const [selectedDoorStates, setSelectedDoorStates] = React.useState<string[]>(
+    searchParams.get('door_state')
+      ? searchParams.get('door_state')!.split(',')
+      : []
+  );
 
   const [isFilterOpen, setIsFilterOpen] = React.useState(false);
 
   React.useEffect(() => {
-    setSelectedStatuses(searchParams.get('status') ? searchParams.get('status')!.split(',') : []);
-    setSelectedEvents(searchParams.get('event_type') ? searchParams.get('event_type')!.split(',') : []);
-    setSelectedSystemStates(searchParams.get('system_state') ? searchParams.get('system_state')!.split(',') : []);
-    setSelectedDoorStates(searchParams.get('door_state') ? searchParams.get('door_state')!.split(',') : []);
+    setSelectedStatuses(
+      searchParams.get('status') ? searchParams.get('status')!.split(',') : []
+    );
+    setSelectedEvents(
+      searchParams.get('event_type')
+        ? searchParams.get('event_type')!.split(',')
+        : []
+    );
+    setSelectedSystemStates(
+      searchParams.get('system_state')
+        ? searchParams.get('system_state')!.split(',')
+        : []
+    );
+    setSelectedDoorStates(
+      searchParams.get('door_state')
+        ? searchParams.get('door_state')!.split(',')
+        : []
+    );
   }, [searchParams]);
 
-  const toggleSelection = (val: string, list: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
-     setter(list.includes(val) ? list.filter(item => item !== val) : [...list, val]);
+  const toggleSelection = (
+    val: string,
+    list: string[],
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    setter(
+      list.includes(val) ? list.filter((item) => item !== val) : [...list, val]
+    );
   };
 
   const applyFilters = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', '1');
-    
-    if (selectedStatuses.length > 0) params.set('status', selectedStatuses.join(','));
+
+    if (selectedStatuses.length > 0)
+      params.set('status', selectedStatuses.join(','));
     else params.delete('status');
 
-    if (selectedEvents.length > 0) params.set('event_type', selectedEvents.join(','));
+    if (selectedEvents.length > 0)
+      params.set('event_type', selectedEvents.join(','));
     else params.delete('event_type');
 
-    if (selectedSystemStates.length > 0) params.set('system_state', selectedSystemStates.join(','));
+    if (selectedSystemStates.length > 0)
+      params.set('system_state', selectedSystemStates.join(','));
     else params.delete('system_state');
 
-    if (selectedDoorStates.length > 0) params.set('door_state', selectedDoorStates.join(','));
+    if (selectedDoorStates.length > 0)
+      params.set('door_state', selectedDoorStates.join(','));
     else params.delete('door_state');
 
     router.push(`${pathname}?${params.toString()}`);
@@ -484,14 +527,27 @@ export function IntrusiDataTable({
             <Button variant="default" size="sm" className="h-8">
               <Filter className="mr-2 h-4 w-4" />
               Filter Data
-              {(selectedStatuses.length + selectedEvents.length + selectedSystemStates.length + selectedDoorStates.length) > 0 && (
-                <Badge variant="neutral" className="ml-2 px-1 font-normal text-xs rounded-sm">
-                  {selectedStatuses.length + selectedEvents.length + selectedSystemStates.length + selectedDoorStates.length}
+              {selectedStatuses.length +
+                selectedEvents.length +
+                selectedSystemStates.length +
+                selectedDoorStates.length >
+                0 && (
+                <Badge
+                  variant="neutral"
+                  className="ml-2 px-1 font-normal text-xs rounded-sm"
+                >
+                  {selectedStatuses.length +
+                    selectedEvents.length +
+                    selectedSystemStates.length +
+                    selectedDoorStates.length}
                 </Badge>
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-0 bg-secondary/80 backdrop-blur-md border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" align="start">
+          <PopoverContent
+            className="w-80 p-0 bg-secondary/80 backdrop-blur-md border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            align="start"
+          >
             <ScrollArea className="h-[400px]">
               <div className="grid gap-4 p-4">
                 <div className="space-y-2 pb-2 border-b border-black/10">
@@ -508,15 +564,29 @@ export function IntrusiDataTable({
                       { label: 'Belum Ditinjau', value: 'unacknowledged' },
                       { label: 'Dikonfirmasi', value: 'acknowledged' },
                       { label: 'Teratasi', value: 'resolved' },
-                      { label: 'Alarm Palsu', value: 'false_alarm' },
+                      { label: 'Alarm Palsu', value: 'false_alarm' }
                     ].map((opt) => (
-                      <div key={opt.value} className="flex flex-row items-center gap-2">
-                        <Checkbox 
+                      <div
+                        key={opt.value}
+                        className="flex flex-row items-center gap-2"
+                      >
+                        <Checkbox
                           id={`status-${opt.value}`}
-                          checked={selectedStatuses.includes(opt.value)} 
-                          onCheckedChange={() => toggleSelection(opt.value, selectedStatuses, setSelectedStatuses)} 
+                          checked={selectedStatuses.includes(opt.value)}
+                          onCheckedChange={() =>
+                            toggleSelection(
+                              opt.value,
+                              selectedStatuses,
+                              setSelectedStatuses
+                            )
+                          }
                         />
-                        <label htmlFor={`status-${opt.value}`} className="text-sm cursor-pointer">{opt.label}</label>
+                        <label
+                          htmlFor={`status-${opt.value}`}
+                          className="text-sm cursor-pointer"
+                        >
+                          {opt.label}
+                        </label>
                       </div>
                     ))}
                   </div>
@@ -525,19 +595,39 @@ export function IntrusiDataTable({
                     <span className="text-sm font-medium">Jenis Event</span>
                     {[
                       { label: 'Peringatan Benturan', value: 'IMPACT_WARNING' },
-                      { label: 'Alarm Paksa Masuk', value: 'FORCED_ENTRY_ALARM' },
+                      {
+                        label: 'Alarm Paksa Masuk',
+                        value: 'FORCED_ENTRY_ALARM'
+                      },
                       { label: 'Buka Tanpa Izin', value: 'UNAUTHORIZED_OPEN' },
-                      { label: 'Level Baterai', value: 'BATTERY_LEVEL_CHANGED' },
+                      {
+                        label: 'Level Baterai',
+                        value: 'BATTERY_LEVEL_CHANGED'
+                      },
                       { label: 'Dipersenjatai', value: 'ARM' },
-                      { label: 'Dilucuti', value: 'DISARM' },
+                      { label: 'Dilucuti', value: 'DISARM' }
                     ].map((opt) => (
-                      <div key={opt.value} className="flex flex-row items-center gap-2">
-                        <Checkbox 
+                      <div
+                        key={opt.value}
+                        className="flex flex-row items-center gap-2"
+                      >
+                        <Checkbox
                           id={`event-${opt.value}`}
-                          checked={selectedEvents.includes(opt.value)} 
-                          onCheckedChange={() => toggleSelection(opt.value, selectedEvents, setSelectedEvents)} 
+                          checked={selectedEvents.includes(opt.value)}
+                          onCheckedChange={() =>
+                            toggleSelection(
+                              opt.value,
+                              selectedEvents,
+                              setSelectedEvents
+                            )
+                          }
                         />
-                        <label htmlFor={`event-${opt.value}`} className="text-sm cursor-pointer">{opt.label}</label>
+                        <label
+                          htmlFor={`event-${opt.value}`}
+                          className="text-sm cursor-pointer"
+                        >
+                          {opt.label}
+                        </label>
                       </div>
                     ))}
                   </div>
@@ -546,15 +636,29 @@ export function IntrusiDataTable({
                     <span className="text-sm font-medium">State Sistem</span>
                     {[
                       { label: 'ARMED', value: 'ARMED' },
-                      { label: 'DISARMED', value: 'DISARMED' },
+                      { label: 'DISARMED', value: 'DISARMED' }
                     ].map((opt) => (
-                      <div key={opt.value} className="flex flex-row items-center gap-2">
-                        <Checkbox 
+                      <div
+                        key={opt.value}
+                        className="flex flex-row items-center gap-2"
+                      >
+                        <Checkbox
                           id={`system-${opt.value}`}
-                          checked={selectedSystemStates.includes(opt.value)} 
-                          onCheckedChange={() => toggleSelection(opt.value, selectedSystemStates, setSelectedSystemStates)} 
+                          checked={selectedSystemStates.includes(opt.value)}
+                          onCheckedChange={() =>
+                            toggleSelection(
+                              opt.value,
+                              selectedSystemStates,
+                              setSelectedSystemStates
+                            )
+                          }
                         />
-                        <label htmlFor={`system-${opt.value}`} className="text-sm cursor-pointer">{opt.label}</label>
+                        <label
+                          htmlFor={`system-${opt.value}`}
+                          className="text-sm cursor-pointer"
+                        >
+                          {opt.label}
+                        </label>
                       </div>
                     ))}
                   </div>
@@ -563,31 +667,47 @@ export function IntrusiDataTable({
                     <span className="text-sm font-medium">State Pintu</span>
                     {[
                       { label: 'Tertutup', value: 'CLOSED' },
-                      { label: 'Terbuka', value: 'OPEN' },
+                      { label: 'Terbuka', value: 'OPEN' }
                     ].map((opt) => (
-                      <div key={opt.value} className="flex flex-row items-center gap-2">
-                        <Checkbox 
+                      <div
+                        key={opt.value}
+                        className="flex flex-row items-center gap-2"
+                      >
+                        <Checkbox
                           id={`door-${opt.value}`}
-                          checked={selectedDoorStates.includes(opt.value)} 
-                          onCheckedChange={() => toggleSelection(opt.value, selectedDoorStates, setSelectedDoorStates)} 
+                          checked={selectedDoorStates.includes(opt.value)}
+                          onCheckedChange={() =>
+                            toggleSelection(
+                              opt.value,
+                              selectedDoorStates,
+                              setSelectedDoorStates
+                            )
+                          }
                         />
-                        <label htmlFor={`door-${opt.value}`} className="text-sm cursor-pointer border-b-transparent">{opt.label}</label>
+                        <label
+                          htmlFor={`door-${opt.value}`}
+                          className="text-sm cursor-pointer border-b-transparent"
+                        >
+                          {opt.label}
+                        </label>
                       </div>
                     ))}
                   </div>
                   {/* Buttons */}
                   <div className="flex gap-2 pt-3 mt-1 border-t border-black/10">
-                    <Button 
-                      variant="neutral" 
-                      size="sm" 
+                    <Button
+                      variant="neutral"
+                      size="sm"
                       className="w-full"
                       onClick={() => {
                         setSelectedStatuses([]);
                         setSelectedEvents([]);
                         setSelectedSystemStates([]);
                         setSelectedDoorStates([]);
-                        
-                        const params = new URLSearchParams(searchParams.toString());
+
+                        const params = new URLSearchParams(
+                          searchParams.toString()
+                        );
                         params.set('page', '1');
                         params.delete('status');
                         params.delete('event_type');
@@ -599,9 +719,9 @@ export function IntrusiDataTable({
                     >
                       Reset
                     </Button>
-                    <Button 
-                      variant="default" 
-                      size="sm" 
+                    <Button
+                      variant="default"
+                      size="sm"
                       className="w-full"
                       onClick={applyFilters}
                     >
@@ -729,7 +849,7 @@ export function IntrusiDataTable({
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                {currentPage} / {totalPages || 1}
+                  {currentPage} / {totalPages || 1}
                 </div>
                 <Button
                   className="h-8 w-8 p-0"
