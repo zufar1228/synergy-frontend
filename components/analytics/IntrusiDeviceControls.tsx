@@ -401,7 +401,7 @@ export const IntrusiDeviceControls = ({
                       isArmed ? 'text-red-600' : ''
                     )}
                   >
-                    {isArmed ? 'ARMED' : 'DISARMED'}
+                    {isArmed ? 'Aktif' : 'Nonaktif'}
                   </p>
                 </div>
               </div>

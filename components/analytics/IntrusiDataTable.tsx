@@ -225,8 +225,8 @@ function EventTypeBadge({ eventType }: { eventType: string }) {
     POWER_SOURCE_CHANGED: 'Ganti Daya',
     BATTERY_LEVEL_CHANGED: 'Level Baterai',
     SIREN_SILENCED: 'Sirine Dimatikan',
-    ARM: 'Dipersenjatai',
-    DISARM: 'Dilucuti'
+    ARM: 'Aktivasi Sistem',
+    DISARM: 'Penonaktifan Sistem'
   };
   return (
     <Badge className={getClass(eventType)}>
@@ -280,7 +280,7 @@ function getColumns(
             ) : (
               <ShieldOff className="h-4 w-4 text-muted-foreground" />
             )}
-            <span>{state}</span>
+            <span>{state === 'ARMED' ? 'Aktif' : 'Nonaktif'}</span>
           </div>
         );
       }
@@ -604,8 +604,8 @@ export function IntrusiDataTable({
                         label: 'Level Baterai',
                         value: 'BATTERY_LEVEL_CHANGED'
                       },
-                      { label: 'Dipersenjatai', value: 'ARM' },
-                      { label: 'Dilucuti', value: 'DISARM' }
+                      { label: 'Aktivasi Sistem', value: 'ARM' },
+                      { label: 'Penonaktifan Sistem', value: 'DISARM' }
                     ].map((opt) => (
                       <div
                         key={opt.value}
@@ -635,8 +635,8 @@ export function IntrusiDataTable({
                   <div className="flex flex-col gap-2">
                     <span className="text-sm font-medium">State Sistem</span>
                     {[
-                      { label: 'ARMED', value: 'ARMED' },
-                      { label: 'DISARMED', value: 'DISARMED' }
+                      { label: 'Aktif', value: 'ARMED' },
+                      { label: 'Nonaktif', value: 'DISARMED' }
                     ].map((opt) => (
                       <div
                         key={opt.value}
