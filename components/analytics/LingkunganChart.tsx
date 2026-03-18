@@ -214,21 +214,21 @@ export const LingkunganChart = ({
                 />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Line
-                  type="stepAfter"
+                  type="monotone"
                   dataKey="temperature"
                   stroke="#3b82f6"
                   style={{ stroke: '#3b82f6' }}
-                  strokeWidth={3}
+                  strokeWidth={2}
                   name="Aktual (°C)"
                   dot={false}
                   connectNulls
                 />
                 <Line
-                  type="stepAfter"
+                  type="monotone"
                   dataKey="pred_temperature"
                   stroke="#22c55e"
                   style={{ stroke: '#22c55e' }}
-                  strokeWidth={3}
+                  strokeWidth={2}
                   name="Prediksi (°C)"
                   dot={false}
                   connectNulls
@@ -262,21 +262,21 @@ export const LingkunganChart = ({
                 />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Line
-                  type="stepAfter"
+                  type="monotone"
                   dataKey="humidity"
                   stroke="#3b82f6"
                   style={{ stroke: '#3b82f6' }}
-                  strokeWidth={3}
+                  strokeWidth={2}
                   name="Aktual (%RH)"
                   dot={false}
                   connectNulls
                 />
                 <Line
-                  type="stepAfter"
+                  type="monotone"
                   dataKey="pred_humidity"
                   stroke="#22c55e"
                   style={{ stroke: '#22c55e' }}
-                  strokeWidth={3}
+                  strokeWidth={2}
                   name="Prediksi (%RH)"
                   dot={false}
                   connectNulls
@@ -310,21 +310,21 @@ export const LingkunganChart = ({
                 />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Line
-                  type="stepAfter"
+                  type="monotone"
                   dataKey="co2"
                   stroke="#3b82f6"
                   style={{ stroke: '#3b82f6' }}
-                  strokeWidth={3}
+                  strokeWidth={2}
                   name="Aktual (ppm)"
                   dot={false}
                   connectNulls
                 />
                 <Line
-                  type="stepAfter"
+                  type="monotone"
                   dataKey="pred_co2"
                   stroke="#22c55e"
                   style={{ stroke: '#22c55e' }}
-                  strokeWidth={3}
+                  strokeWidth={2}
                   name="Prediksi (ppm)"
                   dot={false}
                   connectNulls
