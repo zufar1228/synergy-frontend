@@ -42,19 +42,14 @@ interface Pagination {
 
 interface LingkunganDataTableProps {
   data: LingkunganLog[];
-  latestPrediction?: {
-    timestamp: string;
-    predicted_temperature: number;
-    predicted_humidity: number;
-    predicted_co2: number;
-  } | null;
+  predictions?: any[];
   pagination?: Pagination;
   highlightIds: Set<string>;
 }
 
 export const LingkunganDataTable = ({
   data,
-  latestPrediction,
+  predictions,
   pagination,
   highlightIds
 }: LingkunganDataTableProps) => {
@@ -70,25 +65,53 @@ export const LingkunganDataTable = ({
 
   // Combine prediction and historical data
   const combinedData = React.useMemo(() => {
-    const list: any[] = [];
-    if (latestPrediction) {
-      list.push({
-        id: `pred-${latestPrediction.timestamp}`,
-        timestamp: latestPrediction.timestamp,
-        temperature: latestPrediction.predicted_temperature,
-        humidity: latestPrediction.predicted_humidity,
-        co2: latestPrediction.predicted_co2,
-        isPrediction: true
-      });
+    // 1. Attach closest prediction to actual logs
+    const actualWithPreds = data.map((log) => {
+      const logTime = new Date(log.timestamp).getTime();
+      let matchedPred = null;
+
+      if (predictions && predictions.length > 0) {
+        let closestDiff = Infinity;
+        for (const p of predictions) {
+          const pTime = new Date(p.timestamp).getTime();
+          const diff = Math.abs(pTime - logTime);
+          if (diff < 30000 && diff < closestDiff) { // 30s tolerance
+            closestDiff = diff;
+            matchedPred = p;
+          }
+        }
+      }
+
+      return {
+        ...log,
+        isPredictionOnly: false,
+        prediction: matchedPred
+      };
+    });
+
+    // 2. Add future predictions (pure forecasts without actuals yet)
+    let latestLogTime = 0;
+    if (data.length > 0) {
+      latestLogTime = Math.max(...data.map(d => new Date(d.timestamp).getTime()));
     }
-    // Assume data is already sorted newest first by the parent
-    list.push(...data);
-    
-    // Sort just in case to ensure prediction (future timestamp) is at the top
-    return list.sort(
+
+    const futurePreds = (predictions || [])
+      .filter((p) => new Date(p.timestamp).getTime() > latestLogTime + 30000)
+      .map((p) => ({
+        id: `pred-future-${p.timestamp}`,
+        timestamp: p.timestamp,
+        temperature: null,
+        humidity: null,
+        co2: null,
+        isPredictionOnly: true,
+        prediction: p
+      }));
+
+    // Combine and sort descending
+    return [...futurePreds, ...actualWithPreds].sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
-  }, [data, latestPrediction]);
+  }, [data, predictions]);
 
   // --- pagination helpers copied from Intrusi/Keamanan tables ---
   const goToPage = (page: number) => {
@@ -160,18 +183,20 @@ export const LingkunganDataTable = ({
             ) : (
               combinedData.map((log) => {
                 const isNew = highlightIds.has(log.id);
-                const isPrediction = log.isPrediction;
+                const isPredOnly = log.isPredictionOnly;
+                const p = log.prediction;
 
                 return (
                   <TableRow 
                     key={log.id} 
                     className={cn(
-                      isPrediction && "bg-muted/30 border-l-4 border-l-green-500"
+                      isPredOnly && "bg-muted/30 border-l-4 border-l-green-500",
+                      isNew && "bg-muted/50"
                     )}
                   >
-                    <TableCell className="text-xs sm:text-sm whitespace-nowrap">
+                    <TableCell className="text-xs sm:text-sm whitespace-nowrap align-top py-3">
                       <div className="flex flex-col gap-0.5">
-                        <span className={cn(isPrediction && "text-muted-foreground italic")}>
+                        <span className={cn(isPredOnly && "text-muted-foreground italic")}>
                           {new Date(log.timestamp).toLocaleString('id-ID', {
                             day: '2-digit',
                             month: 'short',
@@ -181,45 +206,87 @@ export const LingkunganDataTable = ({
                             second: '2-digit'
                           })}
                         </span>
-                        {isPrediction && (
-                          <span className="text-[10px] text-green-600 dark:text-green-500 font-medium flex items-center gap-1">
-                            <TrendingUp className="h-3 w-3" /> Prediksi (15m)
+                        {isPredOnly && (
+                          <span className="text-[10px] text-green-600 dark:text-green-500 font-medium flex items-center gap-1 mt-0.5">
+                            <TrendingUp className="h-3 w-3" /> Prediksi (Future)
+                          </span>
+                        )}
+                        {!isPredOnly && p && (
+                          <span className="text-[10px] text-green-600 dark:text-green-500 font-medium flex items-center gap-1 mt-0.5">
+                            <TrendingUp className="h-3 w-3" /> Ada Prediksi (15m lalu)
                           </span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-center font-mono">
-                      <span
-                        className={cn(
-                          isPrediction && "italic text-muted-foreground",
-                          log.temperature > 35
-                            ? 'text-red-600 font-bold'
-                            : log.temperature > 32
-                              ? 'text-orange-500'
-                              : ''
+                    
+                    {/* Temperature */}
+                    <TableCell className="text-center font-mono align-top py-3">
+                      <div className="flex flex-col gap-1 items-center">
+                        {log.temperature !== null ? (
+                          <span
+                            className={cn(
+                              log.temperature > 35
+                                ? 'text-red-600 font-bold'
+                                : log.temperature > 32
+                                  ? 'text-orange-500'
+                                  : ''
+                            )}
+                          >
+                            {Number(log.temperature).toFixed(1)}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground text-xs italic">--</span>
                         )}
-                      >
-                        {Number(log.temperature).toFixed(1)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center font-mono">
-                      <span className={cn(isPrediction && "italic text-muted-foreground")}>
-                        {Number(log.humidity).toFixed(1)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center font-mono">
-                      <span
-                        className={cn(
-                          isPrediction && "italic text-muted-foreground",
-                          log.co2 > 1500
-                            ? 'text-red-600 font-bold'
-                            : log.co2 > 1000
-                              ? 'text-orange-500'
-                              : ''
+                        {p && (
+                          <span className="text-xs text-green-600 dark:text-green-500">
+                            pred: {Number(p.predicted_temperature).toFixed(1)}
+                          </span>
                         )}
-                      >
-                        {Number(log.co2).toFixed(0)}
-                      </span>
+                      </div>
+                    </TableCell>
+
+                    {/* Humidity */}
+                    <TableCell className="text-center font-mono align-top py-3">
+                      <div className="flex flex-col gap-1 items-center">
+                        {log.humidity !== null ? (
+                          <span>
+                            {Number(log.humidity).toFixed(1)}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground text-xs italic">--</span>
+                        )}
+                        {p && (
+                          <span className="text-xs text-green-600 dark:text-green-500">
+                            pred: {Number(p.predicted_humidity).toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+
+                    {/* CO2 */}
+                    <TableCell className="text-center font-mono align-top py-3">
+                      <div className="flex flex-col gap-1 items-center">
+                        {log.co2 !== null ? (
+                          <span
+                            className={cn(
+                              log.co2 > 1500
+                                ? 'text-red-600 font-bold'
+                                : log.co2 > 1000
+                                  ? 'text-orange-500'
+                                  : ''
+                            )}
+                          >
+                            {Number(log.co2).toFixed(0)}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground text-xs italic">--</span>
+                        )}
+                        {p && (
+                          <span className="text-xs text-green-600 dark:text-green-500">
+                            pred: {Number(p.predicted_co2).toFixed(0)}
+                          </span>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
