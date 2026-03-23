@@ -26,7 +26,8 @@ import {
   ChevronsRight,
   Thermometer,
   Droplets,
-  Wind
+  Wind,
+  TrendingUp
 } from 'lucide-react';
 import type { LingkunganLog } from '@/lib/api';
 
@@ -41,12 +42,19 @@ interface Pagination {
 
 interface LingkunganDataTableProps {
   data: LingkunganLog[];
+  latestPrediction?: {
+    timestamp: string;
+    predicted_temperature: number;
+    predicted_humidity: number;
+    predicted_co2: number;
+  } | null;
   pagination?: Pagination;
   highlightIds: Set<string>;
 }
 
 export const LingkunganDataTable = ({
   data,
+  latestPrediction,
   pagination,
   highlightIds
 }: LingkunganDataTableProps) => {
@@ -59,6 +67,28 @@ export const LingkunganDataTable = ({
 
   // ensure state sync with API per_page when first rendered
   const [perPage, setPerPage] = useState(perPageFromApi);
+
+  // Combine prediction and historical data
+  const combinedData = React.useMemo(() => {
+    const list: any[] = [];
+    if (latestPrediction) {
+      list.push({
+        id: `pred-${latestPrediction.timestamp}`,
+        timestamp: latestPrediction.timestamp,
+        temperature: latestPrediction.predicted_temperature,
+        humidity: latestPrediction.predicted_humidity,
+        co2: latestPrediction.predicted_co2,
+        isPrediction: true
+      });
+    }
+    // Assume data is already sorted newest first by the parent
+    list.push(...data);
+    
+    // Sort just in case to ensure prediction (future timestamp) is at the top
+    return list.sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  }, [data, latestPrediction]);
 
   // --- pagination helpers copied from Intrusi/Keamanan tables ---
   const goToPage = (page: number) => {
@@ -118,7 +148,7 @@ export const LingkunganDataTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.length === 0 ? (
+            {combinedData.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={4}
@@ -128,24 +158,40 @@ export const LingkunganDataTable = ({
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((log) => {
+              combinedData.map((log) => {
                 const isNew = highlightIds.has(log.id);
+                const isPrediction = log.isPrediction;
 
                 return (
-                  <TableRow key={log.id}>
+                  <TableRow 
+                    key={log.id} 
+                    className={cn(
+                      isPrediction && "bg-muted/30 border-l-4 border-l-green-500"
+                    )}
+                  >
                     <TableCell className="text-xs sm:text-sm whitespace-nowrap">
-                      {new Date(log.timestamp).toLocaleString('id-ID', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                      })}
+                      <div className="flex flex-col gap-0.5">
+                        <span className={cn(isPrediction && "text-muted-foreground italic")}>
+                          {new Date(log.timestamp).toLocaleString('id-ID', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                          })}
+                        </span>
+                        {isPrediction && (
+                          <span className="text-[10px] text-green-600 dark:text-green-500 font-medium flex items-center gap-1">
+                            <TrendingUp className="h-3 w-3" /> Prediksi (15m)
+                          </span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-center font-mono">
                       <span
                         className={cn(
+                          isPrediction && "italic text-muted-foreground",
                           log.temperature > 35
                             ? 'text-red-600 font-bold'
                             : log.temperature > 32
@@ -153,15 +199,18 @@ export const LingkunganDataTable = ({
                               : ''
                         )}
                       >
-                        {log.temperature.toFixed(1)}
+                        {Number(log.temperature).toFixed(1)}
                       </span>
                     </TableCell>
                     <TableCell className="text-center font-mono">
-                      <span>{log.humidity.toFixed(1)}</span>
+                      <span className={cn(isPrediction && "italic text-muted-foreground")}>
+                        {Number(log.humidity).toFixed(1)}
+                      </span>
                     </TableCell>
                     <TableCell className="text-center font-mono">
                       <span
                         className={cn(
+                          isPrediction && "italic text-muted-foreground",
                           log.co2 > 1500
                             ? 'text-red-600 font-bold'
                             : log.co2 > 1000
@@ -169,7 +218,7 @@ export const LingkunganDataTable = ({
                               : ''
                         )}
                       >
-                        {log.co2.toFixed(0)}
+                        {Number(log.co2).toFixed(0)}
                       </span>
                     </TableCell>
                   </TableRow>

@@ -774,6 +774,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
       {/* Data Table */}
       <LingkunganDataTable
         data={logs}
+        latestPrediction={latestPrediction}
         pagination={pagination}
         highlightIds={newRowIds.current}
       />
