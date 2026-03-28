@@ -1,13 +1,13 @@
 // frontend/lib/api/intrusi.ts
-import { apiFetch } from './client';
+import { apiFetch } from '@/lib/api/client';
 import type {
   IntrusiLog,
   IntrusiSummary,
   IntrusiStatus,
   IntrusiEventType,
   IntrusiCommandPayload,
-  UpdateIncidentStatusPayload,
-} from './types';
+  UpdateIncidentStatusPayload
+} from '@/lib/api/types';
 
 /** Get intrusion logs for a device with pagination and filters */
 export const getIntrusiLogs = async (
@@ -22,7 +22,12 @@ export const getIntrusiLogs = async (
   }
 ): Promise<{
   data: IntrusiLog[];
-  pagination: { total: number; limit: number; offset: number; hasMore: boolean };
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
 }> => {
   const params = new URLSearchParams();
   if (options?.limit) params.set('limit', options.limit.toString());
@@ -31,7 +36,10 @@ export const getIntrusiLogs = async (
   if (options?.to) params.set('to', options.to);
   if (options?.event_type) params.set('event_type', options.event_type);
 
-  return apiFetch(`/intrusi/devices/${deviceId}/logs?${params.toString()}`, token);
+  return apiFetch(
+    `/intrusi/devices/${deviceId}/logs?${params.toString()}`,
+    token
+  );
 };
 
 /** Get intrusion summary for a device */
@@ -72,7 +80,7 @@ export const updateIntrusiLogStatus = (
 ): Promise<IntrusiLog> =>
   apiFetch(`/intrusi/logs/${logId}/status`, token, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
 /** Send a command to an intrusi (door security) device */
@@ -83,5 +91,5 @@ export const sendIntrusiCommand = (
 ): Promise<{ message: string; device_id: string; command: string }> =>
   apiFetch(`/intrusi/devices/${deviceId}/command`, token, {
     method: 'POST',
-    body: JSON.stringify(command),
+    body: JSON.stringify(command)
   });

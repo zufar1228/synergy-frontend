@@ -35,7 +35,7 @@ import {
 import { LingkunganChart } from './LingkunganChart';
 import { LingkunganDataTable } from './LingkunganDataTable';
 import type { LingkunganLog } from '@/lib/api';
-import { AnimatedPageTitle } from './AnimatedPageTitle';
+import { AnimatedPageTitle } from '@/components/shared/AnimatedPageTitle';
 
 export const LingkunganView = ({ initialData }: { initialData: any }) => {
   const params = useParams();

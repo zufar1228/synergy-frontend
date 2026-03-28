@@ -2,9 +2,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
-import { KeamananView } from '@/components/analytics/KeamananView';
-import { IntrusiView } from '@/components/analytics/IntrusiView';
-import { LingkunganView } from '@/components/analytics/LingkunganView';
+import { KeamananView } from '@/features/keamanan/components/KeamananView';
+import { IntrusiView } from '@/features/intrusi/components/IntrusiView';
+import { LingkunganView } from '@/features/lingkungan/components/LingkunganView';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 // Update getAnalytics function definition

@@ -1,0 +1,53 @@
+# Frontend CODEOWNERS
+
+# Protects feature directories so each domain developer can ONLY merge to their own area.
+
+# GitHub requires a CODEOWNERS review before merging PRs that touch owned paths.
+
+#
+
+# Usage: Replace @org/ placeholders with your actual GitHub org or usernames.
+
+# Example: @synergy-iot/lingkungan-dev or @username
+
+# ========================================
+
+# CORE — requires core-team approval
+
+# ========================================
+
+/app/ @org/core-team
+/components/ @org/core-team
+/contexts/ @org/core-team
+/hooks/ @org/core-team
+/lib/ @org/core-team
+/middleware.ts @org/core-team
+/public/ @org/core-team
+/.github/ @org/core-team
+/next.config.ts @org/core-team
+/tsconfig.json @org/core-team
+/package.json @org/core-team
+
+# ========================================
+
+# FEATURE: Lingkungan (Environment)
+
+# ========================================
+
+/features/lingkungan/ @org/lingkungan-dev
+
+# ========================================
+
+# FEATURE: Keamanan (Security)
+
+# ========================================
+
+/features/keamanan/ @org/keamanan-dev
+
+# ========================================
+
+# FEATURE: Intrusi (Intrusion)
+
+# ========================================
+
+/features/intrusi/ @org/intrusi-dev

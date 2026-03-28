@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KeamananDataTable } from './KeamananDataTable';
 import { createClient } from '@/lib/supabase/client';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { AnimatedPageTitle } from './AnimatedPageTitle';
+import { AnimatedPageTitle } from '@/components/shared/AnimatedPageTitle';
 
 export const KeamananView = ({ initialData }: { initialData: any }) => {
   const params = useParams();

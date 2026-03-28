@@ -36,13 +36,31 @@ export type {
   IntrusiCommandType,
   IntrusiCommandPayload,
   LingkunganLog,
-  LingkunganStatus,
+  LingkunganStatus
 } from './types';
 
 // Functions
-export { getWarehouses, createWarehouse, updateWarehouse, deleteWarehouse, getWarehouseDetails } from './warehouses';
-export { getAreas, createArea, updateArea, deleteArea, getAreasByWarehouse } from './areas';
-export { getDevices, createDevice, updateDevice, deleteDevice, getDeviceDetailsByArea } from './devices';
+export {
+  getWarehouses,
+  createWarehouse,
+  updateWarehouse,
+  deleteWarehouse,
+  getWarehouseDetails
+} from './warehouses';
+export {
+  getAreas,
+  createArea,
+  updateArea,
+  deleteArea,
+  getAreasByWarehouse
+} from './areas';
+export {
+  getDevices,
+  createDevice,
+  updateDevice,
+  deleteDevice,
+  getDeviceDetailsByArea
+} from './devices';
 export {
   verifyUserAccess,
   getUsers,
@@ -56,27 +74,31 @@ export {
   updateMyPreferences,
   getVapidPublicKey,
   subscribeToPush,
-  testPushNotification,
+  testPushNotification
 } from './users';
 export { getNavAreasBySystem } from './navigation';
 export { getAnalytics, getAnalyticsDataForSystem } from './analytics';
-export { getActiveAlerts, updateIncidentStatus, updateKeamananLogStatus } from './alerts';
+export {
+  getActiveAlerts,
+  updateIncidentStatus,
+  updateKeamananLogStatus
+} from './alerts';
 export {
   getIntrusiLogs,
   getIntrusiSummary,
   getIntrusiStatus,
   updateIntrusiLogStatus,
-  sendIntrusiCommand,
-} from './intrusi';
+  sendIntrusiCommand
+} from '@/features/intrusi/api/intrusi';
 export {
   getLingkunganStatus,
   getLingkunganChart,
   sendLingkunganControl,
-  updateLingkunganLogStatus,
-} from './lingkungan';
+  updateLingkunganLogStatus
+} from '@/features/lingkungan/api/lingkungan';
 export {
   getTelegramMembers,
   generateTelegramInvite,
   kickTelegramMember,
-  sendTelegramTestAlert,
+  sendTelegramTestAlert
 } from './telegram';

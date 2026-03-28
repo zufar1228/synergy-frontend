@@ -1,10 +1,10 @@
 // frontend/lib/api/lingkungan.ts
-import { apiFetch, apiFetchSafe } from './client';
+import { apiFetch, apiFetchSafe } from '@/lib/api/client';
 import type {
   LingkunganLog,
   LingkunganStatus,
-  UpdateIncidentStatusPayload,
-} from './types';
+  UpdateIncidentStatusPayload
+} from '@/lib/api/types';
 
 /** Get current lingkungan device status */
 export const getLingkunganStatus = async (
@@ -47,7 +47,7 @@ export const sendLingkunganControl = (
 ): Promise<{ message: string }> =>
   apiFetch(`/lingkungan/devices/${deviceId}/control`, token, {
     method: 'POST',
-    body: JSON.stringify(command),
+    body: JSON.stringify(command)
   });
 
 /** Update acknowledgement status for a lingkungan log */
@@ -58,5 +58,5 @@ export const updateLingkunganLogStatus = (
 ): Promise<LingkunganLog> =>
   apiFetch(`/lingkungan/logs/${logId}/status`, token, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });

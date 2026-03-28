@@ -7,17 +7,6 @@
     {
       "name": "backend",
       "path": "../backend"
-    },
-    {
-      "name": "ml-server",
-      "path": "../ml-server"
-    },
-    {
-      "name": "ml",
-      "path": "../ml"
-    },
-    {
-      "path": "../bismillah-final"
     }
   ],
   "settings": {}

@@ -10,7 +10,7 @@ import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { IntrusiLog } from '@/lib/api';
 import { useDeviceStatus } from '@/contexts/DeviceStatusContext';
 import { ShieldAlert, AlertTriangle, Bell, Activity } from 'lucide-react';
-import { AnimatedPageTitle } from './AnimatedPageTitle';
+import { AnimatedPageTitle } from '@/components/shared/AnimatedPageTitle';
 
 export const IntrusiView = ({ initialData }: { initialData: any }) => {
   const params = useParams();
