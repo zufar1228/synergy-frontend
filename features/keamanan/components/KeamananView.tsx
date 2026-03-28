@@ -132,7 +132,7 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [areaId]);
 
   return (
     <div className="space-y-4 sm:space-y-6 md:space-y-8">

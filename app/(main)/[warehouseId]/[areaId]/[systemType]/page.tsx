@@ -69,6 +69,11 @@ export default async function AnalyticsPage({
 }) {
   const supabase = await createClient();
   const {
+    data: { user }
+  } = await supabase.auth.getUser();
+  if (!user) return redirect('/login');
+
+  const {
     data: { session }
   } = await supabase.auth.getSession();
   if (!session) return redirect('/login');

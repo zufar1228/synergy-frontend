@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,6 +54,7 @@ export const LingkunganDataTable = ({
   pagination,
   highlightIds
 }: LingkunganDataTableProps) => {
+  const router = useRouter();
   // derive current page and total pages from API response (page & per_page)
   const currentPage = pagination?.page || 1;
   const perPageFromApi = pagination?.per_page || pagination?.limit || 25;
@@ -75,7 +77,8 @@ export const LingkunganDataTable = ({
         for (const p of predictions) {
           const pTime = new Date(p.timestamp).getTime();
           const diff = Math.abs(pTime - logTime);
-          if (diff < 30000 && diff < closestDiff) { // 30s tolerance
+          if (diff < 30000 && diff < closestDiff) {
+            // 30s tolerance
             closestDiff = diff;
             matchedPred = p;
           }
@@ -92,7 +95,9 @@ export const LingkunganDataTable = ({
     // 2. Add future predictions (pure forecasts without actuals yet)
     let latestLogTime = 0;
     if (data.length > 0) {
-      latestLogTime = Math.max(...data.map(d => new Date(d.timestamp).getTime()));
+      latestLogTime = Math.max(
+        ...data.map((d) => new Date(d.timestamp).getTime())
+      );
     }
 
     const futurePreds = (predictions || [])
@@ -109,21 +114,17 @@ export const LingkunganDataTable = ({
 
     // Combine and sort descending
     return [...futurePreds, ...actualWithPreds].sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }, [data, predictions]);
 
-  // --- pagination helpers copied from Intrusi/Keamanan tables ---
+  // --- pagination helpers ---
   const goToPage = (page: number) => {
     const params = new URLSearchParams(window.location.search);
     params.set('page', String(page));
     params.set('per_page', String(perPage));
-    window.history.pushState(
-      null,
-      '',
-      `${window.location.pathname}?${params.toString()}`
-    );
-    window.location.reload();
+    router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
   const handlePerPageChange = (value: string) => {
@@ -131,12 +132,7 @@ export const LingkunganDataTable = ({
     const params = new URLSearchParams(window.location.search);
     params.set('page', '1');
     params.set('per_page', value);
-    window.history.pushState(
-      null,
-      '',
-      `${window.location.pathname}?${params.toString()}`
-    );
-    window.location.reload();
+    router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
   return (
@@ -187,16 +183,20 @@ export const LingkunganDataTable = ({
                 const p = log.prediction;
 
                 return (
-                  <TableRow 
-                    key={log.id} 
+                  <TableRow
+                    key={log.id}
                     className={cn(
-                      isPredOnly && "bg-muted/30 border-l-4 border-l-green-500",
-                      isNew && "bg-muted/50"
+                      isPredOnly && 'bg-muted/30 border-l-4 border-l-green-500',
+                      isNew && 'bg-muted/50'
                     )}
                   >
                     <TableCell className="text-xs sm:text-sm whitespace-nowrap align-top py-3">
                       <div className="flex flex-col gap-0.5">
-                        <span className={cn(isPredOnly && "text-muted-foreground italic")}>
+                        <span
+                          className={cn(
+                            isPredOnly && 'text-muted-foreground italic'
+                          )}
+                        >
                           {new Date(log.timestamp).toLocaleString('id-ID', {
                             day: '2-digit',
                             month: 'short',
@@ -213,12 +213,13 @@ export const LingkunganDataTable = ({
                         )}
                         {!isPredOnly && p && (
                           <span className="text-[10px] text-green-600 dark:text-green-500 font-medium flex items-center gap-1 mt-0.5">
-                            <TrendingUp className="h-3 w-3" /> Ada Prediksi (15m lalu)
+                            <TrendingUp className="h-3 w-3" /> Ada Prediksi (15m
+                            lalu)
                           </span>
                         )}
                       </div>
                     </TableCell>
-                    
+
                     {/* Temperature */}
                     <TableCell className="text-center font-mono align-top py-3">
                       <div className="flex flex-col gap-1 items-center">
@@ -235,7 +236,9 @@ export const LingkunganDataTable = ({
                             {Number(log.temperature).toFixed(1)}
                           </span>
                         ) : (
-                          <span className="text-muted-foreground text-xs italic">--</span>
+                          <span className="text-muted-foreground text-xs italic">
+                            --
+                          </span>
                         )}
                         {p && (
                           <span className="text-xs text-green-600 dark:text-green-500">
@@ -249,11 +252,11 @@ export const LingkunganDataTable = ({
                     <TableCell className="text-center font-mono align-top py-3">
                       <div className="flex flex-col gap-1 items-center">
                         {log.humidity !== null ? (
-                          <span>
-                            {Number(log.humidity).toFixed(1)}
-                          </span>
+                          <span>{Number(log.humidity).toFixed(1)}</span>
                         ) : (
-                          <span className="text-muted-foreground text-xs italic">--</span>
+                          <span className="text-muted-foreground text-xs italic">
+                            --
+                          </span>
                         )}
                         {p && (
                           <span className="text-xs text-green-600 dark:text-green-500">
@@ -279,7 +282,9 @@ export const LingkunganDataTable = ({
                             {Number(log.co2).toFixed(0)}
                           </span>
                         ) : (
-                          <span className="text-muted-foreground text-xs italic">--</span>
+                          <span className="text-muted-foreground text-xs italic">
+                            --
+                          </span>
                         )}
                         {p && (
                           <span className="text-xs text-green-600 dark:text-green-500">
@@ -346,7 +351,7 @@ export const LingkunganDataTable = ({
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                {currentPage} / {totalPages || 1}
+                  {currentPage} / {totalPages || 1}
                 </div>
                 <Button
                   className="h-8 w-8 p-0"

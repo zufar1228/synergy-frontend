@@ -92,7 +92,8 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
 
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
+  const supabase = supabaseRef.current;
 
   // Fetch device info & status
   const fetchData = useCallback(async () => {
@@ -432,7 +433,11 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-row justify-between items-center gap-2 pb-2 md:pb-3">
         {deviceName ? (
-          <AnimatedPageTitle systemType="lingkungan" areaId={areaId} deviceName={deviceName} />
+          <AnimatedPageTitle
+            systemType="lingkungan"
+            areaId={areaId}
+            deviceName={deviceName}
+          />
         ) : (
           <div /> // Placeholder to keep DatePicker aligned right
         )}

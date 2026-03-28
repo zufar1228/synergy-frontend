@@ -1,9 +1,9 @@
 // frontend/app/(main)/[warehouseId]/dashboard/page.tsx
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin } from "lucide-react";
-import Link from "next/link";
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapPin } from 'lucide-react';
+import Link from 'next/link';
 
 // Tipe data (bisa diimpor dari file lain)
 interface ActiveSystem {
@@ -32,11 +32,11 @@ async function getWarehouseDetails(
       process.env.NEXT_PUBLIC_API_URL +
         `/api/warehouses/${id}/areas-with-systems`,
       {
-        cache: "no-store",
+        cache: 'no-store',
         headers: {
           // <-- Header Authorization ditambahkan
-          Authorization: `Bearer ${accessToken}`,
-        },
+          Authorization: `Bearer ${accessToken}`
+        }
       }
     );
     if (!res.ok) {
@@ -44,25 +44,33 @@ async function getWarehouseDetails(
     }
     return res.json();
   } catch (error) {
-    console.error("Failed to fetch warehouse details:", error);
+    console.error('Failed to fetch warehouse details:', error);
     return null;
   }
 }
 
 // Komponen Halaman
 export default async function WarehouseDashboardPage({
-  params,
+  params
 }: {
   params: { warehouseId: string };
 }) {
   // PERUBAHAN 2: Tambahkan pengecekan sesi autentikasi
   const supabase = await createClient();
   const {
-    data: { session },
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const {
+    data: { session }
   } = await supabase.auth.getSession();
 
   if (!session) {
-    redirect("/login");
+    redirect('/login');
   }
 
   const { warehouseId } = await params;
