@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   return await updateSession(request);
 }
 
-// config matcher  tidak perlu diubah
+// config matcher  tidak perlu diubahh
 export const config = {
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$|.*\\.ico$|.*\\.webp$|sw\\.js$|manifest\\.webmanifest$|offline\\.html$).*)'
