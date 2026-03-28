@@ -36,12 +36,12 @@ export function SiteHeader({
 
       <Separator
         orientation="vertical"
-        className="mx-3"
+        className="mx-1"
         style={{ width: '2.5px' }}
       />
 
       {/* Logo */}
-      <div className="flex items-center">
+      <div className="flex items-center -ml-1">
         <Image
           src="/logo_header-dark.png"
           alt="Synergy IOT"
