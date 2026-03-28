@@ -83,6 +83,7 @@ export interface WarehouseDetails {
     active_systems: {
       system_type: string;
       device_count: number;
+      status: 'Online' | 'Offline';
     }[];
   }[];
 }

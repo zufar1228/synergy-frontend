@@ -4,7 +4,6 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useWarehouse } from '@/contexts/WarehouseContext';
-import { useDeviceStatus } from '@/contexts/DeviceStatusContext';
 import { createClient } from '@/lib/supabase/client';
 import {
   getWarehouses,
@@ -24,15 +23,11 @@ import { Wifi, WifiOff, TriangleAlert } from 'lucide-react'; // <-- Import ikon 
 const AreaCard = ({
   area,
   warehouseId,
-  alerts,
-  deviceStatus
+  alerts
 }: {
   area: any;
   warehouseId: string;
   alerts: Set<string>;
-  deviceStatus: {
-    isDeviceOnline: (areaId: string, systemType: string) => boolean;
-  };
 }) => (
   <Card className="border-2 border-border shadow-shadow transition-all h-full flex flex-col">
     <CardHeader>
@@ -44,11 +39,8 @@ const AreaCard = ({
         area.active_systems.map((system: any) => {
           // Cek apakah sistem ini memiliki peringatan aktif
           const hasAlert = alerts.has(`${area.id}-${system.system_type}`);
-          // Use device status context instead of API status
-          const isOnline = deviceStatus.isDeviceOnline(
-            area.id,
-            system.system_type
-          );
+          // Use the status returned directly from the API
+          const isOnline = system.status === 'Online';
           const isOffline = !isOnline;
 
           return (
@@ -90,7 +82,6 @@ const AreaCard = ({
 
 export default function DashboardPage() {
   const { selectedWarehouse, setSelectedWarehouse } = useWarehouse();
-  const { isDeviceOnline } = useDeviceStatus();
 
   // SWR: fetch all warehouses when 'all' is selected
   const allWarehousesFetcher = React.useCallback(
@@ -138,7 +129,11 @@ export default function DashboardPage() {
       return warehouses ? { type: 'all' as const, warehouses } : null;
     }
     return singleData
-      ? { type: 'single' as const, details: singleData.details, alerts: singleData.alerts }
+      ? {
+          type: 'single' as const,
+          details: singleData.details,
+          alerts: singleData.alerts
+        }
       : null;
   }, [selectedWarehouse, warehouses, singleData]);
 
@@ -183,7 +178,9 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
             Terjadi Kesalahan
           </h2>
-          <p className="text-gray-600 mb-4">{error.message || 'Gagal memuat data dashboard.'}</p>
+          <p className="text-gray-600 mb-4">
+            {error.message || 'Gagal memuat data dashboard.'}
+          </p>
           <Button variant="neutral" onClick={() => setSelectedWarehouse('all')}>
             Kembali ke Semua Gudang
           </Button>
@@ -251,7 +248,6 @@ export default function DashboardPage() {
                 area={area}
                 warehouseId={data.details.id}
                 alerts={alertSet}
-                deviceStatus={{ isDeviceOnline }}
               />
             ))}
           </div>
