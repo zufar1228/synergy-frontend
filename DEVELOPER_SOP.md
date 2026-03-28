@@ -1,167 +1,299 @@
-# Synergy IoT — Frontend Developer SOP
+# Developer Standard Operating Procedure (SOP)
 
-## Architecture: Modular Monolith (Feature-Sliced Design)
+This guide explains how to collaborate on the **Synergy IoT Frontend** using Feature-Sliced Design with domain isolation.
+
+---
+
+## 📋 Team Structure
+
+| Domain | Developer | Folder | Responsibilities |
+|--------|-----------|--------|------------------|
+| **Lingkungan** (Environment) | @keyeicheiaren | `/features/lingkungan/` | Environment dashboard, charts, controls |
+| **Keamanan** (Security) | @Egan354 | `/features/keamanan/` | Security dashboard, alerts, status |
+| **Intrusi** (Intrusion) | @zufar1228 | `/features/intrusi/` | Intrusion dashboard, device controls |
+| **Core** | @zufar1228 | `/app`, `/components`, `/lib`, etc. | Shared layout, auth, utilities |
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone & Setup
+```bash
+git clone https://github.com/zufar1228/synergy-frontend.git
+cd synergy-frontend
+git pull origin main
+pnpm install
+```
+
+### 2. Create Feature Branch
+```bash
+git pull origin main
+git checkout -b feat/your-feature-name
+```
+
+**Branch naming convention:**
+- `feat/your-feature` — new feature
+- `fix/bug-description` — bug fix
+- `refactor/description` — code refactor
+- `docs/description` — documentation
+
+### 3. Make Changes in Your Domain
+**Only edit files in your assigned domain:**
+
+- **Lingkungan**: `/features/lingkungan/`
+- **Keamanan**: `/features/keamanan/`
+- **Intrusi**: `/features/intrusi/`
+
+❌ **Never edit core files** without approval:
+- `/app/`
+- `/components/` (only `/components/shared/` is neutral)
+- `/lib/`
+- `/contexts/`
+- `/hooks/`
+- `/middleware.ts`
+- `next.config.ts`
+- `/package.json`
+
+### 4. Commit & Push
+```bash
+git add .
+git commit -m "feat(lingkungan): add sensor chart
+
+- Implement time-series chart visualization
+- Add real-time data subscription with SWR
+- Add responsive mobile layout"
+
+git push origin feat/your-feature-name
+```
+
+**Commit message format:**
+```
+type(domain): short description
+
+- Bullet point details
+- More details
+```
+
+**Types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
+
+### 5. Open Pull Request on GitHub
+
+1. Go to [synergy-frontend](https://github.com/zufar1228/synergy-frontend) → **Pull Requests**
+2. Click **New Pull Request**
+3. Base: `main` | Compare: your branch
+4. Add description of changes
+5. Click **Create Pull Request**
+
+### 6. Wait for Approval
+GitHub automatically requires:
+- ✅ **Validation**: lint, typecheck, build must pass
+- ✅ **CODEOWNERS Review**: the owner of your domain must approve
+
+GitHub enforces this—you cannot merge without approval.
+
+### 7. Merge
+Once approved and checks pass, click **Merge Pull Request**
+
+Vercel automatically deploys to production when main is updated.
+
+---
+
+## 🏗️ Project Structure
 
 ```
 frontend/
-├── app/                         # Next.js App Router pages (CORE — do not modify)
-│   ├── (main)/                  #   Authenticated routes (dashboard, management, profile)
-│   │   └── [warehouseId]/[areaId]/[systemType]/
-│   │       └── page.tsx         #   Dynamic dispatcher → imports from features/
-│   ├── login/                   #   Auth pages
-│   └── layout.tsx               #   Root layout
-├── features/                    # DOMAIN FEATURE SLICES
-│   ├── lingkungan/              # Environment monitoring (Dev: @org/lingkungan-dev)
-│   │   ├── components/          #   LingkunganView, LingkunganChart, LingkunganDataTable
-│   │   ├── api/                 #   lingkungan.ts (API functions)
-│   │   └── index.ts             #   Barrel export
-│   ├── keamanan/                # Security detection (Dev: @org/keamanan-dev)
-│   │   ├── components/          #   KeamananView, KeamananDataTable
+├── app/
+│   ├── (auth)/                  # Login, signup
+│   ├── (main)/                  # Dashboard layout + router
+│   ├── layout.tsx
+│   └── page.tsx                 # Landing
+├── features/
+│   ├── lingkungan/
+│   │   ├── components/          # UI components
+│   │   ├── api/                 # API calls
+│   │   ├── index.ts             # Barrel export
+│   │   └── lingkungan.types.ts  # Types (if needed)
+│   ├── keamanan/
+│   │   ├── components/
+│   │   ├── api/
 │   │   └── index.ts
-│   └── intrusi/                 # Intrusion detection (Dev: @org/intrusi-dev)
-│       ├── components/          #   IntrusiView, IntrusiDataTable, IntrusiDeviceControls
-│       ├── api/                 #   intrusi.ts (API functions)
+│   └── intrusi/
+│       ├── components/
+│       ├── api/
 │       └── index.ts
-├── components/                  # Core shared components
-│   ├── ui/                      #   shadcn/ui design system (40+ components)
-│   ├── shared/                  #   AnalyticsView, WarehouseCard, AnimatedPageTitle
-│   ├── actions/                 #   CRUD action components
-│   ├── dashboard/               #   Dashboard components
-│   ├── profile/                 #   Profile components
-│   └── [root-level]             #   Sidebar, header, navigation, theme
-├── contexts/                    # React Context providers
-├── hooks/                       # Shared React hooks
-├── lib/                         # Core libraries
-│   ├── api/                     #   API client, types, core API modules
-│   │   ├── client.ts            #   Central fetch wrapper (apiFetch)
-│   │   ├── types.ts             #   All TypeScript interfaces
-│   │   └── index.ts             #   Barrel re-export (backward compat)
-│   └── supabase/                #   Supabase client configuration
-└── middleware.ts                 # Auth middleware
+├── components/
+│   ├── shared/                  # Shared across domains
+│   │   ├── AnimatedPageTitle.tsx
+│   │   ├── Navbar.tsx
+│   │   └── ...
+│   ├── ui/                      # shadcn/ui components
+│   └── ...
+├── lib/
+│   ├── api/
+│   │   ├── client.ts            # Fetch utility
+│   │   ├── types.ts             # All TypeScript interfaces
+│   │   └── index.ts             # Barrel re-export
+│   ├── hooks.ts
+│   └── utils.ts
+├── contexts/                    # Auth, theme context
+├── hooks/                       # Custom React hooks
+├── middleware.ts                # Auth middleware
+├── .github/
+│   ├── workflows/
+│   │   └── validate.yml         # PR validation
+│   └── CODEOWNERS               # Access control
+└── package.json
 ```
 
-## Rules for Domain Developers
+---
 
-### 1. Stay in Your Feature Directory
+## 📝 Import Rules
 
-- **Lingkungan dev** works ONLY in `features/lingkungan/`
-- **Keamanan dev** works ONLY in `features/keamanan/`
-- **Intrusi dev** works ONLY in `features/intrusi/`
-
-### 2. Import Rules
-
-```
-✅ Feature → Core:     import { Button } from '@/components/ui/button';
-✅ Feature → Core:     import type { IntrusiLog } from '@/lib/api/types';
-✅ Feature → Feature:   import within your OWN feature (relative paths)
-❌ Feature → Feature:   NEVER import from another feature's directory
-❌ Feature → Core edit: NEVER modify core files without approval
+### **Within Your Domain** ✅
+```typescript
+// In /features/lingkungan/components/LingkunganView.tsx
+import { LingkunganChart } from './LingkunganChart';
+import { lingkunganAPI } from '../api/lingkungan';
 ```
 
-### 3. Adding New Functionality
+### **Import Shared UI** ✅
+```typescript
+// In /features/lingkungan/components/LingkunganView.tsx
+import { AnimatedPageTitle } from '@/components/shared/AnimatedPageTitle';
+import { Button } from '@/components/ui/button';
+import useSWR from 'swr';
+```
 
-If your feature needs a new component:
+### **Import Core API** ✅
+```typescript
+// In /features/lingkungan/api/lingkungan.ts
+import { fetcher } from '@/lib/api/client';
+import type { SensorReading } from '@/lib/api/types';
+```
 
-1. Create it in `features/<your-feature>/components/`
-2. If it needs API functions, add them in `features/<your-feature>/api/`
-3. Import shared UI from `@/components/ui/`
-4. Import shared types from `@/lib/api/types`
-5. Export from `features/<your-feature>/index.ts`
+### **Cross-Domain** ❌ (Avoid)
+```typescript
+// DON'T do this - cross-domain imports
+import { KeamananChart } from '@/features/keamanan/components/KeamananChart';
+```
 
-If you need a **new shared type or API client change**, open a PR tagging `@org/core-team`.
+If you need another domain's data:
+1. Use the shared API at `/lib/api/index.ts`
+2. Call it separately in your component
+3. Or ask @zufar1228 to add a cross-domain component to `/components/shared/`
 
-## Git Workflow (MANDATORY)
+---
 
-### Before Starting Work
+## 🎨 Component Guidelines
 
+### Domain Component Structure
+```
+features/lingkungan/components/
+├── LingkunganView.tsx           # Main page component
+├── LingkunganChart.tsx          # Sub-component
+├── LingkunganDataTable.tsx      # Sub-component
+└── LingkunganCard.tsx           # Reusable card
+```
+
+### Shared Component Structure
+```
+components/shared/
+├── AnimatedPageTitle.tsx        # Used by all domains
+├── Navbar.tsx
+├── Footer.tsx
+└── ...
+```
+
+---
+
+## ⚠️ Common Issues
+
+### "TypeScript error in my component"
 ```bash
-git checkout main
 git pull origin main
-git checkout -b feature/<your-domain>/<description>
-# Example: feature/intrusi/add-battery-status-indicator
+pnpm run build
 ```
 
-### While Working
+Check the error output. Usually it's import or type issues. Run `npx tsc --noEmit` to see all errors.
 
+### "GitHub says I need approval but I own the domain"
+This happens when your PR also touches **core files**. Examples:
+- Modified `/app/` → need @zufar1228's approval
+- Modified `/lib/api/types.ts` → need @zufar1228's approval
+- Modified `next.config.ts` → need @zufar1228's approval
+
+**Solution:** Only edit files in `/features/{your-domain}/`
+
+### "I need to share a component across domains"
+Ask @zufar1228 to move it to `/components/shared/`. Don't import between domains directly.
+
+### "My styles don't apply"
+Check:
+1. Are you using `@/` path alias? (`import from '@/features/...` not `import from '../features/...'`)
+2. Is Tailwind CSS loaded? Check `globals.css`
+3. Did you rebuild? Run `pnpm run build`
+
+---
+
+## 🔄 CI/CD Pipeline
+
+### On Pull Request
+1. GitHub Actions runs `validate` job:
+   - `pnpm run lint`
+   - `npx tsc --noEmit`
+   - `pnpm run build`
+2. All checks must pass
+3. CODEOWNERS review required
+
+### On Push to Main
+1. Same validation as PR
+2. If validation passes, Vercel auto-deploys
+3. Live in ~3 minutes
+
+---
+
+## 📱 Testing Locally
+
+### Development Server
 ```bash
-# Stage ONLY your feature files
-git add features/<your-domain>/
-
-# Commit with conventional format
-git commit -m "feat(intrusi): add battery status indicator"
+pnpm run dev
+# Open http://localhost:3000
 ```
 
-### Before Pushing
-
+### Full Build & Check
 ```bash
-# ALWAYS pull latest main and rebase BEFORE pushing
-git fetch origin main
-git rebase origin/main
-
-# Fix any conflicts, then:
-git push origin feature/<your-domain>/<description>
+pnpm run typecheck
+pnpm run lint --fix
+pnpm run build
 ```
 
-### Create a Pull Request
-
-1. Open a PR targeting `main`
-2. CI will automatically run **lint + typecheck + build** — all MUST pass
-3. CODEOWNERS will auto-assign the correct reviewer
-4. Vercel will create a Preview Deployment for visual review
-5. If your PR touches files outside your feature directory, the core-team will be notified
-
-### Commit Message Convention
-
-```
-feat(<domain>): short description     # New feature
-fix(<domain>): short description      # Bug fix
-refactor(<domain>): short description # Code restructuring
-```
-
-## CI/CD Pipeline
-
-| Trigger        | Validation                                | Deploy                       |
-| -------------- | ----------------------------------------- | ---------------------------- |
-| Push to `main` | Vercel auto-build                         | Vercel production deployment |
-| PR to `main`   | Lint + TypeCheck + Build (GitHub Actions) | Vercel preview deployment    |
-
-**Failing lint, typecheck, or build will BLOCK the merge.**
-
-## Running Locally
-
+### On Your Domain Only
 ```bash
-pnpm install
-pnpm run dev          # Start dev server (Turbopack)
-pnpm run lint         # ESLint check
-npx tsc --noEmit      # TypeScript validation (run before pushing!)
-pnpm run build        # Full production build
+# Edit your feature components
+pnpm run lint -- --scope "features/lingkungan"
+pnpm run build
 ```
 
-## Key Patterns
+---
 
-### Supabase Realtime
+## 🆘 Need Help?
 
-Each domain view subscribes to Supabase Realtime for live updates. The subscription pattern is:
+- **TypeScript errors?** Run `pnpm run build` to see detailed errors
+- **Lint issues?** Run `pnpm run lint --fix` to auto-fix
+- **Component not showing?** Check `app/(main)/[warehouseId]/[areaId]/[systemType]/page.tsx` to see if your domain is registered
+- **Need core changes?** Open issue for @zufar1228
+- **Another domain's bug?** Notify the domain owner
 
-```tsx
-const channel = supabase
-  .channel('my-channel')
-  .on(
-    'postgres_changes',
-    { event: 'INSERT', schema: 'public', table: 'my_table' },
-    callback
-  )
-  .subscribe();
-```
+---
 
-### SWR Data Fetching
+## ✅ Checklist Before Pushing
 
-Use the `useApiSWR` hook from `@/hooks/use-swr-api` for authenticated API calls:
-
-```tsx
-const { data, error, mutate } = useApiSWR(token, (t) => myApiFn(t, params));
-```
-
-### Path Alias
-
-The `@/` alias maps to the project root. Always use it for cross-directory imports.
+- [ ] Changes only in my feature folder (`/features/{domain}/`)
+- [ ] No changes to core files (`/app/`, `/lib/`, etc.) without approval
+- [ ] No cross-domain imports
+- [ ] Ran `pnpm run lint --fix` locally
+- [ ] Ran `pnpm run typecheck` locally (0 errors)
+- [ ] Ran `pnpm run build` locally (success)
+- [ ] Tested on http://localhost:3000
+- [ ] Commit message is descriptive
+- [ ] Ready for code review
