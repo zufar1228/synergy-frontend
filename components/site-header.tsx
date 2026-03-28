@@ -1,6 +1,7 @@
 // frontend/components/site-header.tsx
 'use client';
 
+import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -39,12 +40,16 @@ export function SiteHeader({
         style={{ width: '2.5px' }}
       />
 
-      {/* Breadcrumbs (#4) — replaces static "Synergy" text */}
-      <div className="hidden sm:flex items-center min-w-0">
-        <HeaderBreadcrumbs />
-      </div>
-      <div className="sm:hidden min-w-0 flex-1">
-        <HeaderBreadcrumbs />
+      {/* Logo */}
+      <div className="flex items-center">
+        <Image
+          src="/logo_header-dark.png"
+          alt="Synergy IOT"
+          width={120}
+          height={32}
+          priority
+          unoptimized
+        />
       </div>
 
       <div className="ml-auto flex items-center gap-2">
