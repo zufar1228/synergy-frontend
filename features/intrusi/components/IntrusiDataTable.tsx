@@ -23,7 +23,15 @@ import {
   ShieldCheck,
   ShieldOff,
   AlertTriangle,
-  Filter
+  Filter,
+  Download,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  Pencil,
+  Eye,
+  CheckCheck,
+  HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,6 +64,12 @@ import {
   updateIntrusiLogStatus
 } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -235,27 +249,82 @@ function EventTypeBadge({ eventType }: { eventType: string }) {
   );
 }
 
+// --- Severity color helper ---
+function getSeverityColor(eventType: string): string {
+  switch (eventType) {
+    case 'FORCED_ENTRY_ALARM':
+    case 'UNAUTHORIZED_OPEN':
+      return 'border-l-[3px] border-l-red-500 bg-red-500/[0.03] dark:bg-red-500/[0.06]';
+    case 'IMPACT_WARNING':
+      return 'border-l-[3px] border-l-amber-500 bg-amber-500/[0.03] dark:bg-amber-500/[0.06]';
+    case 'ARM':
+    case 'DISARM':
+      return 'border-l-[3px] border-l-green-500 bg-green-500/[0.02] dark:bg-green-500/[0.04]';
+    case 'BATTERY_LEVEL_CHANGED':
+    case 'POWER_SOURCE_CHANGED':
+      return 'border-l-[3px] border-l-orange-400 bg-orange-400/[0.02] dark:bg-orange-400/[0.05]';
+    default:
+      return 'border-l-[3px] border-l-border';
+  }
+}
+
 // --- Column definitions ---
 function getColumns(
-  onLogUpdate: (logId: string, updates: Partial<IntrusiLog>) => void
+  onLogUpdate: (logId: string, updates: Partial<IntrusiLog>) => void,
+  selectedIds: Set<string>,
+  toggleSelect: (id: string) => void,
+  toggleSelectAll: (ids: string[]) => void,
+  allSelected: boolean
 ): ColumnDef<IntrusiLog>[] {
   return [
     {
-      id: 'expander',
-      header: () => null,
-      cell: ({ row }) => {
-        if (row.original.status !== 'unacknowledged' && !row.getIsExpanded())
-          return null;
+      id: 'select',
+      meta: { className: 'hidden sm:table-cell' },
+      header: ({ table }) => {
+        const unackRows = table
+          .getRowModel()
+          .rows.filter((r) => r.original.status === 'unacknowledged');
+        if (unackRows.length === 0) return null;
         return (
-          <Button
-            variant="neutral"
-            size="sm"
-            onClick={() => row.toggleExpanded()}
-          >
-            {row.getIsExpanded() ? '▼' : '▶'}
-          </Button>
+          <Checkbox
+            checked={allSelected && unackRows.length > 0}
+            onCheckedChange={() =>
+              toggleSelectAll(unackRows.map((r) => r.original.id))
+            }
+            aria-label="Pilih semua"
+            className="rounded-[3px] h-3.5 w-3.5"
+          />
+        );
+      },
+      cell: ({ row }) => {
+        if (row.original.status !== 'unacknowledged') return null;
+        return (
+          <Checkbox
+            checked={selectedIds.has(row.original.id)}
+            onCheckedChange={() => toggleSelect(row.original.id)}
+            aria-label="Pilih baris"
+            className="rounded-[3px] h-3.5 w-3.5"
+          />
         );
       }
+    },
+    {
+      id: 'expander',
+      header: () => null,
+      cell: ({ row }) => (
+        <Button
+          variant="neutral"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={() => row.toggleExpanded()}
+        >
+          {row.getIsExpanded() ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </Button>
+      )
     },
     {
       accessorKey: 'status',
@@ -270,7 +339,7 @@ function getColumns(
     {
       accessorKey: 'system_state',
       header: 'State Sistem',
-      meta: { className: 'hidden md:table-cell' },
+      meta: { className: '' },
       cell: ({ row }) => {
         const state = row.original.system_state;
         return (
@@ -288,7 +357,7 @@ function getColumns(
     {
       accessorKey: 'door_state',
       header: 'Pintu',
-      meta: { className: 'hidden md:table-cell' },
+      meta: { className: '' },
       cell: ({ row }) => {
         const state = row.original.door_state;
         return (
@@ -306,7 +375,7 @@ function getColumns(
     {
       accessorKey: 'peak_delta_g',
       header: 'Peak ΔG',
-      meta: { className: 'hidden lg:table-cell' },
+      meta: { className: '' },
       cell: ({ row }) => {
         const val = row.original.peak_delta_g;
         if (val == null)
@@ -317,7 +386,7 @@ function getColumns(
     {
       accessorKey: 'hit_count',
       header: 'Anomali (Window)',
-      meta: { className: 'hidden lg:table-cell' },
+      meta: { className: '' },
       cell: ({ row }) => {
         // Windowed threshold: read anomaly_count from payload
         const payload = row.original.payload;
@@ -357,21 +426,67 @@ function getColumns(
     {
       accessorKey: 'timestamp',
       header: 'Waktu',
-      cell: ({ row }) =>
-        format(new Date(row.original.timestamp), 'dd/MM/yy HH:mm:ss')
+      cell: ({ row }) => {
+        const date = new Date(row.original.timestamp);
+        return (
+          <>
+            <span className="sm:hidden text-xs">
+              {format(date, 'dd/MM HH:mm')}
+            </span>
+            <span className="hidden sm:inline">
+              {format(date, 'dd/MM/yy HH:mm:ss')}
+            </span>
+          </>
+        );
+      }
+    },
+    {
+      accessorKey: 'notes',
+      header: 'Catatan',
+      meta: { className: '' },
+      cell: ({ row }) => {
+        const notes = row.original.notes;
+        if (!notes) return <span className="text-muted-foreground">-</span>;
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex items-center gap-1 text-sm text-muted-foreground max-w-[140px] truncate cursor-help">
+                  <MessageSquare className="h-3 w-3 shrink-0" />
+                  {notes}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[300px]">
+                <p className="text-sm">{notes}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      }
     },
     {
       id: 'actions',
       header: 'Aksi',
       cell: ({ row }) => {
-        if (row.original.status !== 'unacknowledged') return null;
+        const isUnack = row.original.status === 'unacknowledged';
         return (
           <Button
-            variant="neutral"
+            variant={isUnack ? 'default' : 'neutral'}
             size="sm"
+            className="h-7 text-xs"
             onClick={() => row.toggleExpanded()}
           >
-            Tinjau
+            {isUnack ? (
+              <>
+                <Eye className="mr-1 h-3 w-3 sm:mr-1.5" />
+                <span className="hidden sm:inline">Tinjau</span>
+              </>
+            ) : (
+              <>
+                <Pencil className="mr-1 h-3 w-3 sm:mr-1.5" />
+                <span className="hidden sm:inline">Edit</span>
+              </>
+            )}
           </Button>
         );
       }
@@ -405,6 +520,67 @@ export function IntrusiDataTable({
     []
   );
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [isBulkSubmitting, setIsBulkSubmitting] = React.useState(false);
+  const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1);
+  const tableContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const toggleSelect = React.useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = React.useCallback((ids: string[]) => {
+    setSelectedIds((prev) => {
+      const allChecked = ids.every((id) => prev.has(id));
+      if (allChecked) return new Set();
+      return new Set(ids);
+    });
+  }, []);
+
+  const unackIds = React.useMemo(
+    () => data.filter((d) => d.status === 'unacknowledged').map((d) => d.id),
+    [data]
+  );
+  const allSelected =
+    unackIds.length > 0 && unackIds.every((id) => selectedIds.has(id));
+
+  const handleBulkAcknowledge = React.useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkSubmitting(true);
+    const supabase = createClient();
+    const {
+      data: { session }
+    } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('Sesi tidak valid.');
+      setIsBulkSubmitting(false);
+      return;
+    }
+    let success = 0;
+    let failed = 0;
+    for (const logId of selectedIds) {
+      try {
+        await updateIntrusiLogStatus(
+          logId,
+          { status: 'acknowledged' } as UpdateIncidentStatusPayload,
+          session.access_token
+        );
+        onLogUpdate(logId, { status: 'acknowledged' as any });
+        success++;
+      } catch {
+        failed++;
+      }
+    }
+    setSelectedIds(new Set());
+    setIsBulkSubmitting(false);
+    if (success > 0) toast.success(`${success} insiden berhasil dikonfirmasi.`);
+    if (failed > 0) toast.error(`${failed} insiden gagal dikonfirmasi.`);
+  }, [selectedIds, onLogUpdate]);
 
   const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>(
     searchParams.get('status') ? searchParams.get('status')!.split(',') : []
@@ -488,7 +664,58 @@ export function IntrusiDataTable({
   const perPage = Number(searchParams.get('per_page') || '25');
   const totalPages = Math.ceil((pagination?.total || 0) / perPage);
 
-  const columns = React.useMemo(() => getColumns(onLogUpdate), [onLogUpdate]);
+  const columns = React.useMemo(
+    () =>
+      getColumns(
+        onLogUpdate,
+        selectedIds,
+        toggleSelect,
+        toggleSelectAll,
+        allSelected
+      ),
+    [onLogUpdate, selectedIds, toggleSelect, toggleSelectAll, allSelected]
+  );
+
+  // Keyboard shortcuts
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+      )
+        return;
+
+      const rows = table.getRowModel().rows;
+
+      if (e.key === 'j' || (e.key === 'ArrowDown' && !e.metaKey)) {
+        e.preventDefault();
+        setFocusedRowIndex((prev) => Math.min(prev + 1, rows.length - 1));
+      } else if (e.key === 'k' || (e.key === 'ArrowUp' && !e.metaKey)) {
+        e.preventDefault();
+        setFocusedRowIndex((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === 'Enter' && !e.metaKey) {
+        e.preventDefault();
+        if (focusedRowIndex >= 0 && focusedRowIndex < rows.length) {
+          rows[focusedRowIndex].toggleExpanded();
+        }
+      } else if (e.key === 'a' && !e.metaKey && !e.ctrlKey) {
+        if (focusedRowIndex >= 0 && focusedRowIndex < rows.length) {
+          const row = rows[focusedRowIndex];
+          if (row.original.status === 'unacknowledged') {
+            toggleSelect(row.original.id);
+          }
+        }
+      } else if (e.key === 'Escape') {
+        setSelectedIds(new Set());
+        setFocusedRowIndex(-1);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  });
 
   const table = useReactTable({
     data,
@@ -518,9 +745,59 @@ export function IntrusiDataTable({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const exportToCsv = () => {
+    const headers = [
+      'Waktu',
+      'Jenis Event',
+      'Status',
+      'State Sistem',
+      'Pintu',
+      'Peak ΔG',
+      'Catatan'
+    ];
+    const evtLabels: Record<string, string> = {
+      IMPACT_WARNING: 'Peringatan Benturan',
+      FORCED_ENTRY_ALARM: 'Alarm Paksa Masuk',
+      UNAUTHORIZED_OPEN: 'Buka Tanpa Izin',
+      POWER_SOURCE_CHANGED: 'Ganti Daya',
+      BATTERY_LEVEL_CHANGED: 'Level Baterai',
+      SIREN_SILENCED: 'Sirine Dimatikan',
+      ARM: 'Aktivasi Sistem',
+      DISARM: 'Penonaktifan Sistem'
+    };
+    const statusLabels: Record<string, string> = {
+      unacknowledged: 'Belum Ditinjau',
+      acknowledged: 'Dikonfirmasi',
+      resolved: 'Teratasi',
+      false_alarm: 'Alarm Palsu'
+    };
+    const rows = data.map((log) => [
+      format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss'),
+      evtLabels[log.event_type] || log.event_type,
+      statusLabels[log.status] || log.status,
+      log.system_state === 'ARMED' ? 'Aktif' : 'Nonaktif',
+      log.door_state === 'CLOSED' ? 'Tertutup' : 'Terbuka',
+      log.peak_delta_g?.toFixed(2) ?? '',
+      (log.notes || '').replace(/"/g, '""')
+    ]);
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))
+    ].join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], {
+      type: 'text/csv;charset=utf-8;'
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `intrusi-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="w-full space-y-4">
-      {/* Filter Menu */}
+      {/* Filter + Export */}
       <div className="flex items-center gap-2">
         <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
@@ -733,16 +1010,79 @@ export function IntrusiDataTable({
             </ScrollArea>
           </PopoverContent>
         </Popover>
+
+        <Button
+          variant="neutral"
+          size="sm"
+          className="h-8"
+          onClick={exportToCsv}
+          disabled={data.length === 0}
+        >
+          <Download className="mr-1.5 h-4 w-4" />
+          <span className="hidden sm:inline">Export CSV</span>
+          <span className="sm:hidden">CSV</span>
+        </Button>
+
+        {selectedIds.size > 0 && (
+          <Button
+            variant="default"
+            size="sm"
+            className="h-8"
+            onClick={handleBulkAcknowledge}
+            disabled={isBulkSubmitting}
+          >
+            <CheckCheck className="mr-1.5 h-4 w-4" />
+            {isBulkSubmitting
+              ? 'Memproses...'
+              : `Konfirmasi (${selectedIds.size})`}
+          </Button>
+        )}
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="ml-auto text-muted-foreground hover:text-foreground transition-colors hidden lg:flex items-center">
+                <HelpCircle className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent align="end" className="space-y-1 text-xs">
+              <p className="font-semibold mb-1">Pintasan Keyboard</p>
+              <p>
+                <kbd className="font-mono bg-muted px-1 rounded">j</kbd> /{' '}
+                <kbd className="font-mono bg-muted px-1 rounded">k</kbd> —
+                navigasi baris
+              </p>
+              <p>
+                <kbd className="font-mono bg-muted px-1 rounded">Enter</kbd> —
+                buka / tutup detail
+              </p>
+              <p>
+                <kbd className="font-mono bg-muted px-1 rounded">a</kbd> — pilih
+                baris terfokus
+              </p>
+              <p>
+                <kbd className="font-mono bg-muted px-1 rounded">Esc</kbd> —
+                batal pilihan
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Table */}
-      <div>
+      <div ref={tableContainerRef}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className={[
+                      'px-2 sm:px-4 h-10 sm:h-12',
+                      (header.column.columnDef.meta as any)?.className ?? ''
+                    ].join(' ')}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -756,18 +1096,34 @@ export function IntrusiDataTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row, rowIndex) => (
                 <React.Fragment key={row.id}>
                   <TableRow
                     data-state={row.getIsSelected() && 'selected'}
-                    className={
+                    className={[
+                      'transition-colors hover:bg-muted/20 hover:text-foreground',
+                      getSeverityColor(row.original.event_type),
                       highlightIds?.has(row.original.id)
                         ? 'animate-row-highlight'
+                        : '',
+                      focusedRowIndex === rowIndex
+                        ? 'outline outline-2 outline-primary/40 outline-offset-[-1px]'
+                        : '',
+                      selectedIds.has(row.original.id)
+                        ? 'bg-primary/10 dark:bg-primary/15'
                         : ''
-                    }
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell
+                        key={cell.id}
+                        className={[
+                          'px-2 sm:px-4 py-2 sm:py-4',
+                          (cell.column.columnDef.meta as any)?.className ?? ''
+                        ].join(' ')}
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

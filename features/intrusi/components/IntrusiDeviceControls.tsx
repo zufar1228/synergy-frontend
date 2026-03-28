@@ -480,7 +480,7 @@ export const IntrusiDeviceControls = ({
                 </div>
               </div>
 
-              {/* Battery */}
+              {/* Battery — Progress Bar (Point 6) */}
               <div className="flex items-center gap-2 rounded-base border-2 border-border bg-secondary p-3 transition-colors">
                 <BatteryCharging
                   className={cn(
@@ -494,27 +494,27 @@ export const IntrusiDeviceControls = ({
                           : 'text-red-500'
                   )}
                 />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-muted-foreground text-xs">Baterai</p>
-                  <p
-                    className={cn(
-                      'font-semibold',
-                      vbatPct == null
-                        ? ''
-                        : vbatPct >= 60
-                          ? 'text-green-600'
-                          : vbatPct >= 30
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
-                    )}
-                  >
-                    {vbatPct != null ? `${vbatPct}%` : '-'}
-                    {vbatVoltage != null && (
-                      <span className="text-muted-foreground ml-1 text-xs font-normal">
-                        ({vbatVoltage.toFixed(2)}V)
-                      </span>
-                    )}
-                  </p>
+                  {vbatPct != null ? (
+                    <div className="mt-1.5 h-2.5 w-full rounded-full bg-muted overflow-hidden border border-border">
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all duration-500',
+                          vbatPct >= 60
+                            ? 'bg-green-500'
+                            : vbatPct >= 30
+                              ? 'bg-yellow-500'
+                              : 'bg-red-500'
+                        )}
+                        style={{
+                          width: `${Math.min(100, Math.max(0, vbatPct))}%`
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <p className="font-semibold">-</p>
+                  )}
                 </div>
               </div>
 

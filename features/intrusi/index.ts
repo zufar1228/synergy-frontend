@@ -2,3 +2,4 @@
 export { IntrusiView } from './components/IntrusiView';
 export { IntrusiDataTable } from './components/IntrusiDataTable';
 export { IntrusiDeviceControls } from './components/IntrusiDeviceControls';
+export { IntrusiEventChart } from './components/IntrusiEventChart';
