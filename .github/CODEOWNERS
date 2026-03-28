@@ -1,53 +1,32 @@
 # Frontend CODEOWNERS
-
-# Protects feature directories so each domain developer can ONLY merge to their own area.
-
-# GitHub requires a CODEOWNERS review before merging PRs that touch owned paths.
-
-#
-
-# Usage: Replace @org/ placeholders with your actual GitHub org or usernames.
-
-# Example: @synergy-iot/lingkungan-dev or @username
+# GitHub requires a review from the code owner before a PR touching their path can be merged.
 
 # ========================================
-
-# CORE — requires core-team approval
+# CORE — requires @zufar1228 approval
+# ========================================
+/app/                               @zufar1228
+/components/                        @zufar1228
+/contexts/                          @zufar1228
+/hooks/                             @zufar1228
+/lib/                               @zufar1228
+/middleware.ts                      @zufar1228
+/public/                            @zufar1228
+/.github/                           @zufar1228
+/next.config.ts                     @zufar1228
+/tsconfig.json                      @zufar1228
+/package.json                       @zufar1228
 
 # ========================================
-
-/app/ @org/core-team
-/components/ @org/core-team
-/contexts/ @org/core-team
-/hooks/ @org/core-team
-/lib/ @org/core-team
-/middleware.ts @org/core-team
-/public/ @org/core-team
-/.github/ @org/core-team
-/next.config.ts @org/core-team
-/tsconfig.json @org/core-team
-/package.json @org/core-team
+# FEATURE: Lingkungan (Environment) — @keyeicheiaren
+# ========================================
+/features/lingkungan/               @keyeicheiaren
 
 # ========================================
-
-# FEATURE: Lingkungan (Environment)
+# FEATURE: Keamanan (Security) — @Egan354
+# ========================================
+/features/keamanan/                 @Egan354
 
 # ========================================
-
-/features/lingkungan/ @org/lingkungan-dev
-
+# FEATURE: Intrusi (Intrusion) — @zufar1228
 # ========================================
-
-# FEATURE: Keamanan (Security)
-
-# ========================================
-
-/features/keamanan/ @org/keamanan-dev
-
-# ========================================
-
-# FEATURE: Intrusi (Intrusion)
-
-# ========================================
-
-/features/intrusi/ @org/intrusi-dev
+/features/intrusi/                  @zufar1228
