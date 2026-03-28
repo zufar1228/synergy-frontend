@@ -87,7 +87,7 @@ export const UpdatePreferencesForm = ({
       <CardHeader>
         <CardTitle>Preferensi Notifikasi</CardTitle>
         <CardDescription>
-          Pilih notifikasi email yang ingin Anda terima.
+          Pilih notifikasi yang ingin Anda terima.
         </CardDescription>
       </CardHeader>
       <CardContent>
