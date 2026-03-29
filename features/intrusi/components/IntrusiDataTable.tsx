@@ -4,6 +4,7 @@ import * as React from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -84,6 +85,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useUserRole } from '@/hooks/use-user-role';
 
 // --- Review Form Schema ---
 const formSchema = z.object({
@@ -489,7 +491,8 @@ function getColumns(
             )}
           </Button>
         );
-      }
+      },
+      enableHiding: true
     }
   ];
 }
@@ -523,7 +526,14 @@ export function IntrusiDataTable({
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [isBulkSubmitting, setIsBulkSubmitting] = React.useState(false);
   const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1);
+  const { isAdmin } = useUserRole();
+  const { isAdmin } = useUserRole();
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const columnVisibility: VisibilityState = React.useMemo(
+    () => (isAdmin ? {} : { actions: false, select: false, expander: false }),
+    [isAdmin]
+  );
 
   const toggleSelect = React.useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -720,7 +730,7 @@ export function IntrusiDataTable({
   const table = useReactTable({
     data,
     columns,
-    state: { columnFilters, expanded },
+    state: { columnFilters, expanded, columnVisibility },
     onColumnFiltersChange: setColumnFilters,
     onExpandedChange: setExpanded,
     getCoreRowModel: getCoreRowModel(),

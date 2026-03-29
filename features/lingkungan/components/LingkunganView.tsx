@@ -36,6 +36,7 @@ import { LingkunganChart } from './LingkunganChart';
 import { LingkunganDataTable } from './LingkunganDataTable';
 import type { LingkunganLog } from '@/lib/api';
 import { AnimatedPageTitle } from '@/components/shared/AnimatedPageTitle';
+import { useUserRole } from '@/hooks/use-user-role';
 
 export const LingkunganView = ({ initialData }: { initialData: any }) => {
   const params = useParams();
@@ -66,6 +67,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
   const [dehumidifierState, setDehumidifierState] = useState<string>('OFF');
   const [controlMode, setControlMode] = useState<string>('AUTO');
   const [overrideUntil, setOverrideUntil] = useState<string | null>(null);
+  const { isAdmin } = useUserRole();
 
   // Latest readings & predictions
   const [latestReading, setLatestReading] = useState<{
@@ -677,6 +679,11 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
                 <div className="flex h-full items-center justify-center gap-2 rounded-base border-2 border-dashed border-red-300 dark:border-red-800 p-4 text-red-500">
                   <WifiOff className="h-5 w-5" />
                   <span className="font-medium">Kontrol Tidak Tersedia</span>
+                </div>
+              ) : !isAdmin ? (
+                <div className="flex h-full items-center justify-center gap-2 rounded-base border-2 border-dashed border-muted-foreground/30 p-4 text-muted-foreground">
+                  <ToggleLeft className="h-5 w-5" />
+                  <span className="font-medium text-sm">Hanya Admin</span>
                 </div>
               ) : (
                 <div className="space-y-3">

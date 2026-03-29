@@ -4,6 +4,7 @@ import * as React from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -74,6 +75,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { cn } from '@/lib/utils';
+import { useUserRole } from '@/hooks/use-user-role';
 
 // --- Form Review (sebelumnya Dialog, sekarang untuk baris 'expand') ---
 const formSchema = z.object({
@@ -222,7 +224,9 @@ const ExpandableReviewForm = ({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground font-bold">Status</FormLabel>
+                  <FormLabel className="text-foreground font-bold">
+                    Status
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -247,7 +251,9 @@ const ExpandableReviewForm = ({
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-foreground font-bold">Notes</FormLabel>
+                  <FormLabel className="text-foreground font-bold">
+                    Notes
+                  </FormLabel>
                   <FormControl>
                     <Textarea placeholder="Tambahkan catatan..." {...field} />
                   </FormControl>
@@ -349,6 +355,12 @@ export function KeamananDataTable({
   );
   // --- 3. Tambah state untuk 'expanded' ---
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
+  const { isAdmin } = useUserRole();
+
+  const columnVisibility: VisibilityState = React.useMemo(
+    () => (isAdmin ? {} : { actions: false }),
+    [isAdmin]
+  );
 
   // Definisikan kolom di sini
   const columns: ColumnDef<KeamananLog>[] = [
@@ -473,7 +485,8 @@ export function KeamananDataTable({
         <Button size="sm" onClick={() => row.toggleExpanded()}>
           {row.getIsExpanded() ? 'Tutup' : 'Review'}
         </Button>
-      )
+      ),
+      enableHiding: true
     }
   ];
 
@@ -489,7 +502,8 @@ export function KeamananDataTable({
     onExpandedChange: setExpanded,
     state: {
       columnFilters,
-      expanded // Tambahkan state expanded di sini
+      expanded,
+      columnVisibility
     }
   });
 

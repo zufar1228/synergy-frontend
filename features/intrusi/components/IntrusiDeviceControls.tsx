@@ -30,6 +30,13 @@ import {
   Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUserRole } from '@/hooks/use-user-role';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 
 interface IntrusiDeviceControlsProps {
   areaId: string;
@@ -64,6 +71,7 @@ export const IntrusiDeviceControls = ({
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const { isAdmin } = useUserRole();
   const supabase = createClient();
 
   // Fetch device details + intrusi status
@@ -547,6 +555,11 @@ export const IntrusiDeviceControls = ({
               <div className="flex h-full items-center justify-center gap-2 rounded-base border-2 border-dashed border-red-300 dark:border-red-800 p-4 text-red-500">
                 <WifiOff className="h-5 w-5" />
                 <span className="font-medium">Kontrol Tidak Tersedia</span>
+              </div>
+            ) : !isAdmin ? (
+              <div className="flex h-full items-center justify-center gap-2 rounded-base border-2 border-dashed border-muted-foreground/30 p-4 text-muted-foreground">
+                <ShieldOff className="h-5 w-5" />
+                <span className="font-medium text-sm">Hanya Admin</span>
               </div>
             ) : (
               <div className="space-y-3">
