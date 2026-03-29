@@ -10,7 +10,6 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
-  // --- 1. Impor ExpandedState ---
   getExpandedRowModel,
   ExpandedState
 } from '@tanstack/react-table';
@@ -19,11 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight,
-  Check,
-  X,
-  Camera,
-  ListTree
+  ChevronsRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,16 +47,6 @@ import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
-// Import komponen untuk dialog review
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -77,15 +62,40 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { cn } from '@/lib/utils';
 import { useUserRole } from '@/hooks/use-user-role';
 
-// --- Form Review (sebelumnya Dialog, sekarang untuk baris 'expand') ---
+// --- Form Schema ---
 const formSchema = z.object({
   status: z.enum(['acknowledged', 'resolved', 'false_alarm']),
   notes: z.string().optional()
 });
 type FormData = z.infer<typeof formSchema>;
 
-// --- 2. GANTI NAMA dan HAPUS LOGIKA DIALOG ---
-// Komponen ini sekarang hanya me-render form, bukan dialog
+// --- Helper: filter attributes > 50% confidence ---
+function getHighConfAttrs(
+  log: KeamananLog
+): { attribute: string; confidence: number }[] {
+  if (!log.attributes || !Array.isArray(log.attributes)) return [];
+  const result: { attribute: string; confidence: number }[] = [];
+  for (const person of log.attributes as any[]) {
+    const attrs = person.attributes || [person];
+    if (!Array.isArray(attrs)) continue;
+    for (const a of attrs) {
+      const conf = typeof a.confidence === 'number' ? a.confidence : 0;
+      if (conf > 0.5 && a.attribute && !a.attribute.includes('not wearing')) {
+        result.push({
+          attribute: a.attribute
+            .replace('person wearing a ', '')
+            .replace(' shirt', '')
+            .replace(' hat', 'topi')
+            .replace(' glasses', 'kacamata'),
+          confidence: conf
+        });
+      }
+    }
+  }
+  return result;
+}
+
+// --- Expandable Review Form ---
 const ExpandableReviewForm = ({
   log,
   onSuccess,
@@ -95,8 +105,6 @@ const ExpandableReviewForm = ({
   onSuccess: () => void;
   onLogUpdate?: (logId: string, updates: Partial<KeamananLog>) => void;
 }) => {
-  // Hapus state [open, setOpen]
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -105,7 +113,6 @@ const ExpandableReviewForm = ({
     }
   });
 
-  // Reset form jika log berubah (misalnya data di-refresh)
   React.useEffect(() => {
     form.reset({
       status: log.status as 'acknowledged' | 'resolved' | 'false_alarm',
@@ -120,35 +127,26 @@ const ExpandableReviewForm = ({
     } = await supabase.auth.getSession();
     if (!session) return toast.error('Sesi tidak valid.');
     try {
-      console.log('Updating log status:', log.id, values);
       await updateKeamananLogStatus(
         log.id,
         values as UpdateIncidentStatusPayload,
         session.access_token
       );
-      console.log('Log status updated successfully');
-
       if (onLogUpdate) {
-        onLogUpdate(log.id, {
-          status: values.status,
-          notes: values.notes
-        });
+        onLogUpdate(log.id, { status: values.status, notes: values.notes });
       }
-
       toast.success('Status log berhasil diperbarui.');
-      // Hapus setOpen(false)
-      onSuccess(); // Panggil onSuccess untuk menutup baris expand
+      onSuccess();
     } catch (error) {
       console.error('Error updating log status:', error);
       toast.error((error as Error).message);
     }
   }
 
-  // Render form secara langsung, tanpa Dialog/DialogTrigger
+  const highConfAttrs = getHighConfAttrs(log);
+
   return (
-    // Tambahkan padding dan background untuk membedakannya, dengan max-width constraint
     <div className="p-4 sm:p-6 bg-secondary border-y-2 border-border max-w-full overflow-hidden animate-in fade-in-0 slide-in-from-top-2 duration-300 font-base text-foreground">
-      {/* Ganti DialogHeader dengan div biasa */}
       <div className="space-y-2">
         <h3 className="text-lg font-heading font-bold text-foreground">
           Review Deteksi Keamanan
@@ -166,56 +164,23 @@ const ExpandableReviewForm = ({
               className="rounded-md border max-h-64 w-full object-contain"
             />
           </a>
-          {/* Show attributes under the image */}
-          {log.attributes &&
-            Array.isArray(log.attributes) &&
-            log.attributes.length > 0 && (
-              <div className="mt-4 p-3 bg-secondary-background border-2 border-border rounded-base shadow-[2px_2px_0px_0px_var(--border)]">
-                <h4 className="text-sm font-heading font-bold text-foreground mb-2">
-                  Atribut Terdeteksi ({log.attributes.length} orang)
-                </h4>
-                <div className="space-y-3 max-h-40 overflow-y-auto">
-                  {log.attributes.map((person: any, index: number) => {
-                    // Handle both nested and flat attribute structures
-                    const isNested =
-                      person.attributes && Array.isArray(person.attributes);
-                    const attributes = isNested ? person.attributes : [person];
-                    const personConfidence =
-                      person.confidence || log.confidence || 0.85;
-
-                    return (
-                      <div
-                        key={index}
-                        className="border-b-2 border-border pb-2 last:border-b-0 last:pb-0"
-                      >
-                        <h5 className="text-xs font-bold text-foreground mb-1">
-                          Orang {index + 1} (Keyakinan:{' '}
-                          {(personConfidence * 100).toFixed(0)}%)
-                        </h5>
-                        <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground font-medium">
-                          {attributes.map((attr: any, i: number) => (
-                            <li key={i}>
-                              <span className="capitalize">
-                                {attr.attribute
-                                  .replace('person wearing a ', '')
-                                  .replace('person not wearing a ', '')}
-                              </span>
-                              <span className="text-muted-foreground ml-1">
-                                (
-                                {(
-                                  (attr.confidence || personConfidence) * 100
-                                ).toFixed(0)}
-                                %)
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+          {highConfAttrs.length > 0 && (
+            <div className="mt-4 p-3 bg-secondary-background border-2 border-border rounded-base shadow-[2px_2px_0px_0px_var(--border)]">
+              <h4 className="text-sm font-heading font-bold text-foreground mb-2">
+                Atribut Terdeteksi
+              </h4>
+              <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground font-medium">
+                {highConfAttrs.map((attr, i) => (
+                  <li key={i}>
+                    <span className="capitalize">{attr.attribute}</span>
+                    <span className="text-muted-foreground ml-1">
+                      ({Math.round(attr.confidence * 100)}%)
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -261,7 +226,6 @@ const ExpandableReviewForm = ({
                 </FormItem>
               )}
             />
-            {/* Ganti DialogFooter dengan div biasa */}
             <div className="flex justify-end">
               <Button type="submit">Simpan</Button>
             </div>
@@ -269,69 +233,6 @@ const ExpandableReviewForm = ({
         </Form>
       </div>
     </div>
-  );
-};
-
-// --- 2. BUAT KOMPONEN BARU UNTUK MENAMPILKAN ATRIBUT ---
-const AttributeDetails = ({ data }: { data: any[] | null }) => {
-  // Data adalah array dari orang yang terdeteksi, contoh:
-  // [ { "box": {...}, "confidence": 0.9, "attributes": [...] } ]
-
-  if (!data || data.length === 0) {
-    return <span className="text-muted-foreground">N/A</span>;
-  }
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button className="px-2 py-0 h-auto text-black flex items-center gap-2">
-          <ListTree className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Detail Atribut Terdeteksi</DialogTitle>
-        </DialogHeader>
-        <div className="py-4 space-y-4 max-h-[60vh] overflow-y-auto">
-          {data.map((person, index) => {
-            // Handle both nested and flat attribute structures
-            const isNested =
-              person.attributes && Array.isArray(person.attributes);
-            const attributes = isNested ? person.attributes : [person];
-            const personConfidence = person.confidence || 0.85;
-
-            return (
-              <div key={index} className="border-b pb-4 last:border-b-0">
-                <h4 className="font-semibold mb-2">
-                  Orang {index + 1} (Keyakinan:{' '}
-                  {(personConfidence * 100).toFixed(0)}%)
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  {attributes.map((attr: any, i: number) => (
-                    <li key={i}>
-                      {/* Membersihkan teks dari skrip Python */}
-                      <span className="capitalize">
-                        {attr.attribute
-                          .replace('person wearing a ', '')
-                          .replace('person not wearing a ', '')}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {' '}
-                        (
-                        {((attr.confidence || personConfidence) * 100).toFixed(
-                          0
-                        )}
-                        %)
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 };
 
@@ -353,24 +254,26 @@ export function KeamananDataTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  // --- 3. Tambah state untuk 'expanded' ---
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const { isAdmin } = useUserRole();
 
   const columnVisibility: VisibilityState = React.useMemo(
-    () => (isAdmin ? {} : { actions: false }),
+    () => (isAdmin ? ({} as VisibilityState) : { actions: false }),
     [isAdmin]
   );
 
-  // Definisikan kolom di sini
+  // Backend returns `page` not `current_page`
+  const currentPage = pagination?.page || pagination?.current_page || 1;
+  const totalPages = pagination?.total_pages || 1;
+
   const columns: ColumnDef<KeamananLog>[] = [
     {
       accessorKey: 'status',
       header: 'Status',
       cell: ({ row }) => {
         const status = row.getValue('status') as string;
-        const getBadgeClass = (status: string) => {
-          switch (status) {
+        const getBadgeClass = (s: string) => {
+          switch (s) {
             case 'resolved':
               return 'bg-green-600 text-white border-2 border-border shadow-[2px_2px_0px_0px_var(--border)]';
             case 'acknowledged':
@@ -389,91 +292,6 @@ export function KeamananDataTable({
       }
     },
     {
-      accessorKey: 'image_url',
-      header: 'Gambar',
-      cell: ({ row }) => {
-        const imageUrl = row.getValue('image_url') as string;
-        const deviceName = row.original.device?.name || 'Unknown Device';
-
-        return (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="px-2 py-0 h-auto text-black flex items-center gap-2">
-                <Camera className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-              <DialogHeader>
-                <DialogTitle>Pratinjau Gambar: {deviceName}</DialogTitle>
-              </DialogHeader>
-              <div className="py-4">
-                {/* Menambahkan link agar tetap bisa dibuka di tab baru jika ingin */}
-                <a
-                  href={imageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Buka di tab baru"
-                >
-                  <img
-                    src={imageUrl}
-                    alt={`Deteksi ${deviceName}`}
-                    className="rounded-md border w-full h-auto max-h-[70vh] object-contain"
-                  />
-                </a>
-              </div>
-            </DialogContent>
-          </Dialog>
-        );
-      }
-    },
-    {
-      accessorKey: 'detected',
-      header: 'Terdeteksi?',
-      cell: ({ row }) => {
-        const isDetected = row.getValue('detected');
-
-        // Handle different data types that might come from backend
-        if (
-          isDetected === true ||
-          isDetected === 'true' ||
-          isDetected === 1 ||
-          isDetected === '1'
-        ) {
-          return (
-            <div className="w-6 h-6 bg-green-500 text-white flex items-center justify-center font-bold text-sm rounded">
-              ✓
-            </div>
-          );
-        }
-
-        if (
-          isDetected === false ||
-          isDetected === 'false' ||
-          isDetected === 0 ||
-          isDetected === '0'
-        ) {
-          return (
-            <div className="w-6 h-6 bg-red-500 text-white flex items-center justify-center font-bold text-sm rounded">
-              ✗
-            </div>
-          );
-        }
-
-        // If null, undefined, or any other value, show dash
-        return (
-          <div className="w-6 h-6 bg-gray-500 text-white flex items-center justify-center font-bold text-sm rounded">
-            -
-          </div>
-        );
-      }
-    },
-    {
-      accessorKey: 'attributes',
-      header: 'Atribut',
-      meta: { className: 'hidden md:table-cell' },
-      cell: ({ row }) => <AttributeDetails data={row.getValue('attributes')} />
-    },
-    {
       accessorKey: 'created_at',
       header: 'Waktu',
       cell: ({ row }) =>
@@ -481,6 +299,7 @@ export function KeamananDataTable({
     },
     {
       id: 'actions',
+      header: '',
       cell: ({ row }) => (
         <Button size="sm" onClick={() => row.toggleExpanded()}>
           {row.getIsExpanded() ? 'Tutup' : 'Review'}
@@ -497,32 +316,26 @@ export function KeamananDataTable({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
-    // --- 5. Tambahkan konfigurasi 'expanded' ---
     getExpandedRowModel: getExpandedRowModel(),
     onExpandedChange: setExpanded,
-    state: {
-      columnFilters,
-      expanded,
-      columnVisibility
-    }
+    state: { columnFilters, expanded, columnVisibility }
   });
 
   const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
     router.push(`${pathname}?${params.toString()}`);
   };
 
   const handleRowsPerPageChange = (perPage: number) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('per_page', perPage.toString());
-    params.set('page', '1'); // Reset to first page
+    params.set('page', '1');
     router.push(`${pathname}?${params.toString()}`);
   };
 
   return (
     <div className="w-full space-y-4">
-      {/* Toolbar: Filter dan Column Toggle */}
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter status..."
@@ -560,10 +373,8 @@ export function KeamananDataTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              // --- 6. Modifikasi rendering TableBody ---
               table.getRowModel().rows.map((row) => (
                 <React.Fragment key={row.id}>
-                  {/* Baris data asli */}
                   <TableRow
                     data-state={row.getIsSelected() && 'selected'}
                     className={
@@ -587,21 +398,16 @@ export function KeamananDataTable({
                       </TableCell>
                     ))}
                   </TableRow>
-
-                  {/* Baris 'expanded' yang kondisional */}
                   {row.getIsExpanded() && (
                     <TableRow className="transition-all duration-300 ease-in-out">
                       <TableCell
                         colSpan={row.getVisibleCells().length}
                         className="max-w-full overflow-hidden"
                       >
-                        {/* Render komponen form di sini */}
                         <ExpandableReviewForm
                           log={row.original}
                           onLogUpdate={onLogUpdate}
-                          onSuccess={() => {
-                            row.toggleExpanded(false); // Tutup baris setelah sukses
-                          }}
+                          onSuccess={() => row.toggleExpanded(false)}
                         />
                       </TableCell>
                     </TableRow>
@@ -622,7 +428,7 @@ export function KeamananDataTable({
         </Table>
       </div>
 
-      {/* Footer Paginasi */}
+      {/* Pagination */}
       {data.length > 0 && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2">
           <div className="text-sm text-muted-foreground">
@@ -630,7 +436,6 @@ export function KeamananDataTable({
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
             <div className="flex items-center space-x-4">
-              {/* Kontrol Baris per Halaman */}
               <div className="flex items-center space-x-2">
                 <p className="text-sm font-medium whitespace-nowrap">Baris</p>
                 <Select
@@ -652,47 +457,37 @@ export function KeamananDataTable({
                 </Select>
               </div>
 
-              {/* Info Halaman & Tombol Navigasi */}
               <div className="flex items-center space-x-2">
                 <Button
                   className="hidden h-8 w-8 p-0 lg:flex"
                   onClick={() => handlePageChange(1)}
-                  disabled={pagination?.current_page === 1}
+                  disabled={currentPage === 1}
                 >
                   <ChevronsLeft className="h-4 w-4" />
                 </Button>
                 <Button
                   className="h-8 w-8 p-0"
-                  onClick={() =>
-                    handlePageChange((pagination?.current_page || 1) - 1)
-                  }
-                  disabled={pagination?.current_page === 1}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
 
                 <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                  {pagination?.current_page || 1} /{' '}
-                  {pagination?.total_pages || 1}
+                  {currentPage} / {totalPages}
                 </div>
 
                 <Button
                   className="h-8 w-8 p-0"
-                  onClick={() =>
-                    handlePageChange((pagination?.current_page || 1) + 1)
-                  }
-                  disabled={
-                    pagination?.current_page === pagination?.total_pages
-                  }
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage >= totalPages}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
                 <Button
                   className="hidden h-8 w-8 p-0 lg:flex"
-                  onClick={() => handlePageChange(pagination?.total_pages || 1)}
-                  disabled={
-                    pagination?.current_page === pagination?.total_pages
-                  }
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={currentPage >= totalPages}
                 >
                   <ChevronsRight className="h-4 w-4" />
                 </Button>

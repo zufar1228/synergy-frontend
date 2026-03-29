@@ -527,11 +527,13 @@ export function IntrusiDataTable({
   const [isBulkSubmitting, setIsBulkSubmitting] = React.useState(false);
   const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1);
   const { isAdmin } = useUserRole();
-  const { isAdmin } = useUserRole();
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
 
   const columnVisibility: VisibilityState = React.useMemo(
-    () => (isAdmin ? {} : { actions: false, select: false, expander: false }),
+    () =>
+      isAdmin
+        ? ({} as VisibilityState)
+        : { actions: false, select: false, expander: false },
     [isAdmin]
   );
 
