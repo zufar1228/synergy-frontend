@@ -654,11 +654,11 @@ export function KeamananDataTable({
           }
           className="max-w-sm"
         />
-        <div className="flex items-center gap-1 border-2 border-border rounded-base p-0.5">
+        <div className="flex items-center gap-2">
           <Button
             variant={viewMode === 'table' ? 'default' : 'neutral'}
             size="sm"
-            className="h-8 px-2.5"
+            className="h-8 px-3"
             onClick={() => setViewMode('table')}
           >
             <TableIcon className="h-4 w-4" />
@@ -667,7 +667,7 @@ export function KeamananDataTable({
           <Button
             variant={viewMode === 'card' ? 'default' : 'neutral'}
             size="sm"
-            className="h-8 px-2.5"
+            className="h-8 px-3"
             onClick={() => setViewMode('card')}
           >
             <LayoutGrid className="h-4 w-4" />
