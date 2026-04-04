@@ -1,10 +1,11 @@
 // frontend/lib/api/users.ts
 import { apiFetch } from './client';
+import { env } from '@/lib/env';
 import type {
   User,
   Profile,
   VerifyAccessResponse,
-  NotificationPreference,
+  NotificationPreference
 } from './types';
 
 // --- Access Verification ---
@@ -13,7 +14,7 @@ export const verifyUserAccess = async (
   token: string
 ): Promise<VerifyAccessResponse> => {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/users/verify-access`,
+    `${env.NEXT_PUBLIC_API_URL}/api/users/verify-access`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   return res.json();
@@ -30,7 +31,7 @@ export const inviteUser = (
 ): Promise<any> =>
   apiFetch('/users/invite', token, {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
 export const deleteUser = (id: string, token: string): Promise<void> =>
@@ -47,7 +48,7 @@ export const updateMyProfile = (
 ): Promise<Profile> =>
   apiFetch('/users/me', token, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
 // --- Role & Status ---
@@ -59,7 +60,7 @@ export const updateUserRole = (
 ): Promise<any> =>
   apiFetch(`/users/${userId}/role`, token, {
     method: 'PUT',
-    body: JSON.stringify({ role }),
+    body: JSON.stringify({ role })
   });
 
 export const updateUserStatus = (
@@ -69,7 +70,7 @@ export const updateUserStatus = (
 ): Promise<any> =>
   apiFetch(`/users/${userId}/status`, token, {
     method: 'PUT',
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status })
   });
 
 // --- Preferences ---
@@ -85,15 +86,14 @@ export const updateMyPreferences = (
 ): Promise<NotificationPreference[]> =>
   apiFetch('/users/me/preferences', token, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
 // --- Push Notifications ---
 
 export const getVapidPublicKey = (
   token: string
-): Promise<{ publicKey: string }> =>
-  apiFetch('/users/push/vapid-key', token);
+): Promise<{ publicKey: string }> => apiFetch('/users/push/vapid-key', token);
 
 export const subscribeToPush = (
   token: string,
@@ -101,7 +101,7 @@ export const subscribeToPush = (
 ): Promise<{ message: string }> =>
   apiFetch('/users/push/subscribe', token, {
     method: 'POST',
-    body: JSON.stringify({ subscription }),
+    body: JSON.stringify({ subscription })
   });
 
 export const testPushNotification = (

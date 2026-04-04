@@ -1,8 +1,14 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig
+} from '@/components/ui/chart';
 import { PieChart as PieChartIcon } from 'lucide-react';
 import type { IntrusiLog } from '@/lib/api';
 
@@ -43,10 +49,21 @@ export function IntrusiEventChart({ logs }: IntrusiEventChartProps) {
         name: EVENT_LABELS[type] || type,
         value: count,
         type,
-        color: EVENT_COLORS[type] || '#94a3b8'
+        fill: EVENT_COLORS[type] || '#94a3b8'
       }))
       .sort((a, b) => b.value - a.value);
   }, [logs]);
+
+  const chartConfig = useMemo<ChartConfig>(() => {
+    const config: ChartConfig = {};
+    for (const entry of chartData) {
+      config[entry.type] = {
+        label: entry.name,
+        color: entry.fill
+      };
+    }
+    return config;
+  }, [chartData]);
 
   if (chartData.length === 0) {
     return (
@@ -76,41 +93,43 @@ export function IntrusiEventChart({ logs }: IntrusiEventChartProps) {
       </CardHeader>
       <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-          <div className="w-[140px] h-[140px] sm:w-[170px] sm:h-[170px] shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="55%"
-                  outerRadius="85%"
-                  paddingAngle={2}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {chartData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const d = payload[0].payload;
-                    return (
-                      <div className="rounded-base border-2 border-border bg-background px-3 py-2 shadow-md">
-                        <p className="font-semibold text-sm">{d.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {d.value} event ({Math.round((d.value / total) * 100)}
-                          %)
-                        </p>
-                      </div>
-                    );
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <ChartContainer
+            config={chartConfig}
+            className="w-[140px] h-[140px] sm:w-[170px] sm:h-[170px] shrink-0 !aspect-square"
+          >
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                innerRadius="55%"
+                outerRadius="85%"
+                paddingAngle={2}
+                dataKey="value"
+                nameKey="type"
+                stroke="none"
+              >
+                {chartData.map((entry, i) => (
+                  <Cell key={i} fill={entry.fill} />
+                ))}
+              </Pie>
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    formatter={(value, name) => {
+                      const v = Number(value);
+                      return (
+                        <span>
+                          {v} event ({Math.round((v / total) * 100)}%)
+                        </span>
+                      );
+                    }}
+                    nameKey="type"
+                  />
+                }
+              />
+            </PieChart>
+          </ChartContainer>
           <div className="flex flex-wrap sm:flex-col gap-x-4 gap-y-1.5 sm:gap-y-2 justify-center sm:justify-start">
             {chartData.map((entry) => (
               <div
@@ -119,7 +138,7 @@ export function IntrusiEventChart({ logs }: IntrusiEventChartProps) {
               >
                 <span
                   className="inline-block h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full shrink-0"
-                  style={{ backgroundColor: entry.color }}
+                  style={{ backgroundColor: entry.fill }}
                 />
                 <span className="text-foreground/80">{entry.name}</span>
                 <span className="font-semibold ml-auto tabular-nums">

@@ -11,7 +11,8 @@ import {
   getActiveAlerts,
   ActiveAlert
 } from '@/lib/api';
-import { useApiSWR } from '@/hooks/use-swr-api';
+import { useApiQuery } from '@/hooks/use-api-query';
+import { useQueryClient } from '@tanstack/react-query';
 import WarehouseCard from '@/components/shared/WarehouseCard'; // <-- Import WarehouseCard sebagai default
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -82,42 +83,36 @@ const AreaCard = ({
 
 export default function DashboardPage() {
   const { selectedWarehouse, setSelectedWarehouse } = useWarehouse();
+  const queryClient = useQueryClient();
 
-  // SWR: fetch all warehouses when 'all' is selected
-  const allWarehousesFetcher = React.useCallback(
-    (token: string) => getWarehouses(token),
-    []
-  );
+  // TanStack Query: fetch all warehouses when 'all' is selected
   const {
     data: warehouses,
     error: allError,
     isLoading: allLoading
-  } = useApiSWR(
-    selectedWarehouse === 'all' || !selectedWarehouse ? 'dashboard-all' : null,
-    allWarehousesFetcher
+  } = useApiQuery(
+    selectedWarehouse === 'all' || !selectedWarehouse
+      ? ['dashboard-all']
+      : null,
+    (token) => getWarehouses(token)
   );
 
-  // SWR: fetch single warehouse details + alerts when a specific warehouse is selected
-  const singleFetcher = React.useCallback(
-    async (token: string) => {
+  // TanStack Query: fetch single warehouse details + alerts when a specific warehouse is selected
+  const {
+    data: singleData,
+    error: singleError,
+    isLoading: singleLoading
+  } = useApiQuery(
+    selectedWarehouse && selectedWarehouse !== 'all'
+      ? ['dashboard-single', selectedWarehouse]
+      : null,
+    async (token) => {
       const [details, alerts] = await Promise.all([
         getWarehouseDetails(selectedWarehouse!, token),
         getActiveAlerts(selectedWarehouse!, token)
       ]);
       return { details, alerts };
-    },
-    [selectedWarehouse]
-  );
-  const {
-    data: singleData,
-    error: singleError,
-    isLoading: singleLoading,
-    mutate: mutateSingle
-  } = useApiSWR(
-    selectedWarehouse && selectedWarehouse !== 'all'
-      ? ['dashboard-single', selectedWarehouse]
-      : null,
-    singleFetcher
+    }
   );
 
   const loading = allLoading || singleLoading;
@@ -144,7 +139,7 @@ export default function DashboardPage() {
     const handleDbChange = () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
-        mutateSingle(); // SWR revalidation
+        queryClient.invalidateQueries({ queryKey: ['dashboard-single'] });
       }, 500);
     };
 
@@ -165,7 +160,7 @@ export default function DashboardPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [mutateSingle]);
+  }, [queryClient]);
 
   if (loading) {
     return <Skeleton className="h-64 w-full" />;

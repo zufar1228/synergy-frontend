@@ -1,34 +1,34 @@
 // frontend/hooks/use-user-profile.ts
-"use client";
+'use client';
 
-import { useCallback } from "react";
-import { useApiSWR } from "./use-swr-api";
-import { getMyProfile } from "@/lib/api";
-import type { Profile } from "@/lib/api";
+import { useCallback } from 'react';
+import { useApiQuery } from './use-api-query';
+import { getMyProfile } from '@/lib/api';
+import type { Profile } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
 
-/**
- * SWR hook for the current user's profile.
- * Cached globally — used by header, sidebar, profile page.
- */
 export function useUserProfile() {
-  const fetcher = useCallback(
-    (token: string) => getMyProfile(token),
-    []
-  );
+  const fetcher = useCallback((token: string) => getMyProfile(token), []);
 
-  const { data, error, isLoading, mutate } = useApiSWR<Profile>(
-    "user-profile",
+  const { data, error, isLoading } = useApiQuery<Profile>(
+    ['user-profile'],
     fetcher,
     {
-      revalidateOnFocus: false, // Profile rarely changes
-      dedupingInterval: 60000,  // Cache for 60s
+      refetchOnWindowFocus: false,
+      staleTime: 60000
     }
+  );
+
+  const queryClient = useQueryClient();
+  const mutate = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ['user-profile'] }),
+    [queryClient]
   );
 
   return {
     profile: data ?? null,
     loading: isLoading,
     error: error?.message ?? null,
-    mutate,
+    mutate
   };
 }

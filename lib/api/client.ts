@@ -1,6 +1,8 @@
 // frontend/lib/api/client.ts
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL + '/api';
+import { env } from '@/lib/env';
+
+export const API_BASE_URL = env.NEXT_PUBLIC_API_URL + '/api';
 
 export type ApiError = Error & { status?: number };
 
@@ -30,7 +32,7 @@ export async function apiFetch<T>(
   options?: RequestInit
 ): Promise<T> {
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${token}`
   };
 
   // Add Content-Type for requests with body
@@ -40,7 +42,7 @@ export async function apiFetch<T>(
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
-    headers: { ...headers, ...(options?.headers as Record<string, string>) },
+    headers: { ...headers, ...(options?.headers as Record<string, string>) }
   });
 
   if (!res.ok) {

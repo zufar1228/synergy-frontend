@@ -1,6 +1,7 @@
 // frontend/app/(main)/[warehouseId]/dashboard/page.tsx
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { env } from '@/lib/env';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin } from 'lucide-react';
 import Link from 'next/link';
@@ -29,8 +30,7 @@ async function getWarehouseDetails(
 ): Promise<WarehouseDetails | null> {
   try {
     const res = await fetch(
-      process.env.NEXT_PUBLIC_API_URL +
-        `/api/warehouses/${id}/areas-with-systems`,
+      env.NEXT_PUBLIC_API_URL + `/api/warehouses/${id}/areas-with-systems`,
       {
         cache: 'no-store',
         headers: {

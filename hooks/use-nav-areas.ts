@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
-import { useCallback } from "react";
-import { useApiSWR } from "./use-swr-api";
-import { getNavAreasBySystem } from "@/lib/api";
-import type { NavArea } from "@/lib/api";
+import { useCallback } from 'react';
+import { useApiQuery } from './use-api-query';
+import { getNavAreasBySystem } from '@/lib/api';
+import type { NavArea } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface NavAreasData {
   keamanan: NavArea[];
@@ -11,31 +12,29 @@ interface NavAreasData {
   lingkungan: NavArea[];
 }
 
-/**
- * SWR hook for fetching navigation areas for all system types.
- * Fetches keamanan, intrusi, and lingkungan areas in parallel.
- * Cached globally so sidebar navigation doesn't re-fetch on every render.
- */
 export function useNavAreas() {
-  const fetcher = useCallback(
-    async (token: string): Promise<NavAreasData> => {
-      const [keamanan, intrusi, lingkungan] = await Promise.all([
-        getNavAreasBySystem("keamanan", token),
-        getNavAreasBySystem("intrusi", token),
-        getNavAreasBySystem("lingkungan", token),
-      ]);
-      return { keamanan, intrusi, lingkungan };
-    },
-    []
-  );
+  const fetcher = useCallback(async (token: string): Promise<NavAreasData> => {
+    const [keamanan, intrusi, lingkungan] = await Promise.all([
+      getNavAreasBySystem('keamanan', token),
+      getNavAreasBySystem('intrusi', token),
+      getNavAreasBySystem('lingkungan', token)
+    ]);
+    return { keamanan, intrusi, lingkungan };
+  }, []);
 
-  const { data, error, isLoading, mutate } = useApiSWR<NavAreasData>(
-    "nav-areas",
+  const { data, error, isLoading } = useApiQuery<NavAreasData>(
+    ['nav-areas'],
     fetcher,
     {
-      revalidateOnFocus: false, // Navigation data rarely changes
-      dedupingInterval: 30000,  // Cache for 30s
+      refetchOnWindowFocus: false,
+      staleTime: 30000
     }
+  );
+
+  const queryClient = useQueryClient();
+  const mutate = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ['nav-areas'] }),
+    [queryClient]
   );
 
   return {
@@ -44,6 +43,6 @@ export function useNavAreas() {
     lingkunganAreas: data?.lingkungan ?? [],
     error,
     isLoading,
-    mutate,
+    mutate
   };
 }

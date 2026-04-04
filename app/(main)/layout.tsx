@@ -7,7 +7,7 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { getMyProfile } from '@/lib/api';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { SiteHeader } from '@/components/site-header';
-import { SWRProvider } from '@/components/providers/swr-provider';
+import { QueryProvider } from '@/components/providers/query-provider';
 import { SessionRefresh } from '@/components/session-refresh';
 import { redirect } from 'next/navigation';
 export default async function MainAppLayout({
@@ -54,7 +54,7 @@ export default async function MainAppLayout({
   return (
     <WarehouseProvider>
       <DeviceStatusProvider>
-        <SWRProvider>
+        <QueryProvider>
           <SessionRefresh />
           <SidebarProvider>
             <div className="flex h-screen w-full bg-secondary">
@@ -78,7 +78,7 @@ export default async function MainAppLayout({
               </SidebarInset>
             </div>
           </SidebarProvider>
-        </SWRProvider>
+        </QueryProvider>
       </DeviceStatusProvider>
     </WarehouseProvider>
   );

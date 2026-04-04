@@ -1,6 +1,7 @@
 // frontend/app/(main)/[warehouseId]/[areaId]/[systemType]/page.tsx
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { env } from '@/lib/env';
 
 import { KeamananView } from '@/features/keamanan/components/KeamananView';
 import { IntrusiView } from '@/features/intrusi/components/IntrusiView';
@@ -36,7 +37,7 @@ async function getAnalytics(
     if (params.door_state) query.append('door_state', params.door_state);
 
     const url =
-      process.env.NEXT_PUBLIC_API_URL +
+      env.NEXT_PUBLIC_API_URL +
       `/api/analytics/${params.systemType}?${query.toString()}`;
     const res = await fetch(url, {
       cache: 'no-store',
