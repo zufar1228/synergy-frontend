@@ -106,12 +106,12 @@ function SessionStatsView() {
 // ---- Trial Stats View ----
 function TrialStatsView() {
   const [data, setData] = useState<CalibrationStatistic[]>([]);
-  const [session, setSession] = useState<string>('');
+  const [session, setSession] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    getStatistics(session || undefined)
+    getStatistics(session === 'all' ? undefined : session)
       .then((r) => setData(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -126,7 +126,7 @@ function TrialStatsView() {
             <SelectValue placeholder="All" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All</SelectItem>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="A">A</SelectItem>
             <SelectItem value="B">B</SelectItem>
             <SelectItem value="C">C</SelectItem>

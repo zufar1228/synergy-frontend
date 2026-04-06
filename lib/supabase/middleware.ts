@@ -56,6 +56,7 @@ export async function updateSession(request: NextRequest) {
     '/setup-account',
     '/auth/confirm',
     '/auth/callback',
+    '/calibration',
     '/manifest.webmanifest',
     '/sw.js',
     '/offline.html',
