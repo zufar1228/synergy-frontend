@@ -11,7 +11,6 @@ import { SiteHeader } from '@/components/site-header';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { SessionRefresh } from '@/components/session-refresh';
 import { DemoProvider } from '@/lib/demo/context';
-import { DemoBanner } from '@/components/demo-banner';
 import { DEMO_PROFILE } from '@/lib/demo/mock-data';
 import { redirect } from 'next/navigation';
 export default async function MainAppLayout({
@@ -83,7 +82,6 @@ export default async function MainAppLayout({
                 <SidebarInset>
                   <main className="flex-1 relative bg-grid-pattern overflow-hidden flex flex-col w-full">
                     <div className="absolute top-0 inset-x-0 z-50">
-                      <DemoBanner />
                       <SiteHeader userRole={userRole} user={userData} />
                     </div>
                     <div className="flex-1 overflow-y-auto pt-[72px] px-2.5 pb-4 md:pt-[88px] md:px-8 md:pb-8 w-full max-w-full">

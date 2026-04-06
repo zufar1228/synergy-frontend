@@ -1,5 +1,6 @@
 // frontend/app/(main)/management/devices/page.tsx
 
+import { cookies } from "next/headers";
 import { getDevices, Device } from "@/lib/api";
 import {
   AddDeviceButton,
@@ -15,16 +16,25 @@ import {
 } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { CopyButton } from "@/components/shared/copy-button"; // <-- IMPORT KOMPONEN BARU
+import { CopyButton } from "@/components/shared/copy-button";
+import { DEMO_DEVICES } from "@/lib/demo/mock-data";
 
 export default async function ManageDevicesPage() {
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) return redirect("/login");
+  const cookieStore = await cookies();
+  const isDemoMode = cookieStore.get('demo-mode')?.value === 'true';
 
-  const devices: Device[] = await getDevices(session.access_token);
+  let devices: Device[] = [];
+
+  if (isDemoMode) {
+    devices = DEMO_DEVICES as any;
+  } else {
+    const supabase = await createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return redirect("/login");
+    devices = await getDevices(session.access_token);
+  }
 
   return (
     <div>

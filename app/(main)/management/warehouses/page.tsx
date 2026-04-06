@@ -1,4 +1,5 @@
 // frontend/app/(main)/management/warehouses/page.tsx
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import {
@@ -13,26 +14,27 @@ import {
   AddWarehouseButton,
   WarehouseActionButtons,
 } from "@/components/actions/WarehouseActions";
-import { Warehouse, getWarehouses } from "@/lib/api"; // <-- Impor getWarehouses dari lib/api
-
-// Fungsi getWarehouses lokal yang lama sudah dihapus
+import { Warehouse, getWarehouses } from "@/lib/api";
+import { DEMO_WAREHOUSES } from "@/lib/demo/mock-data";
 
 export default async function ManageWarehousesPage() {
-  // 1. Buat Supabase client untuk server
-  const supabase = await createClient();
+  const cookieStore = await cookies();
+  const isDemoMode = cookieStore.get('demo-mode')?.value === 'true';
 
-  // 2. Dapatkan sesi pengguna
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  let warehouses: Warehouse[] = [];
 
-  // 3. Jika tidak ada sesi, alihkan ke halaman login
-  if (!session) {
-    redirect("/login");
+  if (isDemoMode) {
+    warehouses = DEMO_WAREHOUSES as any;
+  } else {
+    const supabase = await createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      redirect("/login");
+    }
+    warehouses = await getWarehouses(session.access_token);
   }
-
-  // 4. Panggil fungsi API terpusat dengan access_token
-  const warehouses: Warehouse[] = await getWarehouses(session.access_token);
 
   return (
     <div>

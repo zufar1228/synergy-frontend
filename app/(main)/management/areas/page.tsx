@@ -1,4 +1,5 @@
 // frontend/app/(main)/management/areas/page.tsx
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getAreas, Area } from "@/lib/api";
@@ -14,23 +15,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DEMO_AREAS } from "@/lib/demo/mock-data";
 
 export default async function ManageAreasPage() {
-  // 1. Buat Supabase client untuk server
-  const supabase = await createClient();
+  const cookieStore = await cookies();
+  const isDemoMode = cookieStore.get('demo-mode')?.value === 'true';
 
-  // 2. Dapatkan sesi pengguna
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  let areas: Area[] = [];
 
-  // 3. Jika tidak ada sesi, alihkan ke halaman login
-  if (!session) {
-    redirect("/login");
+  if (isDemoMode) {
+    areas = DEMO_AREAS as any;
+  } else {
+    const supabase = await createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      redirect("/login");
+    }
+    areas = await getAreas(session.access_token);
   }
-
-  // 4. Panggil fungsi API dengan menyertakan access_token
-  const areas: Area[] = await getAreas(session.access_token);
 
   return (
     <div>

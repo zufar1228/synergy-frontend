@@ -1,4 +1,5 @@
 // frontend/app/(main)/management/users/page.tsx
+import { cookies } from "next/headers";
 import { getUsers, User } from "@/lib/api";
 import {
   InviteUserButton,
@@ -19,20 +20,28 @@ import { format } from "date-fns";
 import { cache } from "react";
 import { Separator } from "@/components/ui/separator";
 import TelegramManager from "@/components/telegram/TelegramManager";
+import { DEMO_USERS } from "@/lib/demo/mock-data";
 
-// Cache users data with shorter TTL since it can change
 const getCachedUsers = cache(async (token: string) => {
   return await getUsers(token);
 });
 
 export default async function ManageUsersPage() {
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) return redirect("/login");
+  const cookieStore = await cookies();
+  const isDemoMode = cookieStore.get('demo-mode')?.value === 'true';
 
-  const users: User[] = await getCachedUsers(session.access_token);
+  let users: User[] = [];
+
+  if (isDemoMode) {
+    users = DEMO_USERS as any;
+  } else {
+    const supabase = await createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return redirect("/login");
+    users = await getCachedUsers(session.access_token);
+  }
 
   return (
     <div>
