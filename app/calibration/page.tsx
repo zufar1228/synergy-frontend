@@ -13,7 +13,7 @@ export default function CalibrationPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   return (
-    <div className="container mx-auto p-4 space-y-6 max-w-5xl">
+    <div className="container mx-auto p-4 space-y-6 max-w-5xl h-screen overflow-y-auto">
       <div>
         <h1 className="text-2xl font-bold">MPU6050 Calibration Control</h1>
         <p className="text-muted-foreground">
