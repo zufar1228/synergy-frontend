@@ -5,6 +5,18 @@ import { jwtDecode } from 'jwt-decode';
 import { env } from '@/lib/env';
 
 export async function updateSession(request: NextRequest) {
+  // --- Demo Mode Bypass ---
+  const isDemoMode = request.cookies.get('demo-mode')?.value === 'true';
+  if (isDemoMode) {
+    const requestedPath = request.nextUrl.pathname;
+    // In demo mode, allow /login to redirect to dashboard (consistent behavior)
+    if (requestedPath === '/login') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    // Allow all other routes through
+    return NextResponse.next({ request: { headers: request.headers } });
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers

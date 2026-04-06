@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { logout } from '@/app/login/actions';
+import { useDemo } from '@/lib/demo/context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ interface NavUserProps {
 export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
   const router = useRouter();
+  const { isDemo, exitDemo } = useDemo();
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const { profile } = useUserProfile();
@@ -226,15 +228,25 @@ export function NavUser({ user }: NavUserProps) {
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <form action={logout} className="w-full">
+              {isDemo ? (
                 <button
-                  type="submit"
+                  onClick={exitDemo}
                   className="w-full text-left flex items-center gap-2"
                 >
                   <LogOut />
-                  <span>Keluar</span>
+                  <span>Keluar Demo</span>
                 </button>
-              </form>
+              ) : (
+                <form action={logout} className="w-full">
+                  <button
+                    type="submit"
+                    className="w-full text-left flex items-center gap-2"
+                  >
+                    <LogOut />
+                    <span>Keluar</span>
+                  </button>
+                </form>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

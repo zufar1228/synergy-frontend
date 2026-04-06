@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { KeamananDataTable } from './KeamananDataTable';
 import { createClient } from '@/lib/supabase/client';
+import { isDemoMode } from '@/lib/demo/api-interceptor';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { AnimatedPageTitle } from '@/components/shared/AnimatedPageTitle';
 import { cn } from '@/lib/utils';
@@ -192,6 +193,8 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
 
   // ---- Realtime ----
   useEffect(() => {
+    if (isDemoMode()) return;
+
     const supabase = createClient();
     const channel = supabase
       .channel('realtime-keamanan')

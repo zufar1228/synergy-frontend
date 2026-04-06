@@ -4,11 +4,15 @@
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { isDemoMode } from "@/lib/demo/api-interceptor";
 
 export function SessionRefresh() {
   const router = useRouter();
 
   useEffect(() => {
+    // Skip all auth listeners in demo mode
+    if (isDemoMode()) return;
+
     const supabase = createClient();
 
     // Listen to auth state changes

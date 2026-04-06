@@ -9,11 +9,17 @@ import {
 } from '@tanstack/react-query';
 import { useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { isDemoMode } from '@/lib/demo/api-interceptor';
 
 function useAuthToken() {
   const supabaseRef = useRef(createClient());
 
   return useCallback(async (): Promise<string> => {
+    // In demo mode, skip Supabase and return a static token
+    if (isDemoMode()) {
+      return 'DEMO_TOKEN';
+    }
+
     const {
       data: { session }
     } = await supabaseRef.current.auth.getSession();

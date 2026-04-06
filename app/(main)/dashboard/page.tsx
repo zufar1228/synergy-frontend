@@ -13,6 +13,7 @@ import {
 } from '@/lib/api';
 import { useApiQuery } from '@/hooks/use-api-query';
 import { useQueryClient } from '@tanstack/react-query';
+import { isDemoMode } from '@/lib/demo/api-interceptor';
 import WarehouseCard from '@/components/shared/WarehouseCard'; // <-- Import WarehouseCard sebagai default
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -134,6 +135,8 @@ export default function DashboardPage() {
 
   // --- EFEK BARU UNTUK REAL-TIME SUBSCRIPTION ---
   React.useEffect(() => {
+    if (isDemoMode()) return;
+
     const supabase = createClient();
     let debounceTimer: NodeJS.Timeout;
     const handleDbChange = () => {

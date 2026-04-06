@@ -37,6 +37,7 @@ import { LingkunganDataTable } from './LingkunganDataTable';
 import type { LingkunganLog } from '@/lib/api';
 import { AnimatedPageTitle } from '@/components/shared/AnimatedPageTitle';
 import { useUserRole } from '@/hooks/use-user-role';
+import { isDemoMode } from '@/lib/demo/api-interceptor';
 
 export const LingkunganView = ({ initialData }: { initialData: any }) => {
   const params = useParams();
@@ -99,14 +100,18 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
 
   // Fetch device info & status
   const fetchData = useCallback(async () => {
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
-    if (!session) return;
+    let token: string;
+    if (isDemoMode()) {
+      token = 'DEMO_TOKEN';
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      token = session.access_token;
+    }
 
     try {
       const device = await getDeviceDetailsByArea(
-        session.access_token,
+        token,
         areaId,
         'lingkungan'
       );
@@ -116,7 +121,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
         setDeviceDbStatus(device.status);
 
         const status = await getLingkunganStatus(
-          session.access_token,
+          token,
           device.id
         );
         if (status) {
@@ -171,15 +176,19 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
     setChartPredictions([]);
 
     (async () => {
-      const {
-        data: { session }
-      } = await supabase.auth.getSession();
-      if (!session) return;
+      let token: string;
+      if (isDemoMode()) {
+        token = 'DEMO_TOKEN';
+      } else {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        token = session.access_token;
+      }
 
       try {
         // request limit 200 to give us room for trimming to 120 later
         const res = await getLingkunganChart(
-          session.access_token,
+          token,
           deviceId,
           fromParam || undefined,
           toParam || undefined,
@@ -257,6 +266,8 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
 
   // Realtime subscription for sensor data
   useEffect(() => {
+    if (isDemoMode()) return;
+
     const channel = supabase
       .channel('realtime-lingkungan')
       .on(
@@ -322,6 +333,8 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
 
   // Realtime subscription for predictions
   useEffect(() => {
+    if (isDemoMode()) return;
+
     const predChannel = supabase
       .channel('realtime-predictions')
       .on(
@@ -362,7 +375,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
 
   // Realtime device status
   useEffect(() => {
-    if (!deviceId) return;
+    if (!deviceId || isDemoMode()) return;
 
     const deviceChannel = supabase
       .channel(`lingkungan-device-status-${deviceId}`)
@@ -400,17 +413,21 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
     if (!deviceId) return;
     setIsSending(true);
 
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
-    if (!session) {
-      toast.error('Sesi tidak valid.');
-      setIsSending(false);
-      return;
+    let token: string;
+    if (isDemoMode()) {
+      token = 'DEMO_TOKEN';
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Sesi tidak valid.');
+        setIsSending(false);
+        return;
+      }
+      token = session.access_token;
     }
 
     try {
-      await sendLingkunganControl(session.access_token, deviceId, command);
+      await sendLingkunganControl(token, deviceId, command);
       toast.success('Perintah berhasil dikirim.');
 
       if (command.fan) setFanState(command.fan);

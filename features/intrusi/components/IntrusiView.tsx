@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IntrusiDataTable } from './IntrusiDataTable';
 import { IntrusiDeviceControls } from './IntrusiDeviceControls';
 import { createClient } from '@/lib/supabase/client';
+import { isDemoMode } from '@/lib/demo/api-interceptor';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { IntrusiLog } from '@/lib/api';
 import { useDeviceStatus } from '@/contexts/DeviceStatusContext';
@@ -173,6 +174,8 @@ export const IntrusiView = ({ initialData }: { initialData: any }) => {
 
   // Realtime subscription
   useEffect(() => {
+    if (isDemoMode()) return;
+
     const supabase = createClient();
     const channel = supabase
       .channel('realtime-intrusi')

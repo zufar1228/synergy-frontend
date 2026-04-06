@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { isDemoMode } from '@/lib/demo/api-interceptor';
 import {
   getDeviceDetailsByArea,
   sendIntrusiCommand,
@@ -76,15 +77,19 @@ export const IntrusiDeviceControls = ({
 
   // Fetch device details + intrusi status
   const fetchData = useCallback(async () => {
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
-    if (!session) return;
+    let token: string;
+    if (isDemoMode()) {
+      token = 'DEMO_TOKEN';
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      token = session.access_token;
+    }
 
     try {
       // Get device for this area
       const device = await getDeviceDetailsByArea(
-        session.access_token,
+        token,
         areaId,
         'intrusi'
       );
@@ -102,7 +107,7 @@ export const IntrusiDeviceControls = ({
         if (device.vbat_pct != null) setVbatPct(device.vbat_pct);
 
         // Get intrusi status
-        const status = await getIntrusiStatus(session.access_token, device.id);
+        const status = await getIntrusiStatus(token, device.id);
         setIntrusiStatus(status);
         // Seed door/system state from intrusi status if device fields are null
         if (!device.door_state && status?.door_state)
@@ -123,7 +128,7 @@ export const IntrusiDeviceControls = ({
 
   // Realtime: listen for device table updates (heartbeat → Online/Offline)
   useEffect(() => {
-    if (!deviceId) return;
+    if (!deviceId || isDemoMode()) return;
 
     const deviceChannel = supabase
       .channel(`intrusi-device-status-${deviceId}`)
@@ -170,6 +175,8 @@ export const IntrusiDeviceControls = ({
 
   // Realtime: listen for new intrusi_logs
   useEffect(() => {
+    if (isDemoMode()) return;
+
     const channel = supabase
       .channel(`intrusi-controls-${areaId}`)
       .on(
@@ -280,17 +287,21 @@ export const IntrusiDeviceControls = ({
     if (!deviceId) return;
     setIsSending(true);
 
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
-    if (!session) {
-      toast.error('Sesi tidak valid.');
-      setIsSending(false);
-      return;
+    let token: string;
+    if (isDemoMode()) {
+      token = 'DEMO_TOKEN';
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Sesi tidak valid.');
+        setIsSending(false);
+        return;
+      }
+      token = session.access_token;
     }
 
     try {
-      await sendIntrusiCommand(session.access_token, deviceId, command);
+      await sendIntrusiCommand(token, deviceId, command);
       toast.success(`Perintah '${command.cmd}' berhasil dikirim.`);
     } catch (error) {
       toast.error((error as Error).message);

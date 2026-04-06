@@ -1,7 +1,9 @@
 // frontend/app/(main)/[warehouseId]/[areaId]/[systemType]/page.tsx
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { env } from '@/lib/env';
+import { getDemoAnalytics } from '@/lib/demo/mock-data';
 
 import { KeamananView } from '@/features/keamanan/components/KeamananView';
 import { IntrusiView } from '@/features/intrusi/components/IntrusiView';
@@ -68,39 +70,48 @@ export default async function AnalyticsPage({
     door_state?: string;
   }; // <-- Add from/to and filters
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  if (!user) return redirect('/login');
-
-  const {
-    data: { session }
-  } = await supabase.auth.getSession();
-  if (!session) return redirect('/login');
-
-  // --- PERBAIKAN: Await params sebelum mengakses properties ---
+  // --- Await params before accessing properties ---
   const awaitedParams = await params;
   const { systemType, areaId } = awaitedParams;
-
-  // --- PERBAIKAN 3: Await searchParams sebelum mengakses properties ---
   const awaitedSearchParams = await searchParams;
   const page = awaitedSearchParams.page || '1';
   const perPage = awaitedSearchParams.per_page || '25';
 
-  // Pass all relevant searchParams to the fetch function
-  const data = await getAnalytics(session.access_token, {
-    systemType,
-    areaId,
-    page: page,
-    perPage: perPage,
-    from: awaitedSearchParams.from,
-    to: awaitedSearchParams.to,
-    status: awaitedSearchParams.status,
-    event_type: awaitedSearchParams.event_type,
-    system_state: awaitedSearchParams.system_state,
-    door_state: awaitedSearchParams.door_state
-  });
+  const cookieStore = await cookies();
+  const isDemoMode = cookieStore.get('demo-mode')?.value === 'true';
+
+  let data: any = null;
+
+  if (isDemoMode) {
+    // Demo mode: return mock analytics data
+    data = getDemoAnalytics(systemType, areaId);
+  } else {
+    // Normal mode: Supabase auth + real API
+    const supabase = await createClient();
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (!user) return redirect('/login');
+
+    const {
+      data: { session }
+    } = await supabase.auth.getSession();
+    if (!session) return redirect('/login');
+
+    // Pass all relevant searchParams to the fetch function
+    data = await getAnalytics(session.access_token, {
+      systemType,
+      areaId,
+      page: page,
+      perPage: perPage,
+      from: awaitedSearchParams.from,
+      to: awaitedSearchParams.to,
+      status: awaitedSearchParams.status,
+      event_type: awaitedSearchParams.event_type,
+      system_state: awaitedSearchParams.system_state,
+      door_state: awaitedSearchParams.door_state
+    });
+  }
 
   if (!data) {
     return (

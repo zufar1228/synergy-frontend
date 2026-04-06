@@ -2,8 +2,10 @@
 import { LoginForm } from '@/components/login-form';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { FlickeringGrid } from '@/components/ui/shadcn-io/flickering-grid';
 import { ContainerTextFlip } from '@/components/ui/container-text-flip';
+import { DemoButton } from '@/components/demo-button';
 
 export default async function LoginPage({
   searchParams
@@ -11,6 +13,12 @@ export default async function LoginPage({
   searchParams: { message: string };
 }) {
   const { message } = await searchParams;
+
+  // Check if already in demo mode
+  const cookieStore = await cookies();
+  if (cookieStore.get('demo-mode')?.value === 'true') {
+    redirect('/dashboard');
+  }
 
   // Check if user is already logged in
   const supabase = await createClient();
@@ -25,6 +33,11 @@ export default async function LoginPage({
 
   return (
     <div className="relative min-h-svh flex flex-col items-center justify-center gap-4 sm:gap-6 p-4 sm:p-6 md:p-10">
+      {/* Demo Button — top-left corner */}
+      <div className="absolute top-4 left-4 z-20 sm:top-6 sm:left-6">
+        <DemoButton />
+      </div>
+
       <FlickeringGrid
         className="absolute inset-0 bg-secondary-background "
         squareSize={4}

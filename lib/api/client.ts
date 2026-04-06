@@ -1,6 +1,7 @@
 // frontend/lib/api/client.ts
 
 import { env } from '@/lib/env';
+import { getDemoResponse, isDemoMode } from '@/lib/demo/api-interceptor';
 
 export const API_BASE_URL = env.NEXT_PUBLIC_API_URL + '/api';
 
@@ -31,6 +32,13 @@ export async function apiFetch<T>(
   token: string,
   options?: RequestInit
 ): Promise<T> {
+  // --- Demo Mode Interception ---
+  if (isDemoMode()) {
+    const method = options?.method || 'GET';
+    const mockData = getDemoResponse(path, method);
+    if (mockData !== null) return mockData as T;
+  }
+
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`
   };
