@@ -32,7 +32,7 @@ export default function CalibrationPage() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-[1fr_auto]">
         <CalibrationControlPanel
           deviceId={deviceId}
           onCommandSent={() => setRefreshTrigger((t) => t + 1)}
