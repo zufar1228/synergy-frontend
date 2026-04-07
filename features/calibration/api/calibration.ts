@@ -7,8 +7,8 @@ async function calFetch<T>(path: string, options?: RequestInit): Promise<T> {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+      ...options?.headers
+    }
   });
 
   if (!res.ok) {
@@ -27,7 +27,7 @@ export const sendCommand = (
 ) =>
   calFetch<{ message: string }>('/command', {
     method: 'POST',
-    body: JSON.stringify({ deviceId, cmd, ...extra }),
+    body: JSON.stringify({ deviceId, cmd, ...extra })
   });
 
 /** Get latest device status */
@@ -35,22 +35,25 @@ export const getDeviceStatus = (deviceId: string) =>
   calFetch<{ data: CalibrationDeviceStatus | null }>(`/status/${deviceId}`);
 
 /** Get raw data, optionally filtered by session */
-export const getRawData = (
-  options?: { session?: string; trial?: number; limit?: number; offset?: number }
-) => {
+export const getRawData = (options?: {
+  session?: string;
+  trial?: number;
+  limit?: number;
+  offset?: number;
+}) => {
   const params = new URLSearchParams();
   if (options?.trial) params.set('trial', options.trial.toString());
   if (options?.limit) params.set('limit', options.limit.toString());
   if (options?.offset) params.set('offset', options.offset.toString());
   const sessionPath = options?.session ? `/data/${options.session}` : '/data';
-  return calFetch<{ data: CalibrationRaw[]; pagination: { total: number; limit: number; offset: number } }>(
-    `${sessionPath}?${params.toString()}`
-  );
+  return calFetch<{
+    data: CalibrationRaw[];
+    pagination: { total: number; limit: number; offset: number };
+  }>(`${sessionPath}?${params.toString()}`);
 };
 
 /** Get distinct session names */
-export const getSessions = () =>
-  calFetch<{ data: string[] }>('/sessions');
+export const getSessions = () => calFetch<{ data: string[] }>('/sessions');
 
 /** Get per-trial statistics */
 export const getStatistics = (session?: string) => {
@@ -73,17 +76,21 @@ export const getPeakSummary = () =>
   calFetch<{ data: CalibrationPeakSummary[] }>('/peak-summary');
 
 /** Get summary data (Session A periodic summaries) */
-export const getSummaryData = (
-  options?: { session?: string; trial?: number; limit?: number; offset?: number }
-) => {
+export const getSummaryData = (options?: {
+  session?: string;
+  trial?: number;
+  limit?: number;
+  offset?: number;
+}) => {
   const params = new URLSearchParams();
   if (options?.session) params.set('session', options.session);
   if (options?.trial) params.set('trial', options.trial.toString());
   if (options?.limit) params.set('limit', options.limit.toString());
   if (options?.offset) params.set('offset', options.offset.toString());
-  return calFetch<{ data: CalibrationSummary[]; pagination: { total: number; limit: number; offset: number } }>(
-    `/summary?${params.toString()}`
-  );
+  return calFetch<{
+    data: CalibrationSummary[];
+    pagination: { total: number; limit: number; offset: number };
+  }>(`/summary?${params.toString()}`);
 };
 
 // Types
@@ -106,7 +113,6 @@ export interface CalibrationRaw {
   session: string;
   trial: number;
   ts_device: number;
-  ts_human: string | null;
   ts_iso: string | null;
   delta_g: number;
   marker: string | null;
@@ -122,7 +128,7 @@ export interface CalibrationStatistic {
   dg_min: number;
   dg_max: number;
   dg_mean: number;
-  dg_stddev: number;
+  dg_stddev: number | null;
 }
 
 export interface CalibrationSessionStat {
@@ -132,10 +138,10 @@ export interface CalibrationSessionStat {
   dg_min: number;
   dg_max: number;
   dg_mean: number;
-  dg_stddev: number;
-  dg_median: number;
-  dg_p95: number;
-  dg_p99: number;
+  dg_stddev: number | null;
+  dg_median: number | null;
+  dg_p95: number | null;
+  dg_p99: number | null;
 }
 
 export interface CalibrationSummary {
