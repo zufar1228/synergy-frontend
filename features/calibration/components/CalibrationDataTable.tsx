@@ -7,10 +7,14 @@ import {
   getRawData,
   getSessions,
   getSummaryData,
+  getTrialPeaks,
+  getPeakSummary,
   type CalibrationStatistic,
   type CalibrationSessionStat,
   type CalibrationRaw,
   type CalibrationSummary,
+  type CalibrationTrialPeak,
+  type CalibrationPeakSummary,
 } from '../api/calibration';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,7 +30,7 @@ import {
 } from '@/components/ui/table';
 
 export default function CalibrationDataTable() {
-  const [tab, setTab] = useState<'stats' | 'session-stats' | 'raw' | 'summary'>('session-stats');
+  const [tab, setTab] = useState<'stats' | 'session-stats' | 'raw' | 'summary' | 'peaks' | 'peak-summary'>('session-stats');
 
   return (
     <Card>
@@ -42,6 +46,12 @@ export default function CalibrationDataTable() {
           <Button size="sm" variant={tab === 'stats' ? 'default' : 'neutral'} onClick={() => setTab('stats')}>
             Per-Trial
           </Button>
+          <Button size="sm" variant={tab === 'peaks' ? 'default' : 'neutral'} onClick={() => setTab('peaks')}>
+            Trial Peaks
+          </Button>
+          <Button size="sm" variant={tab === 'peak-summary' ? 'default' : 'neutral'} onClick={() => setTab('peak-summary')}>
+            Peak Summary
+          </Button>
           <Button size="sm" variant={tab === 'raw' ? 'default' : 'neutral'} onClick={() => setTab('raw')}>
             Raw Data
           </Button>
@@ -51,6 +61,8 @@ export default function CalibrationDataTable() {
         {tab === 'session-stats' && <SessionStatsView />}
         {tab === 'summary' && <SummaryDataView />}
         {tab === 'stats' && <TrialStatsView />}
+        {tab === 'peaks' && <TrialPeaksView />}
+        {tab === 'peak-summary' && <PeakSummaryView />}
         {tab === 'raw' && <RawDataView />}
       </CardContent>
     </Card>
@@ -270,6 +282,92 @@ function TrialStatsView() {
           </Table>
         </div>
       )}
+    </div>
+  );
+}
+
+// ---- Trial Peaks View ----
+function TrialPeaksView() {
+  const [data, setData] = useState<CalibrationTrialPeak[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getTrialPeaks()
+      .then((r) => setData(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p className="text-muted-foreground">Loading...</p>;
+  if (data.length === 0) return <p className="text-muted-foreground">No trial peak data yet</p>;
+
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Session</TableHead>
+            <TableHead>Trial</TableHead>
+            <TableHead>Peak Δg</TableHead>
+            <TableHead>Samples</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((row, i) => (
+            <TableRow key={i}>
+              <TableCell className="font-medium">{row.session}</TableCell>
+              <TableCell>{row.trial}</TableCell>
+              <TableCell className="font-mono">{Number(row.dg_peak).toFixed(4)}</TableCell>
+              <TableCell>{row.n_samples}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+// ---- Peak Summary View ----
+function PeakSummaryView() {
+  const [data, setData] = useState<CalibrationPeakSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getPeakSummary()
+      .then((r) => setData(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p className="text-muted-foreground">Loading...</p>;
+  if (data.length === 0) return <p className="text-muted-foreground">No peak summary data yet</p>;
+
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Session</TableHead>
+            <TableHead>Trials</TableHead>
+            <TableHead>Peak Min</TableHead>
+            <TableHead>Peak Max</TableHead>
+            <TableHead>Peak Mean</TableHead>
+            <TableHead>Peak StdDev</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow key={row.session}>
+              <TableCell className="font-medium">{row.session}</TableCell>
+              <TableCell>{row.n_trials}</TableCell>
+              <TableCell className="font-mono">{Number(row.peak_min).toFixed(4)}</TableCell>
+              <TableCell className="font-mono">{Number(row.peak_max).toFixed(4)}</TableCell>
+              <TableCell className="font-mono">{Number(row.peak_mean).toFixed(4)}</TableCell>
+              <TableCell className="font-mono">{row.peak_stddev != null ? Number(row.peak_stddev).toFixed(4) : '—'}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

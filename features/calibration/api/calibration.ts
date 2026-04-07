@@ -62,6 +62,16 @@ export const getStatistics = (session?: string) => {
 export const getSessionStats = () =>
   calFetch<{ data: CalibrationSessionStat[] }>('/session-stats');
 
+/** Get per-trial peak Δg values */
+export const getTrialPeaks = (session?: string) => {
+  const params = session ? `?session=${session}` : '';
+  return calFetch<{ data: CalibrationTrialPeak[] }>(`/trial-peaks${params}`);
+};
+
+/** Get per-session peak summary */
+export const getPeakSummary = () =>
+  calFetch<{ data: CalibrationPeakSummary[] }>('/peak-summary');
+
 /** Get summary data (Session A periodic summaries) */
 export const getSummaryData = (
   options?: { session?: string; trial?: number; limit?: number; offset?: number }
@@ -140,4 +150,20 @@ export interface CalibrationSummary {
   window_ms: number;
   device_id: string;
   created_at: string;
+}
+
+export interface CalibrationTrialPeak {
+  session: string;
+  trial: number;
+  dg_peak: number;
+  n_samples: number;
+}
+
+export interface CalibrationPeakSummary {
+  session: string;
+  n_trials: number;
+  peak_min: number;
+  peak_max: number;
+  peak_mean: number;
+  peak_stddev: number;
 }
