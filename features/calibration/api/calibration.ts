@@ -34,19 +34,23 @@ export const sendCommand = (
 export const getDeviceStatus = (deviceId: string) =>
   calFetch<{ data: CalibrationDeviceStatus | null }>(`/status/${deviceId}`);
 
-/** Get raw data for a session */
+/** Get raw data, optionally filtered by session */
 export const getRawData = (
-  session: string,
-  options?: { trial?: number; limit?: number; offset?: number }
+  options?: { session?: string; trial?: number; limit?: number; offset?: number }
 ) => {
   const params = new URLSearchParams();
   if (options?.trial) params.set('trial', options.trial.toString());
   if (options?.limit) params.set('limit', options.limit.toString());
   if (options?.offset) params.set('offset', options.offset.toString());
+  const sessionPath = options?.session ? `/data/${options.session}` : '/data';
   return calFetch<{ data: CalibrationRaw[]; pagination: { total: number; limit: number; offset: number } }>(
-    `/data/${session}?${params.toString()}`
+    `${sessionPath}?${params.toString()}`
   );
 };
+
+/** Get distinct session names */
+export const getSessions = () =>
+  calFetch<{ data: string[] }>('/sessions');
 
 /** Get per-trial statistics */
 export const getStatistics = (session?: string) => {

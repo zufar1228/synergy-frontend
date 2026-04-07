@@ -5,6 +5,7 @@ import {
   getStatistics,
   getSessionStats,
   getRawData,
+  getSessions,
   type CalibrationStatistic,
   type CalibrationSessionStat,
   type CalibrationRaw,
@@ -176,14 +177,23 @@ function TrialStatsView() {
 // ---- Raw Data View ----
 function RawDataView() {
   const [data, setData] = useState<CalibrationRaw[]>([]);
-  const [session, setSession] = useState('B');
+  const [sessions, setSessions] = useState<string[]>([]);
+  const [session, setSession] = useState('all');
   const [trial, setTrial] = useState('');
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ total: 0, limit: 50, offset: 0 });
 
+  // Load available sessions
+  useEffect(() => {
+    getSessions()
+      .then((r) => setSessions(r.data))
+      .catch(console.error);
+  }, []);
+
   const fetchData = (offset = 0) => {
     setLoading(true);
-    getRawData(session, {
+    getRawData({
+      session: session === 'all' ? undefined : session,
       trial: trial ? parseInt(trial) : undefined,
       limit: 50,
       offset,
@@ -202,17 +212,17 @@ function RawDataView() {
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center flex-wrap">
         <label className="text-sm">Session:</label>
         <Select value={session} onValueChange={setSession}>
-          <SelectTrigger className="w-24">
-            <SelectValue />
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="All sessions" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="A">A</SelectItem>
-            <SelectItem value="B">B</SelectItem>
-            <SelectItem value="C">C</SelectItem>
-            <SelectItem value="D">D</SelectItem>
+            <SelectItem value="all">All</SelectItem>
+            {sessions.map((s) => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <label className="text-sm">Trial:</label>
@@ -242,6 +252,7 @@ function RawDataView() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Session</TableHead>
                 <TableHead>Trial</TableHead>
                 <TableHead>Δg</TableHead>
                 <TableHead>Marker</TableHead>
@@ -252,6 +263,7 @@ function RawDataView() {
             <TableBody>
               {data.map((row) => (
                 <TableRow key={row.id} className={row.marker ? 'bg-yellow-50 dark:bg-yellow-950' : ''}>
+                  <TableCell className="text-xs">{row.session}</TableCell>
                   <TableCell>{row.trial}</TableCell>
                   <TableCell className="font-mono">{Number(row.delta_g).toFixed(4)}</TableCell>
                   <TableCell>{row.marker && <span className="text-yellow-600 font-medium">📌 {row.marker}</span>}</TableCell>
