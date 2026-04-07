@@ -78,10 +78,17 @@ export default function CalibrationStatusDisplay({ deviceId, refreshTrigger }: P
             />
             <StatusItem label="Session" value={status.session || 'none'} />
             <StatusItem label="Trial" value={`#${status.trial}`} />
+            <StatusItem
+              label="Door"
+              value={
+                <Badge variant={status.door_state === 'CLOSED' ? 'success' : status.door_state === 'OPEN' ? 'destructive' : 'neutral'}>
+                  {status.door_state === 'CLOSED' ? '🔒 CLOSED' : status.door_state === 'OPEN' ? '🔓 OPEN' : 'Unknown'}
+                </Badge>
+              }
+            />
             <StatusItem label="WiFi RSSI" value={`${status.wifi_rssi} dBm`} />
             <StatusItem label="Uptime" value={formatUptime(status.uptime_sec)} />
             <StatusItem label="Free Heap" value={`${(status.free_heap / 1024).toFixed(0)} KB`} />
-            <StatusItem label="Device" value={status.device_id} />
             <StatusItem
               label="Last Seen"
               value={new Date(status.created_at).toLocaleTimeString()}

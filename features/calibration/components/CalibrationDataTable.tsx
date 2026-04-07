@@ -6,9 +6,11 @@ import {
   getSessionStats,
   getRawData,
   getSessions,
+  getSummaryData,
   type CalibrationStatistic,
   type CalibrationSessionStat,
   type CalibrationRaw,
+  type CalibrationSummary,
 } from '../api/calibration';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,15 +26,18 @@ import {
 } from '@/components/ui/table';
 
 export default function CalibrationDataTable() {
-  const [tab, setTab] = useState<'stats' | 'session-stats' | 'raw'>('session-stats');
+  const [tab, setTab] = useState<'stats' | 'session-stats' | 'raw' | 'summary'>('session-stats');
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Calibration Data</CardTitle>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button size="sm" variant={tab === 'session-stats' ? 'default' : 'neutral'} onClick={() => setTab('session-stats')}>
             Session Stats
+          </Button>
+          <Button size="sm" variant={tab === 'summary' ? 'default' : 'neutral'} onClick={() => setTab('summary')}>
+            Summary (A)
           </Button>
           <Button size="sm" variant={tab === 'stats' ? 'default' : 'neutral'} onClick={() => setTab('stats')}>
             Per-Trial
@@ -44,10 +49,105 @@ export default function CalibrationDataTable() {
       </CardHeader>
       <CardContent>
         {tab === 'session-stats' && <SessionStatsView />}
+        {tab === 'summary' && <SummaryDataView />}
         {tab === 'stats' && <TrialStatsView />}
         {tab === 'raw' && <RawDataView />}
       </CardContent>
     </Card>
+  );
+}
+
+// ---- Summary Data View (Session A periodic summaries) ----
+function SummaryDataView() {
+  const [data, setData] = useState<CalibrationSummary[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({ total: 0, limit: 50, offset: 0 });
+
+  const fetchData = (offset = 0) => {
+    setLoading(true);
+    getSummaryData({ limit: 50, offset })
+      .then((r) => {
+        setData(r.data);
+        setPagination(r.pagination);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData(0);
+  }, []);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2 items-center">
+        <Button size="sm" variant="neutral" onClick={() => fetchData(0)}>
+          Refresh
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          Showing {data.length} of {pagination.total} summaries (offset: {pagination.offset})
+        </p>
+      </div>
+
+      {loading ? (
+        <p className="text-muted-foreground">Loading...</p>
+      ) : data.length === 0 ? (
+        <p className="text-muted-foreground">No summary data yet — Session A generates periodic 5-second summaries</p>
+      ) : (
+        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Session</TableHead>
+                <TableHead>Trial</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Samples</TableHead>
+                <TableHead>Min Δg</TableHead>
+                <TableHead>Max Δg</TableHead>
+                <TableHead>Mean Δg</TableHead>
+                <TableHead>Window</TableHead>
+                <TableHead>Time</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell className="font-medium">{row.session}</TableCell>
+                  <TableCell>{row.trial}</TableCell>
+                  <TableCell className="text-xs">{row.summary_type}</TableCell>
+                  <TableCell>{row.n_samples}</TableCell>
+                  <TableCell className="font-mono">{Number(row.dg_min).toFixed(4)}</TableCell>
+                  <TableCell className="font-mono">{Number(row.dg_max).toFixed(4)}</TableCell>
+                  <TableCell className="font-mono">{Number(row.dg_mean).toFixed(4)}</TableCell>
+                  <TableCell className="text-xs">{row.window_ms}ms</TableCell>
+                  <TableCell className="text-xs">{new Date(row.created_at).toLocaleTimeString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="neutral"
+          disabled={pagination.offset === 0}
+          onClick={() => fetchData(Math.max(0, pagination.offset - pagination.limit))}
+        >
+          ← Prev
+        </Button>
+        <Button
+          size="sm"
+          variant="neutral"
+          disabled={pagination.offset + pagination.limit >= pagination.total}
+          onClick={() => fetchData(pagination.offset + pagination.limit)}
+        >
+          Next →
+        </Button>
+      </div>
+    </div>
   );
 }
 

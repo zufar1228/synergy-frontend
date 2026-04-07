@@ -62,6 +62,20 @@ export const getStatistics = (session?: string) => {
 export const getSessionStats = () =>
   calFetch<{ data: CalibrationSessionStat[] }>('/session-stats');
 
+/** Get summary data (Session A periodic summaries) */
+export const getSummaryData = (
+  options?: { session?: string; trial?: number; limit?: number; offset?: number }
+) => {
+  const params = new URLSearchParams();
+  if (options?.session) params.set('session', options.session);
+  if (options?.trial) params.set('trial', options.trial.toString());
+  if (options?.limit) params.set('limit', options.limit.toString());
+  if (options?.offset) params.set('offset', options.offset.toString());
+  return calFetch<{ data: CalibrationSummary[]; pagination: { total: number; limit: number; offset: number } }>(
+    `/summary?${params.toString()}`
+  );
+};
+
 // Types
 export interface CalibrationDeviceStatus {
   id: number;
@@ -72,6 +86,7 @@ export interface CalibrationDeviceStatus {
   wifi_rssi: number;
   free_heap: number;
   offline_buf: number;
+  door_state: string | null;
   device_id: string;
   created_at: string;
 }
@@ -111,4 +126,18 @@ export interface CalibrationSessionStat {
   dg_median: number;
   dg_p95: number;
   dg_p99: number;
+}
+
+export interface CalibrationSummary {
+  id: number;
+  session: string;
+  trial: number;
+  summary_type: string;
+  dg_min: number;
+  dg_max: number;
+  dg_mean: number;
+  n_samples: number;
+  window_ms: number;
+  device_id: string;
+  created_at: string;
 }
