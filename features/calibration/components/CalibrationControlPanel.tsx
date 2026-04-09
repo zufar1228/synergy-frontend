@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { sendCommand } from '../api/calibration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,49 +19,194 @@ interface TrialPreset {
 
 const TRIAL_PRESETS: Record<string, TrialPreset[]> = {
   A: [
-    { trial: 1, note: 'ambient_baseline_5min', label: '1. Baseline', desc: 'Rekam derau lingkungan tanpa gangguan' },
+    {
+      trial: 1,
+      note: 'ambient_baseline_5min',
+      label: '1. Baseline',
+      desc: 'Rekam derau lingkungan tanpa gangguan'
+    }
   ],
   B: [
-    { trial: 1, note: 'pukulan_tangan_tengah', label: '1. Pukulan Tengah', desc: 'Pukulan tangan tengah pintu' },
-    { trial: 2, note: 'pukulan_tangan_pinggir', label: '2. Pukulan Pinggir', desc: 'Pukulan tangan pinggir pintu' },
-    { trial: 3, note: 'senggolan_bahu', label: '3. Senggolan Bahu', desc: 'Senggolan bahu seperti orang lewat' },
-    { trial: 4, note: 'tendangan_ringan', label: '4. Tendangan Ringan', desc: 'Tendangan ringan bawah pintu' },
-    { trial: 5, note: 'troli_1x', label: '5. Troli 1x', desc: 'Dorongan troli ke pintu 1x' },
-    { trial: 6, note: 'pukulan_keras', label: '6. Pukulan Keras', desc: 'Pukulan tangan keras 1x' },
-    { trial: 7, note: 'ketukan_jari', label: '7. Ketukan Jari', desc: 'Ketukan jari keras 1x' },
-    { trial: 8, note: 'hentakan_kaki', label: '8. Hentakan Kaki', desc: 'Hentakan kaki ke lantai dekat pintu' },
+    {
+      trial: 1,
+      note: 'pukulan_tangan_tengah',
+      label: '1. Pukulan Tengah',
+      desc: 'Pukulan tangan tengah pintu'
+    },
+    {
+      trial: 2,
+      note: 'pukulan_tangan_pinggir',
+      label: '2. Pukulan Pinggir',
+      desc: 'Pukulan tangan pinggir pintu'
+    },
+    {
+      trial: 3,
+      note: 'senggolan_bahu',
+      label: '3. Senggolan Bahu',
+      desc: 'Senggolan bahu seperti orang lewat'
+    },
+    {
+      trial: 4,
+      note: 'tendangan_ringan',
+      label: '4. Tendangan Ringan',
+      desc: 'Tendangan ringan bawah pintu'
+    },
+    {
+      trial: 5,
+      note: 'troli_1x',
+      label: '5. Troli 1x',
+      desc: 'Dorongan troli ke pintu 1x'
+    },
+    {
+      trial: 6,
+      note: 'pukulan_keras',
+      label: '6. Pukulan Keras',
+      desc: 'Pukulan tangan keras 1x'
+    },
+    {
+      trial: 7,
+      note: 'ketukan_jari',
+      label: '7. Ketukan Jari',
+      desc: 'Ketukan jari keras 1x'
+    },
+    {
+      trial: 8,
+      note: 'hentakan_kaki',
+      label: '8. Hentakan Kaki',
+      desc: 'Hentakan kaki ke lantai dekat pintu'
+    }
   ],
   C: [
-    { trial: 1, note: 'obeng_kusen_kanan_30s', label: '1. Kusen Kanan 30s', desc: 'Obeng pipih, kusen kanan' },
-    { trial: 2, note: 'obeng_tepi_bawah_30s', label: '2. Tepi Bawah 30s', desc: 'Obeng pipih, tepi pintu bawah' },
-    { trial: 3, note: 'obeng_area_kunci_30s', label: '3. Area Kunci 30s', desc: 'Obeng pipih, area kunci' },
-    { trial: 4, note: 'obeng_kusen_kiri_45s', label: '4. Kusen Kiri 45s', desc: 'Obeng pipih, kusen kiri' },
-    { trial: 5, note: 'obeng_plus_tengah_30s', label: '5. Plus Tengah 30s', desc: 'Obeng plus, tengah panel' },
-    { trial: 6, note: 'kunci_pas_kusen_atas_30s', label: '6. Kunci Pas 30s', desc: 'Kunci pas, kusen atas' },
-    { trial: 7, note: 'obeng_lambat_45s', label: '7. Lambat 45s', desc: 'Obeng pipih, ritme lambat' },
-    { trial: 8, note: 'obeng_cepat_20s', label: '8. Cepat 20s', desc: 'Obeng pipih, ritme cepat' },
-    { trial: 9, note: 'obeng_kusen_60s', label: '9. Kusen 60s', desc: 'Obeng pipih, kusen kanan, 60 detik' },
-    { trial: 10, note: 'obeng_ringan_30s', label: '10. Ringan 30s', desc: 'Obeng pipih, intensitas ringan' },
+    {
+      trial: 1,
+      note: 'obeng_kusen_kanan_30s',
+      label: '1. Kusen Kanan 30s',
+      desc: 'Obeng pipih, kusen kanan'
+    },
+    {
+      trial: 2,
+      note: 'obeng_tepi_bawah_30s',
+      label: '2. Tepi Bawah 30s',
+      desc: 'Obeng pipih, tepi pintu bawah'
+    },
+    {
+      trial: 3,
+      note: 'obeng_area_kunci_30s',
+      label: '3. Area Kunci 30s',
+      desc: 'Obeng pipih, area kunci'
+    },
+    {
+      trial: 4,
+      note: 'obeng_kusen_kiri_45s',
+      label: '4. Kusen Kiri 45s',
+      desc: 'Obeng pipih, kusen kiri'
+    },
+    {
+      trial: 5,
+      note: 'obeng_plus_tengah_30s',
+      label: '5. Plus Tengah 30s',
+      desc: 'Obeng plus, tengah panel'
+    },
+    {
+      trial: 6,
+      note: 'kunci_pas_kusen_atas_30s',
+      label: '6. Kunci Pas 30s',
+      desc: 'Kunci pas, kusen atas'
+    },
+    {
+      trial: 7,
+      note: 'obeng_lambat_45s',
+      label: '7. Lambat 45s',
+      desc: 'Obeng pipih, ritme lambat'
+    },
+    {
+      trial: 8,
+      note: 'obeng_cepat_20s',
+      label: '8. Cepat 20s',
+      desc: 'Obeng pipih, ritme cepat'
+    },
+    {
+      trial: 9,
+      note: 'obeng_kusen_60s',
+      label: '9. Kusen 60s',
+      desc: 'Obeng pipih, kusen kanan, 60 detik'
+    },
+    {
+      trial: 10,
+      note: 'obeng_ringan_30s',
+      label: '10. Ringan 30s',
+      desc: 'Obeng pipih, intensitas ringan'
+    }
   ],
   D: [
-    { trial: 1, note: 'bahu_berulang_15s', label: '1. Bahu 15s', desc: 'Dorongan bahu berulang' },
-    { trial: 2, note: 'telapak_keras_15s', label: '2. Telapak Keras 15s', desc: 'Telapak tangan keras berulang' },
-    { trial: 3, note: 'tendangan_berulang_15s', label: '3. Tendangan 15s', desc: 'Tendangan kaki berulang' },
-    { trial: 4, note: 'bahu_jeda_panjang_30s', label: '4. Bahu Jeda 30s', desc: 'Dorongan bahu, jeda panjang' },
-    { trial: 5, note: 'benda_tumpul_15s', label: '5. Tumpul 15s', desc: 'Hantaman benda tumpul berulang' },
-    { trial: 6, note: 'bahu_cepat_10s', label: '6. Bahu Cepat 10s', desc: 'Dorongan bahu cepat' },
-    { trial: 7, note: 'campuran_20s', label: '7. Campuran 20s', desc: 'Telapak tangan + bahu bergantian' },
-    { trial: 8, note: 'dorongan_samping_15s', label: '8. Samping 15s', desc: 'Dorongan dari samping' },
-    { trial: 9, note: 'kuat_jeda5s_30s', label: '9. Kuat Jeda 30s', desc: 'Hantaman kuat, jeda 5 detik' },
-    { trial: 10, note: 'dobrakan_penuh_15s', label: '10. Full 15s', desc: 'Simulasi dobrakan penuh' },
-  ],
+    {
+      trial: 1,
+      note: 'bahu_berulang_15s',
+      label: '1. Bahu 15s',
+      desc: 'Dorongan bahu berulang'
+    },
+    {
+      trial: 2,
+      note: 'telapak_keras_15s',
+      label: '2. Telapak Keras 15s',
+      desc: 'Telapak tangan keras berulang'
+    },
+    {
+      trial: 3,
+      note: 'tendangan_berulang_15s',
+      label: '3. Tendangan 15s',
+      desc: 'Tendangan kaki berulang'
+    },
+    {
+      trial: 4,
+      note: 'bahu_jeda_panjang_30s',
+      label: '4. Bahu Jeda 30s',
+      desc: 'Dorongan bahu, jeda panjang'
+    },
+    {
+      trial: 5,
+      note: 'benda_tumpul_15s',
+      label: '5. Tumpul 15s',
+      desc: 'Hantaman benda tumpul berulang'
+    },
+    {
+      trial: 6,
+      note: 'bahu_cepat_10s',
+      label: '6. Bahu Cepat 10s',
+      desc: 'Dorongan bahu cepat'
+    },
+    {
+      trial: 7,
+      note: 'campuran_20s',
+      label: '7. Campuran 20s',
+      desc: 'Telapak tangan + bahu bergantian'
+    },
+    {
+      trial: 8,
+      note: 'dorongan_samping_15s',
+      label: '8. Samping 15s',
+      desc: 'Dorongan dari samping'
+    },
+    {
+      trial: 9,
+      note: 'kuat_jeda5s_30s',
+      label: '9. Kuat Jeda 30s',
+      desc: 'Hantaman kuat, jeda 5 detik'
+    },
+    {
+      trial: 10,
+      note: 'dobrakan_penuh_15s',
+      label: '10. Full 15s',
+      desc: 'Simulasi dobrakan penuh'
+    }
+  ]
 };
 
 const SESSION_DESCRIPTIONS: Record<string, string> = {
   A: 'Ambient Noise — Derau lingkungan, pintu tertutup',
   B: 'Single Impact — Benturan tunggal (pukulan, senggolan)',
   C: 'Chiseling — Pemahatan repetitif (obeng/pahat)',
-  D: 'Ramming — Pendobrakan (hantaman kuat berulang)',
+  D: 'Ramming — Pendobrakan (hantaman kuat berulang)'
 };
 
 // ── Audio cue system (#7) ──────────────────────────────────────────
@@ -85,7 +230,10 @@ function useAudioCues() {
         osc.type = type;
         osc.frequency.value = freq;
         gain.gain.value = 0.3;
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+        gain.gain.exponentialRampToValueAtTime(
+          0.01,
+          ctx.currentTime + duration
+        );
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
@@ -94,16 +242,17 @@ function useAudioCues() {
         /* audio not available */
       }
     },
-    [getCtx],
+    [getCtx]
   );
 
   return {
+    playBeep: useCallback(() => playTone(660, 0.08), [playTone]),
     playStart: useCallback(() => {
       playTone(880, 0.15);
       setTimeout(() => playTone(1100, 0.15), 180);
     }, [playTone]),
     playStop: useCallback(() => playTone(600, 0.2), [playTone]),
-    playError: useCallback(() => playTone(200, 0.3, 'sawtooth'), [playTone]),
+    playError: useCallback(() => playTone(200, 0.3, 'sawtooth'), [playTone])
   };
 }
 
@@ -114,14 +263,70 @@ interface Props {
   onCommandSent?: () => void;
 }
 
-export default function CalibrationControlPanel({ deviceId, onCommandSent }: Props) {
+export default function CalibrationControlPanel({
+  deviceId,
+  onCommandSent
+}: Props) {
   const [activeSession, setActiveSession] = useState('B');
   const [loading, setLoading] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState('');
-  const [completedTrials, setCompletedTrials] = useState<Set<string>>(new Set());
+  const [completedTrials, setCompletedTrials] = useState<Set<string>>(
+    new Set()
+  );
   const [manualNote, setManualNote] = useState('');
   const [manualTrial, setManualTrial] = useState(1);
   const audio = useAudioCues();
+
+  // ── Recording phase state machine ──
+  const [phase, setPhase] = useState<
+    'idle' | 'countdown' | 'calibrating' | 'ready'
+  >('idle');
+  const [countdownSec, setCountdownSec] = useState(3);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }, []);
+
+  useEffect(() => clearTimers, [clearTimers]);
+
+  const startPhaseSequence = useCallback(
+    (isSessionA: boolean) => {
+      clearTimers();
+      if (isSessionA) {
+        setPhase('calibrating');
+        timersRef.current.push(
+          setTimeout(() => {
+            setPhase('ready');
+            audio.playStart();
+          }, 1200),
+          setTimeout(() => setPhase('idle'), 6000)
+        );
+      } else {
+        setPhase('countdown');
+        setCountdownSec(3);
+        audio.playBeep();
+        timersRef.current.push(
+          setTimeout(() => {
+            setCountdownSec(2);
+            audio.playBeep();
+          }, 1000),
+          setTimeout(() => {
+            setCountdownSec(1);
+            audio.playBeep();
+          }, 2000),
+          setTimeout(() => setPhase('calibrating'), 3000),
+          setTimeout(() => {
+            setPhase('ready');
+            audio.playStart();
+          }, 4200),
+          setTimeout(() => setPhase('idle'), 12000)
+        );
+      }
+    },
+    [audio, clearTimers]
+  );
 
   // Quick-action: SET_SESSION → START in one tap (#5)
   const quickStart = async (session: string, trial: number, note: string) => {
@@ -135,7 +340,7 @@ export default function CalibrationControlPanel({ deviceId, onCommandSent }: Pro
       await sendCommand(deviceId, 'SET_SESSION', { session, trial, note });
       await sendCommand(deviceId, 'START');
       setLastMessage(`✓ ${session}/${trial} started — ${note}`);
-      audio.playStart();
+      startPhaseSequence(session === 'A');
       onCommandSent?.();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -151,6 +356,8 @@ export default function CalibrationControlPanel({ deviceId, onCommandSent }: Pro
     try {
       await sendCommand(deviceId, 'STOP');
       setLastMessage('✓ Recording stopped');
+      clearTimers();
+      setPhase('idle');
       audio.playStop();
       onCommandSent?.();
     } catch (err: unknown) {
@@ -225,13 +432,67 @@ export default function CalibrationControlPanel({ deviceId, onCommandSent }: Pro
           </div>
         )}
 
+        {/* ── Recording phase indicator ── */}
+        {phase !== 'idle' && (
+          <div
+            className={`text-center rounded-xl p-4 sm:p-5 transition-colors ${
+              phase === 'countdown'
+                ? 'bg-yellow-500 text-yellow-950 animate-pulse'
+                : phase === 'calibrating'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-green-500 text-white'
+            }`}
+          >
+            {phase === 'countdown' && (
+              <>
+                <div className="text-5xl sm:text-6xl font-black tabular-nums">
+                  {countdownSec}
+                </div>
+                <div className="text-sm font-semibold mt-1">
+                  ⏱ Hitung mundur — Jangan sentuh pintu!
+                </div>
+              </>
+            )}
+            {phase === 'calibrating' && (
+              <>
+                <div className="text-base sm:text-lg font-bold">
+                  📐 Kalibrasi Baseline...
+                </div>
+                <div className="text-sm mt-1">
+                  Sensor mengukur kondisi diam — Jangan sentuh pintu!
+                </div>
+              </>
+            )}
+            {phase === 'ready' && (
+              <>
+                <div className="text-2xl sm:text-3xl font-black">🟢 MULAI!</div>
+                <div className="text-sm font-semibold mt-1">
+                  Lakukan simulasi sekarang
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Session tabs with trial preset buttons (#5, #6, #8) */}
         <Tabs value={activeSession} onValueChange={setActiveSession}>
           <TabsList className="w-full">
-            <TabsTrigger value="A" className="flex-1">A — Ambient</TabsTrigger>
-            <TabsTrigger value="B" className="flex-1">B — Impact</TabsTrigger>
-            <TabsTrigger value="C" className="flex-1">C — Chisel</TabsTrigger>
-            <TabsTrigger value="D" className="flex-1">D — Ram</TabsTrigger>
+            <TabsTrigger value="A" className="flex-1">
+              <span className="sm:hidden">A</span>
+              <span className="hidden sm:inline">A — Ambient</span>
+            </TabsTrigger>
+            <TabsTrigger value="B" className="flex-1">
+              <span className="sm:hidden">B</span>
+              <span className="hidden sm:inline">B — Impact</span>
+            </TabsTrigger>
+            <TabsTrigger value="C" className="flex-1">
+              <span className="sm:hidden">C</span>
+              <span className="hidden sm:inline">C — Chisel</span>
+            </TabsTrigger>
+            <TabsTrigger value="D" className="flex-1">
+              <span className="sm:hidden">D</span>
+              <span className="hidden sm:inline">D — Ram</span>
+            </TabsTrigger>
           </TabsList>
           <p className="text-xs text-muted-foreground mt-1">
             {SESSION_DESCRIPTIONS[activeSession]}
@@ -240,7 +501,9 @@ export default function CalibrationControlPanel({ deviceId, onCommandSent }: Pro
           {(['A', 'B', 'C', 'D'] as const).map((sess) => (
             <TabsContent key={sess} value={sess} className="space-y-3 mt-3">
               {/* Large touch-friendly preset grid (#8) */}
-              <div className={`grid gap-2 ${sess === 'A' ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              <div
+                className={`grid gap-2 ${sess === 'A' ? 'grid-cols-1' : 'grid-cols-2'}`}
+              >
                 {TRIAL_PRESETS[sess].map((preset) => {
                   const key = `${sess}-${preset.trial}`;
                   const isCompleted = completedTrials.has(key);
@@ -248,7 +511,9 @@ export default function CalibrationControlPanel({ deviceId, onCommandSent }: Pro
                   return (
                     <button
                       key={key}
-                      onClick={() => quickStart(sess, preset.trial, preset.note)}
+                      onClick={() =>
+                        quickStart(sess, preset.trial, preset.note)
+                      }
                       disabled={loading !== null}
                       className={`relative p-4 rounded-lg border-2 text-left transition-all min-h-[72px] disabled:opacity-50 ${
                         isLoading
@@ -258,10 +523,17 @@ export default function CalibrationControlPanel({ deviceId, onCommandSent }: Pro
                             : 'border-border hover:border-foreground/50 hover:bg-accent active:scale-[0.98]'
                       }`}
                     >
-                      <div className="font-semibold text-sm">{preset.label}</div>
-                      <div className="text-xs text-muted-foreground mt-1">{preset.desc}</div>
+                      <div className="font-semibold text-sm">
+                        {preset.label}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {preset.desc}
+                      </div>
                       {isCompleted && (
-                        <Badge variant="success" className="absolute top-2 right-2 text-[10px]">
+                        <Badge
+                          variant="success"
+                          className="absolute top-2 right-2 text-[10px]"
+                        >
                           Done
                         </Badge>
                       )}
@@ -310,7 +582,9 @@ export default function CalibrationControlPanel({ deviceId, onCommandSent }: Pro
                   type="number"
                   min={1}
                   value={manualTrial}
-                  onChange={(e) => setManualTrial(parseInt(e.target.value) || 1)}
+                  onChange={(e) =>
+                    setManualTrial(parseInt(e.target.value) || 1)
+                  }
                 />
               </div>
               <div>
@@ -327,7 +601,11 @@ export default function CalibrationControlPanel({ deviceId, onCommandSent }: Pro
                 variant="neutral"
                 size="sm"
                 onClick={() =>
-                  quickStart(activeSession, manualTrial, manualNote || `manual_trial_${manualTrial}`)
+                  quickStart(
+                    activeSession,
+                    manualTrial,
+                    manualNote || `manual_trial_${manualTrial}`
+                  )
                 }
                 disabled={loading !== null}
               >

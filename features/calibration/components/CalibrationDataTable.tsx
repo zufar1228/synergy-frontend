@@ -42,9 +42,9 @@ export default function CalibrationDataTable() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Calibration Data</CardTitle>
-        <div className="flex gap-2 flex-wrap">
+      <CardHeader className="px-4 sm:px-6">
+        <CardTitle className="text-base sm:text-lg">Calibration Data</CardTitle>
+        <div className="flex gap-1.5 flex-wrap sm:gap-2">
           <Button
             size="sm"
             variant={tab === 'session-stats' ? 'default' : 'neutral'}
@@ -89,7 +89,7 @@ export default function CalibrationDataTable() {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 sm:px-6">
         {tab === 'session-stats' && <SessionStatsView />}
         {tab === 'summary' && <SummaryDataView />}
         {tab === 'stats' && <TrialStatsView />}
