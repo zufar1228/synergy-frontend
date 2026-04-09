@@ -302,7 +302,8 @@ export default function CalibrationControlPanel({
         // Audio cues on state transitions
         if (state !== prevStateRef.current) {
           if (state === 'RECORDING') audio.playStart();
-          else if (state === 'IDLE' && prevStateRef.current === 'RECORDING') audio.playStop();
+          else if (state === 'IDLE' && prevStateRef.current === 'RECORDING')
+            audio.playStop();
           else if (state === 'COUNTDOWN') audio.playBeep();
           prevStateRef.current = state;
         }
@@ -311,7 +312,9 @@ export default function CalibrationControlPanel({
         if (state === 'IDLE' && prevStateRef.current === 'IDLE') {
           // keep polling at slower rate
         }
-      } catch { /* ignore poll errors */ }
+      } catch {
+        /* ignore poll errors */
+      }
     };
     poll(); // immediate first poll
     pollingRef.current = setInterval(poll, 1000); // poll every 1s
@@ -454,9 +457,7 @@ export default function CalibrationControlPanel({
             )}
             {deviceCalState === 'RECORDING' && (
               <>
-                <div className="text-2xl sm:text-3xl font-black">
-                  🟢 MULAI!
-                </div>
+                <div className="text-2xl sm:text-3xl font-black">🟢 MULAI!</div>
                 <div className="text-sm font-semibold mt-1">
                   Lakukan simulasi sekarang
                 </div>
@@ -464,9 +465,7 @@ export default function CalibrationControlPanel({
             )}
             {deviceCalState === 'PAUSED' && (
               <>
-                <div className="text-base sm:text-lg font-bold">
-                  ⏸ PAUSED
-                </div>
+                <div className="text-base sm:text-lg font-bold">⏸ PAUSED</div>
                 <div className="text-sm mt-1">
                   Recording dijeda — pintu terbuka
                 </div>

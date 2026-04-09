@@ -83,12 +83,18 @@ export default function CalibrationStatusDisplay({
             <StatusItem
               label="State"
               value={
-                <Badge variant={
-                  status.cal_state === 'RECORDING' ? 'default' :
-                  status.cal_state === 'COUNTDOWN' || status.cal_state === 'CALIBRATING' ? 'warning' :
-                  'neutral'
-                }>
-                  {status.cal_state || (status.recording ? 'RECORDING' : 'IDLE')}
+                <Badge
+                  variant={
+                    status.cal_state === 'RECORDING'
+                      ? 'default'
+                      : status.cal_state === 'COUNTDOWN' ||
+                          status.cal_state === 'CALIBRATING'
+                        ? 'warning'
+                        : 'neutral'
+                  }
+                >
+                  {status.cal_state ||
+                    (status.recording ? 'RECORDING' : 'IDLE')}
                 </Badge>
               }
             />
