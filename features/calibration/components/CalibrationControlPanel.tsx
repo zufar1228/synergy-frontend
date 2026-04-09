@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { sendCommand } from '../api/calibration';
+import { sendCommand, getDeviceStatus } from '../api/calibration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -277,56 +277,45 @@ export default function CalibrationControlPanel({
   const [manualTrial, setManualTrial] = useState(1);
   const audio = useAudioCues();
 
-  // ── Recording phase state machine ──
-  const [phase, setPhase] = useState<
-    'idle' | 'countdown' | 'calibrating' | 'ready'
-  >('idle');
-  const [countdownSec, setCountdownSec] = useState(3);
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // ── Device state polling (synced with actual firmware state) ──
+  const [deviceCalState, setDeviceCalState] = useState<string>('IDLE');
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prevStateRef = useRef<string>('IDLE');
 
-  const clearTimers = useCallback(() => {
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
   }, []);
 
-  useEffect(() => clearTimers, [clearTimers]);
+  useEffect(() => stopPolling, [stopPolling]);
 
-  const startPhaseSequence = useCallback(
-    (isSessionA: boolean) => {
-      clearTimers();
-      if (isSessionA) {
-        setPhase('calibrating');
-        timersRef.current.push(
-          setTimeout(() => {
-            setPhase('ready');
-            audio.playStart();
-          }, 1200),
-          setTimeout(() => setPhase('idle'), 6000)
-        );
-      } else {
-        setPhase('countdown');
-        setCountdownSec(3);
-        audio.playBeep();
-        timersRef.current.push(
-          setTimeout(() => {
-            setCountdownSec(2);
-            audio.playBeep();
-          }, 1000),
-          setTimeout(() => {
-            setCountdownSec(1);
-            audio.playBeep();
-          }, 2000),
-          setTimeout(() => setPhase('calibrating'), 3000),
-          setTimeout(() => {
-            setPhase('ready');
-            audio.playStart();
-          }, 4200),
-          setTimeout(() => setPhase('idle'), 12000)
-        );
-      }
-    },
-    [audio, clearTimers]
-  );
+  const startPolling = useCallback(() => {
+    stopPolling();
+    const poll = async () => {
+      try {
+        const result = await getDeviceStatus(deviceId);
+        const state = result.data?.cal_state || 'IDLE';
+        setDeviceCalState(state);
+
+        // Audio cues on state transitions
+        if (state !== prevStateRef.current) {
+          if (state === 'RECORDING') audio.playStart();
+          else if (state === 'IDLE' && prevStateRef.current === 'RECORDING') audio.playStop();
+          else if (state === 'COUNTDOWN') audio.playBeep();
+          prevStateRef.current = state;
+        }
+
+        // Stop fast polling once we've been IDLE for a while after recording
+        if (state === 'IDLE' && prevStateRef.current === 'IDLE') {
+          // keep polling at slower rate
+        }
+      } catch { /* ignore poll errors */ }
+    };
+    poll(); // immediate first poll
+    pollingRef.current = setInterval(poll, 1000); // poll every 1s
+  }, [deviceId, audio, stopPolling]);
 
   // Quick-action: SET_SESSION → START in one tap (#5)
   const quickStart = async (session: string, trial: number, note: string) => {
@@ -340,7 +329,7 @@ export default function CalibrationControlPanel({
       await sendCommand(deviceId, 'SET_SESSION', { session, trial, note });
       await sendCommand(deviceId, 'START');
       setLastMessage(`✓ ${session}/${trial} started — ${note}`);
-      startPhaseSequence(session === 'A');
+      startPolling();
       onCommandSent?.();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -356,8 +345,8 @@ export default function CalibrationControlPanel({
     try {
       await sendCommand(deviceId, 'STOP');
       setLastMessage('✓ Recording stopped');
-      clearTimers();
-      setPhase('idle');
+      stopPolling();
+      setDeviceCalState('IDLE');
       audio.playStop();
       onCommandSent?.();
     } catch (err: unknown) {
@@ -432,28 +421,28 @@ export default function CalibrationControlPanel({
           </div>
         )}
 
-        {/* ── Recording phase indicator ── */}
-        {phase !== 'idle' && (
+        {/* ── Recording phase indicator (synced with device) ── */}
+        {deviceCalState !== 'IDLE' && (
           <div
             className={`text-center rounded-xl p-4 sm:p-5 transition-colors ${
-              phase === 'countdown'
+              deviceCalState === 'COUNTDOWN'
                 ? 'bg-yellow-500 text-yellow-950 animate-pulse'
-                : phase === 'calibrating'
+                : deviceCalState === 'CALIBRATING'
                   ? 'bg-blue-500 text-white'
-                  : 'bg-green-500 text-white'
+                  : deviceCalState === 'RECORDING'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-orange-500 text-white'
             }`}
           >
-            {phase === 'countdown' && (
+            {deviceCalState === 'COUNTDOWN' && (
               <>
-                <div className="text-5xl sm:text-6xl font-black tabular-nums">
-                  {countdownSec}
-                </div>
+                <div className="text-4xl sm:text-5xl font-black">⏱</div>
                 <div className="text-sm font-semibold mt-1">
-                  ⏱ Hitung mundur — Jangan sentuh pintu!
+                  Hitung mundur — Jangan sentuh pintu!
                 </div>
               </>
             )}
-            {phase === 'calibrating' && (
+            {deviceCalState === 'CALIBRATING' && (
               <>
                 <div className="text-base sm:text-lg font-bold">
                   📐 Kalibrasi Baseline...
@@ -463,11 +452,23 @@ export default function CalibrationControlPanel({
                 </div>
               </>
             )}
-            {phase === 'ready' && (
+            {deviceCalState === 'RECORDING' && (
               <>
-                <div className="text-2xl sm:text-3xl font-black">🟢 MULAI!</div>
+                <div className="text-2xl sm:text-3xl font-black">
+                  🟢 MULAI!
+                </div>
                 <div className="text-sm font-semibold mt-1">
                   Lakukan simulasi sekarang
+                </div>
+              </>
+            )}
+            {deviceCalState === 'PAUSED' && (
+              <>
+                <div className="text-base sm:text-lg font-bold">
+                  ⏸ PAUSED
+                </div>
+                <div className="text-sm mt-1">
+                  Recording dijeda — pintu terbuka
                 </div>
               </>
             )}

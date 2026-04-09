@@ -98,6 +98,7 @@ export interface CalibrationDeviceStatus {
   id: number;
   session: string;
   recording: boolean;
+  cal_state: string;
   trial: number;
   uptime_sec: number;
   wifi_rssi: number;
