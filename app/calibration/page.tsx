@@ -13,7 +13,7 @@ export default function CalibrationPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   return (
-    <div className="container mx-auto px-3 py-4 space-y-4 max-w-5xl sm:px-4 sm:space-y-6 pb-8">
+    <div className="min-h-screen overflow-y-auto container mx-auto px-3 py-4 space-y-4 max-w-5xl sm:px-4 sm:space-y-6 pb-8">
       <div>
         <h1 className="text-xl sm:text-2xl font-bold">Calibration Control</h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
