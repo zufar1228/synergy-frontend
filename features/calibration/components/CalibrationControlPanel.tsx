@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { sendCommand, getDeviceStatus } from '../api/calibration';
+import { sendCommand } from '../api/calibration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -260,11 +260,14 @@ function useAudioCues() {
 
 interface Props {
   deviceId: string;
+  /** Realtime calibration state from SSE (IDLE, COUNTDOWN, CALIBRATING, RECORDING, PAUSED) */
+  calState: string;
   onCommandSent?: () => void;
 }
 
 export default function CalibrationControlPanel({
   deviceId,
+  calState: deviceCalState,
   onCommandSent
 }: Props) {
   const [activeSession, setActiveSession] = useState('B');
@@ -277,48 +280,18 @@ export default function CalibrationControlPanel({
   const [manualTrial, setManualTrial] = useState(1);
   const audio = useAudioCues();
 
-  // ── Device state polling (synced with actual firmware state) ──
-  const [deviceCalState, setDeviceCalState] = useState<string>('IDLE');
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // ── Audio cues on state transitions (driven by SSE calState prop) ──
   const prevStateRef = useRef<string>('IDLE');
 
-  const stopPolling = useCallback(() => {
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
+  useEffect(() => {
+    if (deviceCalState !== prevStateRef.current) {
+      if (deviceCalState === 'RECORDING') audio.playStart();
+      else if (deviceCalState === 'IDLE' && prevStateRef.current === 'RECORDING')
+        audio.playStop();
+      else if (deviceCalState === 'COUNTDOWN') audio.playBeep();
+      prevStateRef.current = deviceCalState;
     }
-  }, []);
-
-  useEffect(() => stopPolling, [stopPolling]);
-
-  const startPolling = useCallback(() => {
-    stopPolling();
-    const poll = async () => {
-      try {
-        const result = await getDeviceStatus(deviceId);
-        const state = result.data?.cal_state || 'IDLE';
-        setDeviceCalState(state);
-
-        // Audio cues on state transitions
-        if (state !== prevStateRef.current) {
-          if (state === 'RECORDING') audio.playStart();
-          else if (state === 'IDLE' && prevStateRef.current === 'RECORDING')
-            audio.playStop();
-          else if (state === 'COUNTDOWN') audio.playBeep();
-          prevStateRef.current = state;
-        }
-
-        // Stop fast polling once we've been IDLE for a while after recording
-        if (state === 'IDLE' && prevStateRef.current === 'IDLE') {
-          // keep polling at slower rate
-        }
-      } catch {
-        /* ignore poll errors */
-      }
-    };
-    poll(); // immediate first poll
-    pollingRef.current = setInterval(poll, 1000); // poll every 1s
-  }, [deviceId, audio, stopPolling]);
+  }, [deviceCalState, audio]);
 
   // Quick-action: SET_SESSION → START in one tap (#5)
   const quickStart = async (session: string, trial: number, note: string) => {
@@ -332,7 +305,6 @@ export default function CalibrationControlPanel({
       await sendCommand(deviceId, 'SET_SESSION', { session, trial, note });
       await sendCommand(deviceId, 'START');
       setLastMessage(`✓ ${session}/${trial} started — ${note}`);
-      startPolling();
       onCommandSent?.();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -348,8 +320,6 @@ export default function CalibrationControlPanel({
     try {
       await sendCommand(deviceId, 'STOP');
       setLastMessage('✓ Recording stopped');
-      stopPolling();
-      setDeviceCalState('IDLE');
       audio.playStop();
       onCommandSent?.();
     } catch (err: unknown) {

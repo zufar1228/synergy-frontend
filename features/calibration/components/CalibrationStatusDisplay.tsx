@@ -10,42 +10,50 @@ import { Badge } from '@/components/ui/badge';
 
 interface Props {
   deviceId: string;
-  refreshTrigger?: number;
+  /** Realtime status from SSE hook (takes priority over polling) */
+  sseStatus?: CalibrationDeviceStatus | null;
+  /** Whether SSE is connected (disables polling when true) */
+  sseConnected?: boolean;
 }
 
 export default function CalibrationStatusDisplay({
   deviceId,
-  refreshTrigger
+  sseStatus,
+  sseConnected
 }: Props) {
-  const [status, setStatus] = useState<CalibrationDeviceStatus | null>(null);
+  const [polledStatus, setPolledStatus] = useState<CalibrationDeviceStatus | null>(null);
   const [error, setError] = useState('');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
-  const fetchStatus = async () => {
-    if (!deviceId) return;
-    try {
-      const result = await getDeviceStatus(deviceId);
-      setStatus(result.data);
-      setError('');
-      setLastRefresh(new Date());
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
+  // Use SSE data when available, fall back to polled data
+  const status = sseStatus ?? polledStatus;
 
-  // Poll every 5 seconds
+  // Update lastRefresh timestamp when SSE data arrives
   useEffect(() => {
+    if (sseStatus) {
+      setLastRefresh(new Date());
+    }
+  }, [sseStatus]);
+
+  // Fallback: poll every 5 seconds only when SSE is disconnected
+  useEffect(() => {
+    if (sseConnected || !deviceId) return;
+
+    const fetchStatus = async () => {
+      try {
+        const result = await getDeviceStatus(deviceId);
+        setPolledStatus(result.data);
+        setError('');
+        setLastRefresh(new Date());
+      } catch (err: any) {
+        setError(err.message);
+      }
+    };
+
     fetchStatus();
     const interval = setInterval(fetchStatus, 5000);
     return () => clearInterval(interval);
-  }, [deviceId]);
-
-  // Refresh on command sent
-  useEffect(() => {
-    if (refreshTrigger) {
-      setTimeout(fetchStatus, 1000);
-    }
-  }, [refreshTrigger]);
+  }, [deviceId, sseConnected]);
 
   if (!deviceId) {
     return (
