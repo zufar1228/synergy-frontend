@@ -47,15 +47,15 @@ const TRIAL_PRESETS: Record<string, TrialPreset[]> = {
     },
     {
       trial: 4,
-      note: 'tendangan_ringan',
-      label: '4. Tendangan Ringan',
-      desc: 'Tendangan ringan bawah pintu'
+      note: 'tendangan_kuat',
+      label: '4. Tendangan Kuat',
+      desc: 'Tendangan kuat pada pintu'
     },
     {
       trial: 5,
-      note: 'tendangan_keras',
-      label: '5. Tendangan Keras',
-      desc: 'Tendangan keras pada pintu'
+      note: 'tendangan_ringan',
+      label: '5. Tendangan Ringan',
+      desc: 'Tendangan ringan bawah pintu'
     },
     {
       trial: 6,

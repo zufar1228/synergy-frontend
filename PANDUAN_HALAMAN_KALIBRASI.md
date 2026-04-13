@@ -124,8 +124,8 @@ Setiap sesi memiliki daftar tombol percobaan yang sudah disiapkan. Ini adalah to
 | 1. Pukulan Tengah   | Pukul pintu di bagian tengah dengan tangan          |
 | 2. Pukulan Pinggir  | Pukul pintu di bagian pinggir/tepi                  |
 | 3. Senggolan Bahu   | Senggol pintu dengan bahu seperti orang lewat biasa |
-| 4. Tendangan Ringan | Tendang ringan bagian bawah pintu                   |
-| 5. Tendangan Keras  | Tendangan keras pada pintu                          |
+| 4. Tendangan Kuat   | Tendangan kuat pada pintu                           |
+| 5. Tendangan Ringan | Tendang ringan bagian bawah pintu                   |
 | 6. Pukulan Keras    | Pukul keras sekali dengan tangan                    |
 | 7. Ketukan Jari     | Ketuk pintu dengan jari keras 1x                    |
 
