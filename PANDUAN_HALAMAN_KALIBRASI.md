@@ -21,7 +21,7 @@ Tujuan kalibrasi adalah **mengumpulkan data nyata** untuk membuktikan bahwa:
 2. **Benturan tunggal tidak disengaja** (seseorang tidak sengaja menyenggol pintu) **hanya melewati threshold 1 kali** — sehingga tidak memicu alarm karena syaratnya harus lebih dari 1x
 3. **Upaya intrusi nyata** (pemahatan, pendobrakan) **melewati threshold berkali-kali** dalam jendela waktu — sehingga alarm benar-benar berbunyi
 
-Dengan data dari 4 sesi percobaan (ambient, benturan tunggal, pemahatan, pendobrakan), kita bisa menentukan **nilai threshold yang tepat** — cukup tinggi agar tidak terganggu derau, tapi cukup rendah agar bisa mendeteksi upaya intrusi.
+Dengan data dari 3 sesi percobaan (ambient, pendobrakan, pemahatan), kita bisa menentukan **nilai threshold yang tepat** — cukup tinggi agar tidak terganggu derau, tapi cukup rendah agar bisa mendeteksi upaya intrusi.
 
 Dengan halaman ini, kamu bisa:
 
@@ -94,14 +94,13 @@ Di bawah judul panel, ada kotak kecil yang muncul setelah kamu menekan tombol ap
 
 ### 2.3 Tab Sesi (Session Tabs)
 
-Ada 4 tab sesi yang merepresentasikan **jenis percobaan** berbeda:
+Ada 3 tab sesi yang merepresentasikan **jenis percobaan** berbeda:
 
 | Tab   | Nama    | Penjelasan                                                                                                                                                                                               |
 | ----- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **A** | Ambient | Rekam derau/kebisingan alami lingkungan — **pintu tertutup, tanpa gangguan apapun**. Data ini menjadi dasar untuk memastikan threshold **di atas** level derau                                           |
-| **B** | Impact  | Rekam data benturan **tunggal** pada pintu (pukulan, senggolan, tendangan). Tujuannya membuktikan bahwa benturan tunggal tidak disengaja **hanya melewati threshold 1x** sehingga **tidak memicu alarm** |
+| **B** | Ramming | Rekam data benturan **tunggal** pada pintu (pukulan, senggolan, tendangan). Tujuannya membuktikan bahwa benturan tunggal tidak disengaja **hanya melewati threshold 1x** sehingga **tidak memicu alarm** |
 | **C** | Chisel  | Rekam data **pemahatan/gesekan berulang** menggunakan obeng atau alat lain. Simulasi upaya intrusi nyata yang harus **melewati threshold berkali-kali** dan **memicu alarm**                             |
-| **D** | Ram     | Rekam data **pendobrakan** — hantaman kuat berulang pada pintu. Simulasi upaya paksa yang harus **melewati threshold berkali-kali** dan **memicu alarm**                                                 |
 
 Klik tab yang sesuai dengan jenis percobaan yang ingin kamu lakukan.
 
@@ -126,10 +125,9 @@ Setiap sesi memiliki daftar tombol percobaan yang sudah disiapkan. Ini adalah to
 | 2. Pukulan Pinggir  | Pukul pintu di bagian pinggir/tepi                  |
 | 3. Senggolan Bahu   | Senggol pintu dengan bahu seperti orang lewat biasa |
 | 4. Tendangan Ringan | Tendang ringan bagian bawah pintu                   |
-| 5. Troli 1x         | Dorong troli ke arah pintu sekali                   |
+| 5. Tendangan Keras  | Tendangan keras pada pintu                          |
 | 6. Pukulan Keras    | Pukul keras sekali dengan tangan                    |
-| 7. Ketukan Jari     | Ketuk pintuk dengan jari keras 1x                   |
-| 8. Hentakan Kaki    | Hentakkan kaki ke lantai dekat pintu                |
+| 7. Ketukan Jari     | Ketuk pintu dengan jari keras 1x                    |
 
 > 💡 Saat tombol ditekan:
 >
@@ -137,7 +135,7 @@ Setiap sesi memiliki daftar tombol percobaan yang sudah disiapkan. Ini adalah to
 > - Kartu berubah hijau + badge **Done** = berhasil dimulai
 > - Bunyi nada 2x = konfirmasi sukses
 
-**Sesi A** hanya memiliki 1 percobaan (Baseline), **Sesi B** memiliki 8, **Sesi C** memiliki 10, dan **Sesi D** memiliki 10 percobaan.
+**Sesi A** hanya memiliki 1 percobaan (Baseline), **Sesi B** memiliki 7, dan **Sesi C** memiliki 7 percobaan.
 
 ---
 
@@ -343,9 +341,9 @@ Berikut urutan penggunaan halaman ini untuk satu sesi percobaan:
 2. **Bandingkan nilai Δg antar sesi** — ini inti dari kalibrasi:
    - **Sesi A (Max Δg)** = batas atas derau lingkungan
    - **Sesi B (Max Δg)** = kekuatan benturan tunggal tidak disengaja
-   - **Sesi C & D (Mean/P95 Δg)** = kekuatan getaran upaya intrusi
-   - **Threshold ideal** = di atas Max Δg Sesi A, tapi di bawah Peak Δg Sesi C/D
-3. Periksa tab **Peak Summary** untuk memastikan puncak getaran derau (A) **tidak bersinggungan** dengan puncak getaran intrusi (C/D)
+   - **Sesi C (Mean/P95 Δg)** = kekuatan getaran upaya intrusi
+   - **Threshold ideal** = di atas Max Δg Sesi A, tapi di bawah Peak Δg Sesi C
+3. Periksa tab **Peak Summary** untuk memastikan puncak getaran derau (A) **tidak bersinggungan** dengan puncak getaran intrusi (C)
 4. Gunakan tab **Raw Data** jika ingin melihat data mentah secara detail
 
 ---
@@ -355,7 +353,7 @@ Berikut urutan penggunaan halaman ini untuk satu sesi percobaan:
 | Tombol                      | Di mana                  | Fungsi                                           |
 | --------------------------- | ------------------------ | ------------------------------------------------ |
 | **⏹ STOP**                  | Kanan atas panel kontrol | Hentikan rekaman sekarang                        |
-| **A / B / C / D** (tab)     | Tengah panel kontrol     | Pilih jenis sesi percobaan                       |
+| **A / B / C** (tab)       | Tengah panel kontrol     | Pilih jenis sesi percobaan                       |
 | **Kartu Percobaan** (besar) | Di dalam tab sesi        | Mulai percobaan tertentu (Set + Start otomatis)  |
 | **T1, T2, ... Tn**          | Di bawah kartu sesi      | Tandai percobaan sebagai selesai (penanda lokal) |
 | **▶ Manual Control**        | Bawah panel kontrol      | Buka kontrol manual (klik untuk expand)          |
@@ -378,7 +376,7 @@ Berikut urutan penggunaan halaman ini untuk satu sesi percobaan:
 | Istilah          | Penjelasan Sederhana                                                                                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Δg (Delta-g)** | Satuan ukur getaran/percepatan dalam kelipatan gravitasi bumi. Nilai besar = getaran kuat. Ini adalah nilai yang dibandingkan dengan threshold untuk mendeteksi intrusi  |
-| **Session**      | Kelompok percobaan dengan jenis yang sama (A=ambient, B=benturan tunggal, C=pemahatan, D=pendobrakan)                                                                    |
+| **Session**      | Kelompok percobaan dengan jenis yang sama (A=ambient, B=pendobrakan, C=pemahatan)                                                                    |
 | **Trial**        | Satu kali percobaan individual dalam sebuah sesi                                                                                                                         |
 | **MQTT**         | Protokol komunikasi yang digunakan untuk mengirim perintah dari web ke sensor                                                                                            |
 | **UUID**         | ID unik berbentuk huruf dan angka panjang yang mengidentifikasi perangkat sensor                                                                                         |

@@ -20,7 +20,7 @@ export default function CalibrationPage() {
         <h1 className="text-xl sm:text-2xl font-bold">Calibration Control</h1>
         <div className="flex items-center gap-2">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Remote control — Sessions A (ambient), B (impact), C (chisel), D (ram)
+            Remote control — Sessions A (ambient), B (ramming), C (chisel)
           </p>
           <Badge variant={sseConnected ? 'success' : 'neutral'} className="text-[10px] h-5">
             {sseConnected ? '● Live' : '○ Polling'}

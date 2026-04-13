@@ -53,9 +53,9 @@ const TRIAL_PRESETS: Record<string, TrialPreset[]> = {
     },
     {
       trial: 5,
-      note: 'troli_1x',
-      label: '5. Troli 1x',
-      desc: 'Dorongan troli ke pintu 1x'
+      note: 'tendangan_keras',
+      label: '5. Tendangan Keras',
+      desc: 'Tendangan keras pada pintu'
     },
     {
       trial: 6,
@@ -68,145 +68,58 @@ const TRIAL_PRESETS: Record<string, TrialPreset[]> = {
       note: 'ketukan_jari',
       label: '7. Ketukan Jari',
       desc: 'Ketukan jari keras 1x'
-    },
-    {
-      trial: 8,
-      note: 'hentakan_kaki',
-      label: '8. Hentakan Kaki',
-      desc: 'Hentakan kaki ke lantai dekat pintu'
     }
   ],
   C: [
     {
       trial: 1,
-      note: 'obeng_kusen_kanan_30s',
-      label: '1. Kusen Kanan 30s',
-      desc: 'Obeng pipih, kusen kanan'
+      note: 'sela_kusen_kanan',
+      label: '1. Sela Kusen Kanan',
+      desc: 'Pemahatan sela kusen kanan'
     },
     {
       trial: 2,
-      note: 'obeng_tepi_bawah_30s',
-      label: '2. Tepi Bawah 30s',
-      desc: 'Obeng pipih, tepi pintu bawah'
+      note: 'sela_bawah_pintu',
+      label: '2. Sela Bawah Pintu',
+      desc: 'Pemahatan sela bawah pintu'
     },
     {
       trial: 3,
-      note: 'obeng_area_kunci_30s',
-      label: '3. Area Kunci 30s',
-      desc: 'Obeng pipih, area kunci'
+      note: 'sela_kusen_kiri',
+      label: '3. Sela Kusen Kiri',
+      desc: 'Pemahatan sela kusen kiri'
     },
     {
       trial: 4,
-      note: 'obeng_kusen_kiri_45s',
-      label: '4. Kusen Kiri 45s',
-      desc: 'Obeng pipih, kusen kiri'
+      note: 'sela_kusen_atas',
+      label: '4. Sela Kusen Atas',
+      desc: 'Pemahatan sela kusen atas'
     },
     {
       trial: 5,
-      note: 'obeng_plus_tengah_30s',
-      label: '5. Plus Tengah 30s',
-      desc: 'Obeng plus, tengah panel'
+      note: 'kusen_kanan',
+      label: '5. Kusen Kanan',
+      desc: 'Pemahatan kusen kanan'
     },
     {
       trial: 6,
-      note: 'kunci_pas_kusen_atas_30s',
-      label: '6. Kunci Pas 30s',
-      desc: 'Kunci pas, kusen atas'
+      note: 'kusen_kiri',
+      label: '6. Kusen Kiri',
+      desc: 'Pemahatan kusen kiri'
     },
     {
       trial: 7,
-      note: 'obeng_lambat_45s',
-      label: '7. Lambat 45s',
-      desc: 'Obeng pipih, ritme lambat'
-    },
-    {
-      trial: 8,
-      note: 'obeng_cepat_20s',
-      label: '8. Cepat 20s',
-      desc: 'Obeng pipih, ritme cepat'
-    },
-    {
-      trial: 9,
-      note: 'obeng_kusen_60s',
-      label: '9. Kusen 60s',
-      desc: 'Obeng pipih, kusen kanan, 60 detik'
-    },
-    {
-      trial: 10,
-      note: 'obeng_ringan_30s',
-      label: '10. Ringan 30s',
-      desc: 'Obeng pipih, intensitas ringan'
-    }
-  ],
-  D: [
-    {
-      trial: 1,
-      note: 'bahu_berulang_15s',
-      label: '1. Bahu 15s',
-      desc: 'Dorongan bahu berulang'
-    },
-    {
-      trial: 2,
-      note: 'telapak_keras_15s',
-      label: '2. Telapak Keras 15s',
-      desc: 'Telapak tangan keras berulang'
-    },
-    {
-      trial: 3,
-      note: 'tendangan_berulang_15s',
-      label: '3. Tendangan 15s',
-      desc: 'Tendangan kaki berulang'
-    },
-    {
-      trial: 4,
-      note: 'bahu_jeda_panjang_30s',
-      label: '4. Bahu Jeda 30s',
-      desc: 'Dorongan bahu, jeda panjang'
-    },
-    {
-      trial: 5,
-      note: 'benda_tumpul_15s',
-      label: '5. Tumpul 15s',
-      desc: 'Hantaman benda tumpul berulang'
-    },
-    {
-      trial: 6,
-      note: 'bahu_cepat_10s',
-      label: '6. Bahu Cepat 10s',
-      desc: 'Dorongan bahu cepat'
-    },
-    {
-      trial: 7,
-      note: 'campuran_20s',
-      label: '7. Campuran 20s',
-      desc: 'Telapak tangan + bahu bergantian'
-    },
-    {
-      trial: 8,
-      note: 'dorongan_samping_15s',
-      label: '8. Samping 15s',
-      desc: 'Dorongan dari samping'
-    },
-    {
-      trial: 9,
-      note: 'kuat_jeda5s_30s',
-      label: '9. Kuat Jeda 30s',
-      desc: 'Hantaman kuat, jeda 5 detik'
-    },
-    {
-      trial: 10,
-      note: 'dobrakan_penuh_15s',
-      label: '10. Full 15s',
-      desc: 'Simulasi dobrakan penuh'
+      note: 'kusen_atas',
+      label: '7. Kusen Atas',
+      desc: 'Pemahatan kusen atas'
     }
   ]
 };
 
 const SESSION_DESCRIPTIONS: Record<string, string> = {
   A: 'Ambient Noise — Derau lingkungan, pintu tertutup',
-  B: 'Single Impact — Benturan tunggal (pukulan, senggolan)',
-  C: 'Chiseling — Pemahatan repetitif (obeng/pahat)',
-  D: 'Ramming — Pendobrakan (hantaman kuat berulang)'
+  B: 'Ramming — Pendobrakan (hantaman kuat berulang)',
+  C: 'Chiseling — Pemahatan repetitif (obeng/pahat)'
 };
 
 // ── Audio cue system (#7) ──────────────────────────────────────────
@@ -453,22 +366,18 @@ export default function CalibrationControlPanel({
             </TabsTrigger>
             <TabsTrigger value="B" className="flex-1">
               <span className="sm:hidden">B</span>
-              <span className="hidden sm:inline">B — Impact</span>
+              <span className="hidden sm:inline">B — Ramming</span>
             </TabsTrigger>
             <TabsTrigger value="C" className="flex-1">
               <span className="sm:hidden">C</span>
               <span className="hidden sm:inline">C — Chisel</span>
-            </TabsTrigger>
-            <TabsTrigger value="D" className="flex-1">
-              <span className="sm:hidden">D</span>
-              <span className="hidden sm:inline">D — Ram</span>
             </TabsTrigger>
           </TabsList>
           <p className="text-xs text-muted-foreground mt-1">
             {SESSION_DESCRIPTIONS[activeSession]}
           </p>
 
-          {(['A', 'B', 'C', 'D'] as const).map((sess) => (
+          {(['A', 'B', 'C'] as const).map((sess) => (
             <TabsContent key={sess} value={sess} className="space-y-3 mt-3">
               {/* Large touch-friendly preset grid (#8) */}
               <div
