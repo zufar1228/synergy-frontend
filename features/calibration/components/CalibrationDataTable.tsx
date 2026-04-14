@@ -153,9 +153,7 @@ function SummaryDataView() {
                 <TableHead>Trial</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Samples</TableHead>
-                <TableHead>Min Δg</TableHead>
                 <TableHead>Max Δg</TableHead>
-                <TableHead>Mean Δg</TableHead>
                 <TableHead>Window</TableHead>
                 <TableHead>Time</TableHead>
               </TableRow>
@@ -168,13 +166,7 @@ function SummaryDataView() {
                   <TableCell className="text-xs">{row.summary_type}</TableCell>
                   <TableCell>{row.n_samples}</TableCell>
                   <TableCell className="font-mono">
-                    {Number(row.dg_min).toFixed(4)}
-                  </TableCell>
-                  <TableCell className="font-mono">
                     {Number(row.dg_max).toFixed(4)}
-                  </TableCell>
-                  <TableCell className="font-mono">
-                    {Number(row.dg_mean).toFixed(4)}
                   </TableCell>
                   <TableCell className="text-xs">{row.window_ms}ms</TableCell>
                   <TableCell className="text-xs">
@@ -236,13 +228,7 @@ function SessionStatsView() {
             <TableHead>Session</TableHead>
             <TableHead>Trials</TableHead>
             <TableHead>Samples</TableHead>
-            <TableHead>Min Δg</TableHead>
             <TableHead>Max Δg</TableHead>
-            <TableHead>Mean Δg</TableHead>
-            <TableHead>StdDev</TableHead>
-            <TableHead>Median</TableHead>
-            <TableHead>P95</TableHead>
-            <TableHead>P99</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -251,17 +237,7 @@ function SessionStatsView() {
               <TableCell className="font-medium">{row.session}</TableCell>
               <TableCell>{row.n_trials}</TableCell>
               <TableCell>{row.total_samples}</TableCell>
-              <TableCell>{row.dg_min}</TableCell>
               <TableCell>{row.dg_max}</TableCell>
-              <TableCell>{row.dg_mean}</TableCell>
-              <TableCell>
-                {row.dg_stddev != null ? row.dg_stddev : '—'}
-              </TableCell>
-              <TableCell>
-                {row.dg_median != null ? row.dg_median : '—'}
-              </TableCell>
-              <TableCell>{row.dg_p95 != null ? row.dg_p95 : '—'}</TableCell>
-              <TableCell>{row.dg_p99 != null ? row.dg_p99 : '—'}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -314,10 +290,7 @@ function TrialStatsView() {
                 <TableHead>Session</TableHead>
                 <TableHead>Trial</TableHead>
                 <TableHead>Samples</TableHead>
-                <TableHead>Min Δg</TableHead>
                 <TableHead>Max Δg</TableHead>
-                <TableHead>Mean Δg</TableHead>
-                <TableHead>StdDev</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -326,12 +299,7 @@ function TrialStatsView() {
                   <TableCell className="font-medium">{row.session}</TableCell>
                   <TableCell>{row.trial}</TableCell>
                   <TableCell>{row.n_samples}</TableCell>
-                  <TableCell>{row.dg_min}</TableCell>
                   <TableCell>{row.dg_max}</TableCell>
-                  <TableCell>{row.dg_mean}</TableCell>
-                  <TableCell>
-                    {row.dg_stddev != null ? row.dg_stddev : '—'}
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -409,10 +377,7 @@ function PeakSummaryView() {
           <TableRow>
             <TableHead>Session</TableHead>
             <TableHead>Trials</TableHead>
-            <TableHead>Peak Min</TableHead>
             <TableHead>Peak Max</TableHead>
-            <TableHead>Peak Mean</TableHead>
-            <TableHead>Peak StdDev</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -421,18 +386,7 @@ function PeakSummaryView() {
               <TableCell className="font-medium">{row.session}</TableCell>
               <TableCell>{row.n_trials}</TableCell>
               <TableCell className="font-mono">
-                {Number(row.peak_min).toFixed(4)}
-              </TableCell>
-              <TableCell className="font-mono">
                 {Number(row.peak_max).toFixed(4)}
-              </TableCell>
-              <TableCell className="font-mono">
-                {Number(row.peak_mean).toFixed(4)}
-              </TableCell>
-              <TableCell className="font-mono">
-                {row.peak_stddev != null
-                  ? Number(row.peak_stddev).toFixed(4)
-                  : '—'}
               </TableCell>
             </TableRow>
           ))}

@@ -106,12 +106,6 @@ const TRIAL_PRESETS: Record<string, TrialPreset[]> = {
       note: 'kusen_kiri',
       label: '6. Kusen Kiri',
       desc: 'Pemahatan kusen kiri'
-    },
-    {
-      trial: 7,
-      note: 'kusen_atas',
-      label: '7. Kusen Atas',
-      desc: 'Pemahatan kusen atas'
     }
   ]
 };
@@ -199,7 +193,10 @@ export default function CalibrationControlPanel({
   useEffect(() => {
     if (deviceCalState !== prevStateRef.current) {
       if (deviceCalState === 'RECORDING') audio.playStart();
-      else if (deviceCalState === 'IDLE' && prevStateRef.current === 'RECORDING')
+      else if (
+        deviceCalState === 'IDLE' &&
+        prevStateRef.current === 'RECORDING'
+      )
         audio.playStop();
       else if (deviceCalState === 'COUNTDOWN') audio.playBeep();
       prevStateRef.current = deviceCalState;
