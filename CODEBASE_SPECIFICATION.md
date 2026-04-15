@@ -1053,11 +1053,15 @@ Form termasuk warehouse selector dropdown.
 
 ### Flow
 
-1. User klik "Coba Demo" → `startDemo()` server action → set cookie `demo-mode=true`
+1. User buka `/demo` → route handler set cookie `demo-mode=true` lalu redirect ke `/dashboard`
 2. Middleware detect cookie → bypass auth
 3. `DemoProvider` set `isDemo = true`
 4. `apiFetch()` detect demo mode via `isDemoMode()` → return mock data dari `getDemoResponse()`
 5. Exit: `exitDemo()` → hapus cookie, redirect `/login`
+
+Catatan:
+- Tombol demo di halaman login dihapus.
+- URL publik demo sekarang adalah `/demo`, sehingga bisa langsung dipakai dari portfolio.
 
 ### Mock Data (`lib/demo/mock-data.ts`)
 

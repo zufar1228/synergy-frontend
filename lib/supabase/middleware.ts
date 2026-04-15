@@ -53,6 +53,7 @@ export async function updateSession(request: NextRequest) {
 
   const publicPaths = [
     '/login',
+    '/demo',
     '/setup-account',
     '/auth/confirm',
     '/auth/callback',
