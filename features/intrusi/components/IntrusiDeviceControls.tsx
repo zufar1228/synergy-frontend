@@ -499,43 +499,54 @@ export const IntrusiDeviceControls = ({
                 </div>
               </div>
 
-              {/* Battery — Progress Bar (Point 6) */}
-              <div className="flex items-center gap-2 rounded-base border-2 border-border bg-secondary p-3 transition-colors">
-                <BatteryCharging
-                  className={cn(
-                    'h-5 w-5 shrink-0',
-                    vbatPct == null
-                      ? 'text-muted-foreground'
-                      : vbatPct >= 60
-                        ? 'text-green-500'
-                        : vbatPct >= 30
-                          ? 'text-yellow-500'
-                          : 'text-red-500'
-                  )}
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-muted-foreground text-xs">Baterai</p>
-                  {vbatPct != null ? (
-                    <div className="mt-1.5 h-2.5 w-full rounded-full bg-muted overflow-hidden border border-border">
-                      <div
-                        className={cn(
-                          'h-full rounded-full transition-all duration-500',
-                          vbatPct >= 60
-                            ? 'bg-green-500'
-                            : vbatPct >= 30
-                              ? 'bg-yellow-500'
-                              : 'bg-red-500'
-                        )}
-                        style={{
-                          width: `${Math.min(100, Math.max(0, vbatPct))}%`
-                        }}
-                      />
+              {/* Battery — 5-Step Bar */}
+              {(() => {
+                // Round up to 4 discrete steps: 0=empty, 1=1-25%, 2=26-50%, 3=51-75%, 4=76-100%
+                const steps = vbatPct == null
+                  ? 0
+                  : vbatPct <= 0
+                    ? 0
+                    : Math.min(4, Math.ceil(vbatPct / 25));
+                const stepColor =
+                  vbatPct == null
+                    ? 'bg-muted-foreground/30'
+                    : steps >= 3
+                      ? 'bg-green-500'
+                      : steps === 2
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500';
+                const iconColor =
+                  vbatPct == null
+                    ? 'text-muted-foreground'
+                    : steps >= 3
+                      ? 'text-green-500'
+                      : steps === 2
+                        ? 'text-yellow-500'
+                        : 'text-red-500';
+                return (
+                  <div className="flex items-center gap-2 rounded-base border-2 border-border bg-secondary p-3 transition-colors">
+                    <BatteryCharging className={cn('h-5 w-5 shrink-0', iconColor)} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-muted-foreground text-xs">Baterai</p>
+                      {vbatPct != null ? (
+                        <div className="mt-1.5 flex gap-1">
+                          {[0, 1, 2, 3].map((i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                'h-2.5 flex-1 rounded-sm border border-border transition-all duration-500',
+                                i < steps ? stepColor : 'bg-muted'
+                              )}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="font-semibold">-</p>
+                      )}
                     </div>
-                  ) : (
-                    <p className="font-semibold">-</p>
-                  )}
-                </div>
-              </div>
+                  </div>
+                );
+              })()}
 
               {/* Last Update — 6th tile (#3) */}
               <div className="flex items-center gap-2 rounded-base border-2 border-border bg-secondary p-3 transition-colors">
