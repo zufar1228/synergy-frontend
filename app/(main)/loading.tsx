@@ -1,3 +1,12 @@
+/**
+ * @file loading.tsx
+ * @purpose Loading skeleton for main layout
+ * @usedBy Next.js app router (main group loading)
+ * @deps Skeleton
+ * @exports Loading (default)
+ * @sideEffects None
+ */
+
 // frontend/app/(main)/loading.tsx
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";

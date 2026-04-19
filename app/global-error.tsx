@@ -1,3 +1,12 @@
+/**
+ * @file global-error.tsx
+ * @purpose Global error boundary for unhandled errors
+ * @usedBy Next.js app router
+ * @deps None
+ * @exports GlobalError (default)
+ * @sideEffects None
+ */
+
 'use client';
 
 import { useEffect } from 'react';

@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose Login page — renders login form, redirects if already authenticated
+ * @usedBy Next.js app router (/login)
+ * @deps LoginForm, supabase/server
+ * @exports LoginPage (default)
+ * @sideEffects Server-side auth check
+ */
+
 // frontend/app/login/page.tsx
 import { LoginForm } from '@/components/login-form';
 import { createClient } from '@/lib/supabase/server';

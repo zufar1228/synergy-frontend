@@ -1,3 +1,12 @@
+/**
+ * @file calibration.ts
+ * @purpose API functions for calibration data retrieval and device commands
+ * @usedBy Calibration components
+ * @deps lib/api/client (apiFetch)
+ * @exports fetchCalibrationStatus, fetchRawData, fetchSessions, fetchSummary, sendCalibrationCommand + more
+ * @sideEffects HTTP calls to calibration endpoints
+ */
+
 import { env } from '@/lib/env';
 
 const CAL_BASE_URL = env.NEXT_PUBLIC_API_URL + '/api-cal';

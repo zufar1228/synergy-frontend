@@ -1,3 +1,12 @@
+/**
+ * @file route.ts
+ * @purpose Demo mode entry route — sets demo cookie and redirects to dashboard
+ * @usedBy Public demo link
+ * @deps None
+ * @exports GET
+ * @sideEffects Sets demo cookie, redirects
+ */
+
 import { NextResponse } from 'next/server';
 
 export function GET(request: Request) {
@@ -7,7 +16,7 @@ export function GET(request: Request) {
     path: '/',
     maxAge: 3600,
     sameSite: 'lax',
-    httpOnly: false,
+    httpOnly: false
   });
 
   return response;

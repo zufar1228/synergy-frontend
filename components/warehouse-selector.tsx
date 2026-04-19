@@ -1,3 +1,12 @@
+/**
+ * @file warehouse-selector.tsx
+ * @purpose Warehouse dropdown selector in sidebar
+ * @usedBy AppSidebar
+ * @deps useWarehouse, useWarehouses, Select UI
+ * @exports WarehouseSelector
+ * @sideEffects Updates WarehouseContext selection
+ */
+
 // frontend/components/warehouse-selector.tsx
 "use client";
 

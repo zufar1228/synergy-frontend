@@ -1,3 +1,12 @@
+/**
+ * @file CalibrationDataTable.tsx
+ * @purpose Data table displaying calibration raw data and session statistics
+ * @usedBy CalibrationPage
+ * @deps calibration API, Table UI
+ * @exports CalibrationDataTable (default)
+ * @sideEffects API calls (fetchRawData, fetchSessions)
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';

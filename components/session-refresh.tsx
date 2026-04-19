@@ -1,3 +1,12 @@
+/**
+ * @file session-refresh.tsx
+ * @purpose Silent Supabase session refresh on interval
+ * @usedBy MainLayout
+ * @deps supabase/client
+ * @exports SessionRefresh
+ * @sideEffects Periodic auth token refresh
+ */
+
 // frontend/components/session-refresh.tsx
 "use client";
 

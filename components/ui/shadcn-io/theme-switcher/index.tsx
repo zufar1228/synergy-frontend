@@ -1,3 +1,12 @@
+/**
+ * @file theme-switcher/index.tsx
+ * @purpose Theme switcher UI component (shadcn-io variant)
+ * @usedBy SiteHeader
+ * @deps next-themes
+ * @exports ThemeSwitcher (default)
+ * @sideEffects Toggles theme
+ */
+
 "use client";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";

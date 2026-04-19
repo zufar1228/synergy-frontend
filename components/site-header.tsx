@@ -1,3 +1,12 @@
+/**
+ * @file site-header.tsx
+ * @purpose Top header bar with breadcrumbs, theme toggle, mobile sidebar trigger
+ * @usedBy MainLayout
+ * @deps HeaderBreadcrumbs, ThemeToggle, MobileSidebar
+ * @exports SiteHeader, SiteHeaderSkeleton
+ * @sideEffects None
+ */
+
 // frontend/components/site-header.tsx
 'use client';
 

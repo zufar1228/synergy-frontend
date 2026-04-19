@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose Calibration dashboard page — MPU6050 sensor data collection UI
+ * @usedBy Next.js app router (/calibration)
+ * @deps CalibrationControlPanel, CalibrationStatusDisplay, CalibrationDataTable, useCalibrationSSE
+ * @exports CalibrationPage (default)
+ * @sideEffects SSE connection, API calls
+ */
+
 'use client';
 
 import { useState } from 'react';

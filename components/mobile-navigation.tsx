@@ -1,3 +1,12 @@
+/**
+ * @file mobile-navigation.tsx
+ * @purpose Bottom tab navigation for mobile viewport
+ * @usedBy MainLayout (mobile only)
+ * @deps useWarehouse, usePathname
+ * @exports MobileNavigation
+ * @sideEffects None
+ */
+
 // frontend/components/mobile-navigation.tsx
 'use client';
 

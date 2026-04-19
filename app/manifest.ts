@@ -1,3 +1,12 @@
+/**
+ * @file manifest.ts
+ * @purpose PWA manifest configuration
+ * @usedBy Next.js metadata API
+ * @deps None
+ * @exports manifest (default)
+ * @sideEffects None
+ */
+
 import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {

@@ -1,3 +1,12 @@
+/**
+ * @file theme-provider.tsx
+ * @purpose next-themes ThemeProvider wrapper
+ * @usedBy RootLayout
+ * @deps next-themes
+ * @exports ThemeProvider
+ * @sideEffects None
+ */
+
 // frontend/components/theme-provider.tsx
 "use client";
 

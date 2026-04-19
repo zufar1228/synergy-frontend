@@ -1,3 +1,12 @@
+/**
+ * @file demo-banner.tsx
+ * @purpose Banner displayed in demo mode to indicate non-production state
+ * @usedBy MainLayout
+ * @deps useDemo context
+ * @exports DemoBanner
+ * @sideEffects None
+ */
+
 // frontend/components/demo-banner.tsx
 'use client';
 

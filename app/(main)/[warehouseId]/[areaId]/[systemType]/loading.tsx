@@ -1,3 +1,12 @@
+/**
+ * @file loading.tsx
+ * @purpose Loading skeleton for system monitoring page
+ * @usedBy Next.js app router (/[warehouseId]/[areaId]/[systemType] loading)
+ * @deps Skeleton
+ * @exports Loading (default)
+ * @sideEffects None
+ */
+
 // frontend/app/(main)/[warehouseId]/[areaId]/[systemType]/loading.tsx
 import { Skeleton } from "@/components/ui/skeleton";
 

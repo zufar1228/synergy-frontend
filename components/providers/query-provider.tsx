@@ -1,3 +1,12 @@
+/**
+ * @file query-provider.tsx
+ * @purpose TanStack React Query provider wrapper
+ * @usedBy RootLayout
+ * @deps @tanstack/react-query
+ * @exports QueryProvider
+ * @sideEffects None
+ */
+
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

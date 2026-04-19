@@ -1,3 +1,12 @@
+/**
+ * @file UpdateProfileForm.tsx
+ * @purpose User profile update form (username)
+ * @usedBy ProfilePage
+ * @deps lib/api/users, useApiMutation
+ * @exports UpdateProfileForm
+ * @sideEffects API call (updateMyProfile)
+ */
+
 // frontend/components/profile/UpdateProfileForm.tsx
 "use client";
 

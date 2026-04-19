@@ -1,3 +1,12 @@
+/**
+ * @file TelegramManager.tsx
+ * @purpose Telegram bot management UI — subscribers list, invite, kick, test alert
+ * @usedBy ProfilePage or admin section
+ * @deps useTelegramMembers hook, lib/api/telegram
+ * @exports TelegramManager (default)
+ * @sideEffects API calls (generateInvite, kickMember, sendTestAlert)
+ */
+
 // frontend/components/telegram/TelegramManager.tsx
 "use client";
 

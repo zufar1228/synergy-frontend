@@ -1,3 +1,12 @@
+/**
+ * @file UpdatePasswordForm.tsx
+ * @purpose Password update form for authenticated users
+ * @usedBy ProfilePage
+ * @deps supabase/client
+ * @exports UpdatePasswordForm
+ * @sideEffects Supabase password update
+ */
+
 // frontend/components/profile/UpdatePasswordForm.tsx
 "use client";
 

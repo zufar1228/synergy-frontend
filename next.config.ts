@@ -1,3 +1,12 @@
+/**
+ * @file next.config.ts
+ * @purpose Next.js configuration — image domains, headers, redirects
+ * @usedBy Next.js build system
+ * @deps None
+ * @exports nextConfig (default)
+ * @sideEffects None
+ */
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

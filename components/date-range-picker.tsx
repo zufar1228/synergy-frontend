@@ -1,3 +1,12 @@
+/**
+ * @file date-range-picker.tsx
+ * @purpose Reusable date range picker with preset ranges
+ * @usedBy Analytics/log pages
+ * @deps Calendar, Popover UI
+ * @exports DateRangePicker
+ * @sideEffects None
+ */
+
 // frontend/components/ui/date-range-picker.tsx
 "use client";
 

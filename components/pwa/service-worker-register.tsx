@@ -1,3 +1,12 @@
+/**
+ * @file service-worker-register.tsx
+ * @purpose Registers PWA service worker on mount
+ * @usedBy RootLayout
+ * @deps None (uses navigator.serviceWorker)
+ * @exports ServiceWorkerRegister
+ * @sideEffects Service worker registration
+ */
+
 "use client";
 
 import { useEffect } from "react";

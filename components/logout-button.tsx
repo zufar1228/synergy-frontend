@@ -1,3 +1,12 @@
+/**
+ * @file logout-button.tsx
+ * @purpose Logout button that triggers server-side logout action
+ * @usedBy NavUser
+ * @deps app/login/actions (logout)
+ * @exports LogoutButton
+ * @sideEffects Triggers logout + redirect
+ */
+
 // frontend/components/logout-button.tsx
 "use client";
 

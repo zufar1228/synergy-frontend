@@ -1,3 +1,12 @@
+/**
+ * @file navigation.ts
+ * @purpose API function to fetch areas grouped by system type for navigation
+ * @usedBy useNavAreas hook
+ * @deps client (apiFetch)
+ * @exports getNavAreasBySystem
+ * @sideEffects HTTP call (GET)
+ */
+
 // frontend/lib/api/navigation.ts
 import { apiFetch } from './client';
 import type { NavArea } from './types';

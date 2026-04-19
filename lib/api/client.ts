@@ -1,3 +1,12 @@
+/**
+ * @file client.ts
+ * @purpose Centralized API fetch client with error handling and auth token injection
+ * @usedBy All lib/api modules
+ * @deps lib/env, lib/demo/api-interceptor
+ * @exports API_BASE_URL, ApiError, buildApiError, apiFetch, apiFetchSafe
+ * @sideEffects HTTP calls to backend API
+ */
+
 // frontend/lib/api/client.ts
 
 import { env } from '@/lib/env';

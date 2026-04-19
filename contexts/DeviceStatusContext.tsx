@@ -1,3 +1,12 @@
+/**
+ * @file DeviceStatusContext.tsx
+ * @purpose React context for real-time device online/offline status tracking
+ * @usedBy MainLayout (provider), system view components (consumer)
+ * @deps lib/api/devices, useApiQuery
+ * @exports DeviceStatusProvider, useDeviceStatus
+ * @sideEffects Periodic API polling for device status
+ */
+
 "use client";
 
 import {

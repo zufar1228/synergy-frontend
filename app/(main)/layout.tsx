@@ -1,3 +1,12 @@
+/**
+ * @file layout.tsx
+ * @purpose Main authenticated layout — sidebar, header, session refresh, device status
+ * @usedBy All authenticated pages
+ * @deps AppSidebar, SiteHeader, SessionRefresh, WarehouseProvider, DeviceStatusProvider
+ * @exports MainLayout (default)
+ * @sideEffects Server-side auth check, redirects unauthenticated
+ */
+
 // frontend/app/(main)/layout.tsx
 import React from 'react';
 import { cookies } from 'next/headers';

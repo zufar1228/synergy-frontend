@@ -1,3 +1,12 @@
+/**
+ * @file users.ts
+ * @purpose API functions for user management, profile, preferences, push notifications
+ * @usedBy UserActions, profile components, hooks
+ * @deps client (apiFetch)
+ * @exports verifyUserAccess, getUsers, inviteUser, deleteUser, getMyProfile, updateMyProfile, updateUserRole, updateUserStatus + more
+ * @sideEffects HTTP calls (GET/POST/PUT/DELETE)
+ */
+
 // frontend/lib/api/users.ts
 import { apiFetch } from './client';
 import { env } from '@/lib/env';

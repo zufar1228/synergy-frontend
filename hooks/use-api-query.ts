@@ -1,3 +1,12 @@
+/**
+ * @file use-api-query.ts
+ * @purpose TanStack Query wrappers with Supabase token injection
+ * @usedBy All components needing API data fetching/mutation
+ * @deps @tanstack/react-query, supabase/client
+ * @exports useApiQuery, useApiMutation
+ * @sideEffects API calls via provided fetch functions
+ */
+
 'use client';
 
 import {

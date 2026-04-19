@@ -1,3 +1,12 @@
+/**
+ * @file loading.tsx
+ * @purpose Loading skeleton for warehouse dashboard
+ * @usedBy Next.js app router (/[warehouseId]/dashboard loading)
+ * @deps Skeleton
+ * @exports Loading (default)
+ * @sideEffects None
+ */
+
 // frontend/app/(main)/[warehouseId]/dashboard/loading.tsx
 import { Skeleton } from "@/components/ui/skeleton";
 

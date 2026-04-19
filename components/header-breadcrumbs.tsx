@@ -1,3 +1,12 @@
+/**
+ * @file header-breadcrumbs.tsx
+ * @purpose Dynamic breadcrumb navigation based on current route
+ * @usedBy SiteHeader
+ * @deps usePathname, Breadcrumb UI
+ * @exports HeaderBreadcrumbs
+ * @sideEffects None
+ */
+
 'use client';
 
 import React from 'react';

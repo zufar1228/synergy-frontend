@@ -1,3 +1,12 @@
+/**
+ * @file mobile-sidebar.tsx
+ * @purpose Drawer-based sidebar for mobile navigation
+ * @usedBy SiteHeader (mobile hamburger)
+ * @deps Sheet UI, useNavAreas, useWarehouse
+ * @exports MobileSidebar
+ * @sideEffects None
+ */
+
 // frontend/components/mobile-sidebar.tsx
 'use client';
 

@@ -1,3 +1,12 @@
+/**
+ * @file LingkunganDataTable.tsx
+ * @purpose Data table for lingkungan sensor logs with prediction rows
+ * @usedBy LingkunganView
+ * @deps Table UI, Badge
+ * @exports LingkunganDataTable
+ * @sideEffects None (data via props)
+ */
+
 'use client';
 
 import React, { useState, useMemo } from 'react';

@@ -38,6 +38,7 @@
 Synergy IoT Frontend adalah aplikasi Next.js yang menyediakan web dashboard untuk monitoring dan pengelolaan ekosistem IoT gudang. Aplikasi ini menampilkan data realtime dari 3 domain: keamanan kamera, keamanan pintu (intrusi), dan monitoring lingkungan (suhu/kelembapan/CO₂). Dilengkapi dengan role-based access control, push notifications, Telegram integration, dan demo mode.
 
 **Fitur utama:**
+
 - Dashboard overview per gudang
 - Monitoring realtime (Supabase Realtime + SSE untuk kalibrasi)
 - CRUD management (gudang, area, perangkat, pengguna)
@@ -50,25 +51,25 @@ Synergy IoT Frontend adalah aplikasi Next.js yang menyediakan web dashboard untu
 
 ## 2. Stack Teknologi
 
-| Layer | Teknologi | Versi |
-|-------|-----------|-------|
-| Framework | Next.js | 16.0.8 |
-| React | React | 19.1.0 |
-| Language | TypeScript | 5 |
-| Build | Turbopack | Built-in Next.js |
-| Auth | Supabase SSR + supabase-js | Latest |
-| Data Fetching | TanStack React Query | v5 |
-| Tables | TanStack React Table | v8 |
-| Forms | react-hook-form + zod | Latest |
-| UI Framework | shadcn/ui (48 komponen) | Latest |
-| UI Primitives | Radix UI (30+ packages) | Latest |
-| Icons | Lucide React | Latest |
-| Charts | Recharts | Latest |
-| Styling | Tailwind CSS v4 | v4 |
-| Animation | Motion (framer-motion) | Latest |
-| Dates | date-fns + date-fns-tz | Latest |
-| Toasts | Sonner | Latest |
-| Env Validation | @t3-oss/env-nextjs | Latest |
+| Layer          | Teknologi                  | Versi            |
+| -------------- | -------------------------- | ---------------- |
+| Framework      | Next.js                    | 16.0.8           |
+| React          | React                      | 19.1.0           |
+| Language       | TypeScript                 | 5                |
+| Build          | Turbopack                  | Built-in Next.js |
+| Auth           | Supabase SSR + supabase-js | Latest           |
+| Data Fetching  | TanStack React Query       | v5               |
+| Tables         | TanStack React Table       | v8               |
+| Forms          | react-hook-form + zod      | Latest           |
+| UI Framework   | shadcn/ui (48 komponen)    | Latest           |
+| UI Primitives  | Radix UI (30+ packages)    | Latest           |
+| Icons          | Lucide React               | Latest           |
+| Charts         | Recharts                   | Latest           |
+| Styling        | Tailwind CSS v4            | v4               |
+| Animation      | Motion (framer-motion)     | Latest           |
+| Dates          | date-fns + date-fns-tz     | Latest           |
+| Toasts         | Sonner                     | Latest           |
+| Env Validation | @t3-oss/env-nextjs         | Latest           |
 
 ---
 
@@ -241,13 +242,13 @@ frontend/
 
 Divalidasi via `@t3-oss/env-nextjs` di `lib/env.ts`.
 
-| Variable | Scope | Fungsi |
-|----------|-------|--------|
-| `NEXT_PUBLIC_API_URL` | Client | URL backend API (e.g. `http://localhost:5001`) |
-| `NEXT_PUBLIC_SUPABASE_URL` | Client | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Client | Supabase anon key |
-| `NEXT_PUBLIC_SUPABASE_PROJECT_REF` | Client (optional) | Supabase project ref |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Client | Web Push VAPID public key |
+| Variable                               | Scope             | Fungsi                                         |
+| -------------------------------------- | ----------------- | ---------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`                  | Client            | URL backend API (e.g. `http://localhost:5001`) |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Client            | Supabase project URL                           |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Client            | Supabase anon key                              |
+| `NEXT_PUBLIC_SUPABASE_PROJECT_REF`     | Client (optional) | Supabase project ref                           |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY`         | Client            | Web Push VAPID public key                      |
 
 ---
 
@@ -275,16 +276,16 @@ Divalidasi via `@t3-oss/env-nextjs` di `lib/env.ts`.
 
 ### 5.2 Page Rendering
 
-| Page | Tipe | Data Fetching |
-|------|------|---------------|
-| `/login` | SSC | Supabase session check |
-| `/setup-account` | Client | URL hash token parsing |
-| `/dashboard` | Client | useApiQuery + Supabase Realtime |
-| `/profile` | Client | useApiQuery + forms |
-| `/management/*` | SSC | Server-side API fetch |
-| `/[wid]/dashboard` | SSC | Server-side API fetch |
+| Page                 | Tipe         | Data Fetching                                                      |
+| -------------------- | ------------ | ------------------------------------------------------------------ |
+| `/login`             | SSC          | Supabase session check                                             |
+| `/setup-account`     | Client       | URL hash token parsing                                             |
+| `/dashboard`         | Client       | useApiQuery + Supabase Realtime                                    |
+| `/profile`           | Client       | useApiQuery + forms                                                |
+| `/management/*`      | SSC          | Server-side API fetch                                              |
+| `/[wid]/dashboard`   | SSC          | Server-side API fetch                                              |
 | `/[wid]/[aid]/[sys]` | SSC dispatch | Fetch analytics → render KeamananView\|IntrusiView\|LingkunganView |
-| `/calibration` | Client | SSE + direct API calls |
+| `/calibration`       | Client       | SSE + direct API calls                                             |
 
 ### 5.3 Dynamic Route: Feature View Dispatch
 
@@ -350,11 +351,11 @@ Setiap request:
 
 ### 6.3 Roles
 
-| Role | Akses Dashboard | Akses Monitoring | Akses Management | Akses Users |
-|------|----------------|-----------------|------------------|-------------|
-| `user` | ✅ | ✅ (read only) | ❌ | ❌ |
-| `admin` | ✅ | ✅ (read + write) | ✅ | ❌ |
-| `super_admin` | ✅ | ✅ (read + write) | ✅ | ✅ |
+| Role          | Akses Dashboard | Akses Monitoring  | Akses Management | Akses Users |
+| ------------- | --------------- | ----------------- | ---------------- | ----------- |
+| `user`        | ✅              | ✅ (read only)    | ❌               | ❌          |
+| `admin`       | ✅              | ✅ (read + write) | ✅               | ❌          |
+| `super_admin` | ✅              | ✅ (read + write) | ✅               | ✅          |
 
 ### 6.4 Session Refresh (`components/session-refresh.tsx`)
 
@@ -423,6 +424,7 @@ SIDEBAR
 ```
 
 **Area sub-links difilter berdasarkan:**
+
 - `selectedWarehouse` dari WarehouseContext
 - Data dari `useNavAreas()` per system_type
 
@@ -500,20 +502,20 @@ function useApiQuery<T>(
   queryKey: QueryKey,
   queryFn: (token: string) => Promise<T>,
   options?: UseQueryOptions
-)
+);
 // token diambil dari supabase.auth.getSession()
 // Demo mode: return static "demo-token"
 
 function useApiMutation<TData, TVariables>(
   mutationFn: (variables: TVariables, token: string) => Promise<TData>,
   options?: UseMutationOptions
-)
+);
 ```
 
 #### `useWarehouses` (`hooks/use-warehouses.ts`)
 
 ```ts
-function useWarehouses()
+function useWarehouses();
 // Returns: TanStack Query result untuk getWarehouses()
 // QueryKey: ['warehouses']
 ```
@@ -521,7 +523,7 @@ function useWarehouses()
 #### `useNavAreas` (`hooks/use-nav-areas.ts`)
 
 ```ts
-function useNavAreas()
+function useNavAreas();
 // Returns: { keamanan: NavArea[], intrusi: NavArea[], lingkungan: NavArea[] }
 // Fetch 3 parallel queries: getNavAreasBySystem untuk setiap system_type
 // QueryKeys: ['navAreas', systemType]
@@ -530,7 +532,7 @@ function useNavAreas()
 #### `useUserProfile` (`hooks/use-user-profile.ts`)
 
 ```ts
-function useUserProfile()
+function useUserProfile();
 // Returns: TanStack Query result untuk getMyProfile()
 // QueryKey: ['userProfile']
 ```
@@ -538,7 +540,7 @@ function useUserProfile()
 #### `useUserRole` (`hooks/use-user-role.ts`)
 
 ```ts
-function useUserRole()
+function useUserRole();
 // Returns: { role: string, isAdmin: boolean, isLoading: boolean }
 // isAdmin = role === 'admin' || role === 'super_admin'
 // Derived dari useUserProfile()
@@ -547,7 +549,7 @@ function useUserRole()
 #### `useTelegramMembers` (`hooks/use-telegram-members.ts`)
 
 ```ts
-function useTelegramMembers()
+function useTelegramMembers();
 // Returns: TanStack Query result untuk getTelegramMembers()
 // QueryKey: ['telegramMembers']
 ```
@@ -557,7 +559,7 @@ function useTelegramMembers()
 #### `usePushNotification` (`hooks/use-push-notification.ts`)
 
 ```ts
-function usePushNotification()
+function usePushNotification();
 // Returns: {
 //   isSubscribed: boolean,
 //   isSupported: boolean,
@@ -570,7 +572,7 @@ function usePushNotification()
 #### `useIsMobile` (`hooks/use-mobile.ts`)
 
 ```ts
-function useIsMobile()
+function useIsMobile();
 // Returns: boolean (window.innerWidth < 768)
 ```
 
@@ -581,12 +583,13 @@ function useIsMobile()
 ### 10.1 Base Client (`lib/api/client.ts`)
 
 ```ts
-export const API_BASE_URL: string   // dari env.NEXT_PUBLIC_API_URL
-export function apiFetch<T>(path, options?, token?): Promise<T>
-export function apiFetchSafe<T>(path, options?, token?): Promise<T | null>
+export const API_BASE_URL: string; // dari env.NEXT_PUBLIC_API_URL
+export function apiFetch<T>(path, options?, token?): Promise<T>;
+export function apiFetchSafe<T>(path, options?, token?): Promise<T | null>;
 ```
 
 **`apiFetch` flow:**
+
 1. Cek demo mode → return mock data
 2. Add `Authorization: Bearer {token}` header
 3. Fetch dari `${API_BASE_URL}${path}`
@@ -599,118 +602,118 @@ export function apiFetchSafe<T>(path, options?, token?): Promise<T | null>
 
 #### Warehouses (`lib/api/warehouses.ts`)
 
-| Fungsi | Method | Path | Keterangan |
-|--------|--------|------|------------|
-| `getWarehouses(token)` | GET | `/api/warehouses` | List with stats |
-| `createWarehouse(data, token)` | POST | `/api/warehouses` | |
-| `updateWarehouse(id, data, token)` | PUT | `/api/warehouses/:id` | |
-| `deleteWarehouse(id, token)` | DELETE | `/api/warehouses/:id` | |
-| `getWarehouseDetails(id, token)` | GET | `/api/warehouses/:id/areas-with-systems` | Detail drill-down |
+| Fungsi                             | Method | Path                                     | Keterangan        |
+| ---------------------------------- | ------ | ---------------------------------------- | ----------------- |
+| `getWarehouses(token)`             | GET    | `/api/warehouses`                        | List with stats   |
+| `createWarehouse(data, token)`     | POST   | `/api/warehouses`                        |                   |
+| `updateWarehouse(id, data, token)` | PUT    | `/api/warehouses/:id`                    |                   |
+| `deleteWarehouse(id, token)`       | DELETE | `/api/warehouses/:id`                    |                   |
+| `getWarehouseDetails(id, token)`   | GET    | `/api/warehouses/:id/areas-with-systems` | Detail drill-down |
 
 #### Areas (`lib/api/areas.ts`)
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `getAreas(token)` | GET | `/api/areas` |
-| `createArea(data, token)` | POST | `/api/areas` |
-| `updateArea(id, data, token)` | PUT | `/api/areas/:id` |
-| `deleteArea(id, token)` | DELETE | `/api/areas/:id` |
-| `getAreasByWarehouse(warehouseId, token)` | GET | `/api/areas?warehouse_id=` |
+| Fungsi                                    | Method | Path                       |
+| ----------------------------------------- | ------ | -------------------------- |
+| `getAreas(token)`                         | GET    | `/api/areas`               |
+| `createArea(data, token)`                 | POST   | `/api/areas`               |
+| `updateArea(id, data, token)`             | PUT    | `/api/areas/:id`           |
+| `deleteArea(id, token)`                   | DELETE | `/api/areas/:id`           |
+| `getAreasByWarehouse(warehouseId, token)` | GET    | `/api/areas?warehouse_id=` |
 
 #### Devices (`lib/api/devices.ts`)
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `getDevices(token)` | GET | `/api/devices` |
-| `createDevice(data, token)` | POST | `/api/devices` |
-| `updateDevice(id, data, token)` | PUT | `/api/devices/:id` |
-| `deleteDevice(id, token)` | DELETE | `/api/devices/:id` |
-| `getDeviceDetailsByArea(areaId, systemType, token)` | GET | `/api/devices/details?area_id&system_type` |
+| Fungsi                                              | Method | Path                                       |
+| --------------------------------------------------- | ------ | ------------------------------------------ |
+| `getDevices(token)`                                 | GET    | `/api/devices`                             |
+| `createDevice(data, token)`                         | POST   | `/api/devices`                             |
+| `updateDevice(id, data, token)`                     | PUT    | `/api/devices/:id`                         |
+| `deleteDevice(id, token)`                           | DELETE | `/api/devices/:id`                         |
+| `getDeviceDetailsByArea(areaId, systemType, token)` | GET    | `/api/devices/details?area_id&system_type` |
 
 #### Users (`lib/api/users.ts`)
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `verifyUserAccess(token)` | GET | `/api/users/verify-access` |
-| `getUsers(token)` | GET | `/api/users` |
-| `inviteUser(data, token)` | POST | `/api/users/invite` |
-| `deleteUser(id, token)` | DELETE | `/api/users/:id` |
-| `getMyProfile(token)` | GET | `/api/users/me` |
-| `updateMyProfile(data, token)` | PUT | `/api/users/me` |
-| `updateUserRole(id, role, token)` | PUT | `/api/users/:id/role` |
-| `updateUserStatus(id, status, token)` | PUT | `/api/users/:id/status` |
-| `getMyPreferences(token)` | GET | `/api/users/me/preferences` |
-| `updateMyPreferences(prefs, token)` | PUT | `/api/users/me/preferences` |
-| `getVapidPublicKey(token)` | GET | `/api/users/push/vapid-key` |
-| `subscribeToPush(sub, token)` | POST | `/api/users/push/subscribe` |
-| `testPushNotification(token)` | POST | `/api/users/push/test` |
+| Fungsi                                | Method | Path                        |
+| ------------------------------------- | ------ | --------------------------- |
+| `verifyUserAccess(token)`             | GET    | `/api/users/verify-access`  |
+| `getUsers(token)`                     | GET    | `/api/users`                |
+| `inviteUser(data, token)`             | POST   | `/api/users/invite`         |
+| `deleteUser(id, token)`               | DELETE | `/api/users/:id`            |
+| `getMyProfile(token)`                 | GET    | `/api/users/me`             |
+| `updateMyProfile(data, token)`        | PUT    | `/api/users/me`             |
+| `updateUserRole(id, role, token)`     | PUT    | `/api/users/:id/role`       |
+| `updateUserStatus(id, status, token)` | PUT    | `/api/users/:id/status`     |
+| `getMyPreferences(token)`             | GET    | `/api/users/me/preferences` |
+| `updateMyPreferences(prefs, token)`   | PUT    | `/api/users/me/preferences` |
+| `getVapidPublicKey(token)`            | GET    | `/api/users/push/vapid-key` |
+| `subscribeToPush(sub, token)`         | POST   | `/api/users/push/subscribe` |
+| `testPushNotification(token)`         | POST   | `/api/users/push/test`      |
 
 #### Navigation (`lib/api/navigation.ts`)
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `getNavAreasBySystem(systemType, token)` | GET | `/api/navigation/areas-by-system?system_type=` |
+| Fungsi                                   | Method | Path                                           |
+| ---------------------------------------- | ------ | ---------------------------------------------- |
+| `getNavAreasBySystem(systemType, token)` | GET    | `/api/navigation/areas-by-system?system_type=` |
 
 #### Analytics (`lib/api/analytics.ts`)
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `getAnalytics(systemType, params, token)` | GET | `/api/analytics/:systemType?area_id&page&per_page&from&to` |
-| `getAnalyticsDataForSystem(systemType, areaId, params, token)` | GET | Same (convenience wrapper) |
+| Fungsi                                                         | Method | Path                                                       |
+| -------------------------------------------------------------- | ------ | ---------------------------------------------------------- |
+| `getAnalytics(systemType, params, token)`                      | GET    | `/api/analytics/:systemType?area_id&page&per_page&from&to` |
+| `getAnalyticsDataForSystem(systemType, areaId, params, token)` | GET    | Same (convenience wrapper)                                 |
 
 #### Alerts (`lib/api/alerts.ts`)
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `getActiveAlerts(warehouseId, token)` | GET | `/api/alerts/active?warehouse_id=` |
-| `updateIncidentStatus(id, data, token)` | PUT | `/api/incidents/:id/status` |
-| `updateKeamananLogStatus(id, data, token)` | PUT | `/api/security-logs/:id/status` |
+| Fungsi                                     | Method | Path                               |
+| ------------------------------------------ | ------ | ---------------------------------- |
+| `getActiveAlerts(warehouseId, token)`      | GET    | `/api/alerts/active?warehouse_id=` |
+| `updateIncidentStatus(id, data, token)`    | PUT    | `/api/incidents/:id/status`        |
+| `updateKeamananLogStatus(id, data, token)` | PUT    | `/api/security-logs/:id/status`    |
 
 #### Telegram (`lib/api/telegram.ts`)
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `getTelegramMembers(token)` | GET | `/api/telegram/members` |
-| `generateTelegramInvite(token)` | POST | `/api/telegram/invite` |
-| `kickTelegramMember(userId, token)` | POST | `/api/telegram/kick` |
-| `sendTelegramTestAlert(token)` | POST | `/api/telegram/test-alert` |
+| Fungsi                              | Method | Path                       |
+| ----------------------------------- | ------ | -------------------------- |
+| `getTelegramMembers(token)`         | GET    | `/api/telegram/members`    |
+| `generateTelegramInvite(token)`     | POST   | `/api/telegram/invite`     |
+| `kickTelegramMember(userId, token)` | POST   | `/api/telegram/kick`       |
+| `sendTelegramTestAlert(token)`      | POST   | `/api/telegram/test-alert` |
 
 ### 10.3 Feature-Specific APIs
 
 #### Intrusi (`features/intrusi/api/intrusi.ts`)
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `getIntrusiLogs(deviceId, params, token)` | GET | `/api/intrusi/devices/:id/logs` |
-| `getIntrusiSummary(deviceId, token)` | GET | `/api/intrusi/devices/:id/summary` |
-| `getIntrusiStatus(deviceId, token)` | GET | `/api/intrusi/devices/:id/status` |
-| `updateIntrusiLogStatus(logId, data, token)` | PUT | `/api/intrusi/logs/:id/status` |
-| `sendIntrusiCommand(deviceId, command, token)` | POST | `/api/intrusi/devices/:id/command` |
+| Fungsi                                         | Method | Path                               |
+| ---------------------------------------------- | ------ | ---------------------------------- |
+| `getIntrusiLogs(deviceId, params, token)`      | GET    | `/api/intrusi/devices/:id/logs`    |
+| `getIntrusiSummary(deviceId, token)`           | GET    | `/api/intrusi/devices/:id/summary` |
+| `getIntrusiStatus(deviceId, token)`            | GET    | `/api/intrusi/devices/:id/status`  |
+| `updateIntrusiLogStatus(logId, data, token)`   | PUT    | `/api/intrusi/logs/:id/status`     |
+| `sendIntrusiCommand(deviceId, command, token)` | POST   | `/api/intrusi/devices/:id/command` |
 
 #### Lingkungan (`features/lingkungan/api/lingkungan.ts`)
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `getLingkunganStatus(deviceId, token)` | GET | `/api/lingkungan/devices/:id/status` |
-| `getLingkunganChart(deviceId, params, token)` | GET | `/api/lingkungan/devices/:id/chart` |
-| `sendLingkunganControl(deviceId, command, token)` | POST | `/api/lingkungan/devices/:id/control` |
-| `updateLingkunganLogStatus(logId, data, token)` | PUT | `/api/lingkungan/logs/:id/status` |
+| Fungsi                                            | Method | Path                                  |
+| ------------------------------------------------- | ------ | ------------------------------------- |
+| `getLingkunganStatus(deviceId, token)`            | GET    | `/api/lingkungan/devices/:id/status`  |
+| `getLingkunganChart(deviceId, params, token)`     | GET    | `/api/lingkungan/devices/:id/chart`   |
+| `sendLingkunganControl(deviceId, command, token)` | POST   | `/api/lingkungan/devices/:id/control` |
+| `updateLingkunganLogStatus(logId, data, token)`   | PUT    | `/api/lingkungan/logs/:id/status`     |
 
 #### Kalibrasi (`features/calibration/api/calibration.ts`)
 
 **Berbeda dari API utama** — menggunakan base URL `/api-cal` (bukan `/api`) dan TANPA auth token.
 
-| Fungsi | Method | Path |
-|--------|--------|------|
-| `sendCommand(command)` | POST | `/api-cal/command` |
-| `getDeviceStatus(deviceId)` | GET | `/api-cal/status/:deviceId` |
-| `getRawData(params)` | GET | `/api-cal/data` |
-| `getSessions(deviceId)` | GET | `/api-cal/sessions` |
-| `getStatistics(deviceId)` | GET | `/api-cal/statistics` |
-| `getSessionStats(deviceId)` | GET | `/api-cal/session-stats` |
-| `getTrialPeaks(deviceId)` | GET | `/api-cal/trial-peaks` |
-| `getPeakSummary(deviceId)` | GET | `/api-cal/peak-summary` |
-| `getSummaryData(deviceId)` | GET | `/api-cal/summary` |
+| Fungsi                      | Method | Path                        |
+| --------------------------- | ------ | --------------------------- |
+| `sendCommand(command)`      | POST   | `/api-cal/command`          |
+| `getDeviceStatus(deviceId)` | GET    | `/api-cal/status/:deviceId` |
+| `getRawData(params)`        | GET    | `/api-cal/data`             |
+| `getSessions(deviceId)`     | GET    | `/api-cal/sessions`         |
+| `getStatistics(deviceId)`   | GET    | `/api-cal/statistics`       |
+| `getSessionStats(deviceId)` | GET    | `/api-cal/session-stats`    |
+| `getTrialPeaks(deviceId)`   | GET    | `/api-cal/trial-peaks`      |
+| `getPeakSummary(deviceId)`  | GET    | `/api-cal/peak-summary`     |
+| `getSummaryData(deviceId)`  | GET    | `/api-cal/summary`          |
 
 ---
 
@@ -720,9 +723,11 @@ export function apiFetchSafe<T>(path, options?, token?): Promise<T | null>
 
 ```ts
 // Digunakan di: management pages, analytics dispatch
-const supabase = await createClient()  // Server client
-const { data: { session } } = await supabase.auth.getSession()
-const data = await getWarehouses(session?.access_token || '')
+const supabase = await createClient(); // Server client
+const {
+  data: { session }
+} = await supabase.auth.getSession();
+const data = await getWarehouses(session?.access_token || '');
 ```
 
 Demo mode: cek cookie `demo-mode` → return mock data langsung.
@@ -731,10 +736,9 @@ Demo mode: cek cookie `demo-mode` → return mock data langsung.
 
 ```ts
 // Digunakan di: dashboard, profile, sidebar
-const { data, isLoading, error } = useApiQuery(
-  ['queryKey'],
-  (token) => fetchFunction(token)
-)
+const { data, isLoading, error } = useApiQuery(['queryKey'], (token) =>
+  fetchFunction(token)
+);
 ```
 
 - Token otomatis diambil dari `supabase.auth.getSession()`
@@ -748,29 +752,33 @@ const { data, isLoading, error } = useApiQuery(
 // Digunakan di: dashboard, keamanan, intrusi, lingkungan views
 const channel = supabase
   .channel('channel-name')
-  .on('postgres_changes', {
-    event: 'INSERT',  // atau '*' untuk semua
-    schema: 'public',
-    table: 'table_name',
-    filter: 'device_id=eq.xxx'
-  }, (payload) => {
-    // Update local state
-  })
-  .subscribe()
+  .on(
+    'postgres_changes',
+    {
+      event: 'INSERT', // atau '*' untuk semua
+      schema: 'public',
+      table: 'table_name',
+      filter: 'device_id=eq.xxx'
+    },
+    (payload) => {
+      // Update local state
+    }
+  )
+  .subscribe();
 ```
 
-| View | Tabel | Event | Filter |
-|------|-------|-------|--------|
-| Dashboard | `devices`, `areas` | `*` | - |
-| KeamananView | `keamanan_logs` | `INSERT`, `UPDATE` | `device_id` |
-| IntrusiView | `intrusi_logs` | `INSERT`, `UPDATE` | `device_id` |
-| LingkunganView | `lingkungan_logs` | `INSERT` | `device_id` |
+| View           | Tabel              | Event              | Filter      |
+| -------------- | ------------------ | ------------------ | ----------- |
+| Dashboard      | `devices`, `areas` | `*`                | -           |
+| KeamananView   | `keamanan_logs`    | `INSERT`, `UPDATE` | `device_id` |
+| IntrusiView    | `intrusi_logs`     | `INSERT`, `UPDATE` | `device_id` |
+| LingkunganView | `lingkungan_logs`  | `INSERT`           | `device_id` |
 
 ### 11.4 SSE (Server-Sent Events)
 
 ```ts
 // Hanya untuk kalibrasi
-const { calState, status, connected } = useCalibrationSSE(deviceId)
+const { calState, status, connected } = useCalibrationSSE(deviceId);
 // EventSource ke /api-cal/events/:deviceId
 // Fallback: HTTP polling 3 detik jika SSE disconnect
 ```
@@ -788,6 +796,7 @@ const { calState, status, connected } = useCalibrationSSE(deviceId)
 ### File: `app/(main)/dashboard/page.tsx`
 
 **Client component** yang:
+
 1. Menggunakan `useWarehouse()` untuk filter gudang
 2. `useApiQuery` untuk fetch warehouse details
 3. Subscribe ke Supabase Realtime (`devices`, `areas` tabel)
@@ -805,6 +814,7 @@ const { calState, status, connected } = useCalibrationSSE(deviceId)
 **Props:** `{ areaId, deviceId, initialData, warehouseId }`
 
 **Sections:**
+
 1. **Alert banner** — muncul jika ada deteksi unacknowledged
 2. **Latest photo preview** — gambar terakhir dari kamera
 3. **Summary cards** — total deteksi, unacknowledged
@@ -829,6 +839,7 @@ const { calState, status, connected } = useCalibrationSSE(deviceId)
 **Props:** `{ areaId, deviceId, initialData, initialStatus, warehouseId }`
 
 **Sections:**
+
 1. **Summary cards** — total events, alarm, impact, unacknowledged, acknowledge rate
 2. **Alert banner** — peringatan aktif
 3. **Device controls** (`IntrusiDeviceControls`)
@@ -841,6 +852,7 @@ const { calState, status, connected } = useCalibrationSSE(deviceId)
 ### File: `features/intrusi/components/IntrusiDeviceControls.tsx`
 
 **Commands:**
+
 - ARM — aktifkan sistem
 - DISARM — matikan sistem
 - SIREN_SILENCE — matikan sirene
@@ -863,6 +875,7 @@ Tombol di-gate berdasarkan role (admin+ only) dan device state.
 **Props:** `{ areaId, deviceId, initialData, initialStatus, warehouseId }`
 
 **Sections:**
+
 1. **Status cards** — suhu, kelembapan, CO₂ (actual + prediction)
    - Warna: hijau (normal), kuning (waspada), merah (bahaya)
    - Prediction overlay jika ada
@@ -897,6 +910,7 @@ Tombol di-gate berdasarkan role (admin+ only) dan device state.
 **Standalone page** (tanpa sidebar layout). Client component.
 
 **Structure:**
+
 ```
 CalibrationPage
 ├── Device ID input (collapsible)
@@ -911,11 +925,12 @@ CalibrationPage
 ### File: `features/calibration/hooks/useCalibrationSSE.ts`
 
 ```ts
-function useCalibrationSSE(deviceId: string | null)
+function useCalibrationSSE(deviceId: string | null);
 // Returns: { calState: string, status: CalibrationDeviceStatus | null, connected: boolean }
 ```
 
 **Flow:**
+
 1. Open `EventSource` ke `${API_BASE_URL}/api-cal/events/${deviceId}`
 2. `onopen` → `connected = true`, stop fallback polling
 3. `onmessage` → parse JSON, map ke `CalibrationDeviceStatus`, update state
@@ -927,6 +942,7 @@ function useCalibrationSSE(deviceId: string | null)
 **Props:** `{ deviceId, calState }`
 
 **State:**
+
 - `activeSession` — Tab A/B/C/D
 - `loading` — Button loading tracker
 - `completedTrials` — `Set<string>` progress
@@ -941,6 +957,7 @@ function useCalibrationSSE(deviceId: string | null)
 | D | 10 | Dorong badan, Tendang 1x, dll |
 
 **Flow:**
+
 1. Klik trial → `quickStart()`: SET_SESSION + START via POST `/api-cal/command`
 2. Phase indicator berdasarkan `calState` prop:
    - ⏳ COUNTDOWN
@@ -954,6 +971,7 @@ function useCalibrationSSE(deviceId: string | null)
 **Props:** `{ deviceId, sseStatus?, sseConnected? }`
 
 Menampilkan grid metrik:
+
 - `cal_state`, session, trial, door_state
 - WiFi RSSI, uptime, free heap, last seen
 
@@ -963,14 +981,14 @@ Menampilkan grid metrik:
 
 **6 Tab:**
 
-| Tab | API Call | Data |
-|-----|----------|------|
-| Session Stats | `getSessionStats()` | Agregat per-session + percentiles |
-| Summary (A) | `getSummaryData()` | Periodic 5s windows |
-| Per-Trial | `getStatistics()` | Stats per trial + filter |
-| Trial Peaks | `getTrialPeaks()` | Max Δg per trial |
-| Peak Summary | `getPeakSummary()` | Peak stats across trials |
-| Raw Data | `getRawData()` | Individual readings, pagination limit=50 |
+| Tab           | API Call            | Data                                     |
+| ------------- | ------------------- | ---------------------------------------- |
+| Session Stats | `getSessionStats()` | Agregat per-session + percentiles        |
+| Summary (A)   | `getSummaryData()`  | Periodic 5s windows                      |
+| Per-Trial     | `getStatistics()`   | Stats per trial + filter                 |
+| Trial Peaks   | `getTrialPeaks()`   | Max Δg per trial                         |
+| Peak Summary  | `getPeakSummary()`  | Peak stats across trials                 |
+| Raw Data      | `getRawData()`      | Individual readings, pagination limit=50 |
 
 ---
 
@@ -993,46 +1011,46 @@ Page (SSC)
 
 ### 17.2 Warehouses (`management/warehouses/page.tsx`)
 
-| Action | Fungsi | Role |
-|--------|--------|------|
-| List | `getWarehouses()` | user+ |
+| Action | Fungsi              | Role   |
+| ------ | ------------------- | ------ |
+| List   | `getWarehouses()`   | user+  |
 | Create | `createWarehouse()` | admin+ |
 | Update | `updateWarehouse()` | admin+ |
 | Delete | `deleteWarehouse()` | admin+ |
 
 ### 17.3 Areas (`management/areas/page.tsx`)
 
-| Action | Fungsi | Role |
-|--------|--------|------|
-| List | `getAreas()` | user+ |
+| Action | Fungsi                               | Role   |
+| ------ | ------------------------------------ | ------ |
+| List   | `getAreas()`                         | user+  |
 | Create | `createArea({ warehouse_id, name })` | admin+ |
-| Update | `updateArea()` | admin+ |
-| Delete | `deleteArea()` | admin+ |
+| Update | `updateArea()`                       | admin+ |
+| Delete | `deleteArea()`                       | admin+ |
 
 Form termasuk warehouse selector dropdown.
 
 ### 17.4 Devices (`management/devices/page.tsx`)
 
-| Action | Fungsi | Role |
-|--------|--------|------|
-| List | `getDevices()` | user+ |
+| Action | Fungsi                                         | Role   |
+| ------ | ---------------------------------------------- | ------ |
+| List   | `getDevices()`                                 | user+  |
 | Create | `createDevice({ area_id, name, system_type })` | admin+ |
-| Update | `updateDevice()` | admin+ |
-| Delete | `deleteDevice()` | admin+ |
+| Update | `updateDevice()`                               | admin+ |
+| Delete | `deleteDevice()`                               | admin+ |
 
 - Create response termasuk MQTT credentials → ditampilkan sekali
 - Form: warehouse → area cascade dropdown
 
 ### 17.5 Users (`management/users/page.tsx`)
 
-| Action | Fungsi | Role |
-|--------|--------|------|
-| List | `getUsers()` | super_admin |
-| Invite | `inviteUser({ email, role })` | super_admin |
-| Change role | `updateUserRole(id, role)` | super_admin |
+| Action        | Fungsi                         | Role        |
+| ------------- | ------------------------------ | ----------- |
+| List          | `getUsers()`                   | super_admin |
+| Invite        | `inviteUser({ email, role })`  | super_admin |
+| Change role   | `updateUserRole(id, role)`     | super_admin |
 | Toggle status | `updateUserStatus(id, status)` | super_admin |
-| Delete | `deleteUser(id)` | super_admin |
-| Telegram | `TelegramManager` component | super_admin |
+| Delete        | `deleteUser(id)`               | super_admin |
+| Telegram      | `TelegramManager` component    | super_admin |
 
 ---
 
@@ -1060,12 +1078,14 @@ Form termasuk warehouse selector dropdown.
 5. Exit: `exitDemo()` → hapus cookie, redirect `/login`
 
 Catatan:
+
 - Tombol demo di halaman login dihapus.
 - URL publik demo sekarang adalah `/demo`, sehingga bisa langsung dipakai dari portfolio.
 
 ### Mock Data (`lib/demo/mock-data.ts`)
 
 20+ konstanta mock untuk semua API endpoints:
+
 - `DEMO_WAREHOUSES`, `DEMO_AREAS`, `DEMO_DEVICES`
 - `DEMO_NAV_AREAS` (per system_type)
 - `DEMO_WAREHOUSE_DETAILS`
@@ -1085,20 +1105,20 @@ Catatan:
 
 ### 20.1 CRUD Action Components (`components/actions/`)
 
-| File | Exports | Pattern |
-|------|---------|---------|
-| `WarehouseActions.tsx` | `AddWarehouseButton`, `WarehouseActionButtons` | Dialog form → API mutation |
-| `AreaActions.tsx` | `AddAreaButton`, `AreaActionButtons` | + warehouse cascading select |
-| `DeviceActions.tsx` | `AddDeviceButton`, `DeviceActionButtons` | + MQTT creds display on create |
-| `UserActions.tsx` | `InviteUserButton`, `UserActionButtons` | + role dropdown, status toggle |
+| File                   | Exports                                        | Pattern                        |
+| ---------------------- | ---------------------------------------------- | ------------------------------ |
+| `WarehouseActions.tsx` | `AddWarehouseButton`, `WarehouseActionButtons` | Dialog form → API mutation     |
+| `AreaActions.tsx`      | `AddAreaButton`, `AreaActionButtons`           | + warehouse cascading select   |
+| `DeviceActions.tsx`    | `AddDeviceButton`, `DeviceActionButtons`       | + MQTT creds display on create |
+| `UserActions.tsx`      | `InviteUserButton`, `UserActionButtons`        | + role dropdown, status toggle |
 
 ### 20.2 Shared Components (`components/shared/`)
 
-| File | Export | Fungsi |
-|------|--------|--------|
-| `WarehouseCard.tsx` | `WarehouseCard` | Overview card dengan status badge |
+| File                    | Export              | Fungsi                                    |
+| ----------------------- | ------------------- | ----------------------------------------- |
+| `WarehouseCard.tsx`     | `WarehouseCard`     | Overview card dengan status badge         |
 | `AnimatedPageTitle.tsx` | `AnimatedPageTitle` | Animated text cycling (ContainerTextFlip) |
-| `copy-button.tsx` | `CopyButton` | Copy to clipboard dengan tooltip |
+| `copy-button.tsx`       | `CopyButton`        | Copy to clipboard dengan tooltip          |
 
 ### 20.3 UI Components (`components/ui/`)
 
@@ -1196,17 +1216,17 @@ Auth:
 ```tsx
 // SSC (Server Component)
 export default async function Page() {
-  const supabase = await createClient()
-  const data = await fetchData(token)
-  return <ClientComponent initialData={data} />
+  const supabase = await createClient();
+  const data = await fetchData(token);
+  return <ClientComponent initialData={data} />;
 }
 
 // Client Component
-'use client'
+('use client');
 export function Component({ initialData }: Props) {
   const { data } = useApiQuery(['key'], (token) => fetchFn(token), {
     initialData
-  })
+  });
   // ...
 }
 ```
@@ -1230,12 +1250,18 @@ const form = useForm({ resolver: zodResolver(schema) })
 useEffect(() => {
   const channel = supabase
     .channel(`${table}-${deviceId}`)
-    .on('postgres_changes', { event: 'INSERT', table, filter: `device_id=eq.${deviceId}` },
-      (payload) => { setData(prev => [payload.new, ...prev]) }
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', table, filter: `device_id=eq.${deviceId}` },
+      (payload) => {
+        setData((prev) => [payload.new, ...prev]);
+      }
     )
-    .subscribe()
-  return () => { supabase.removeChannel(channel) }
-}, [deviceId])
+    .subscribe();
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [deviceId]);
 ```
 
 ### Error Handling
@@ -1243,9 +1269,9 @@ useEffect(() => {
 ```tsx
 // API errors
 try {
-  await apiFetch('/path', options, token)
+  await apiFetch('/path', options, token);
 } catch (error) {
-  toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan')
+  toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan');
 }
 
 // Error boundaries

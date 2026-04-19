@@ -1,3 +1,12 @@
+/**
+ * @file api-interceptor.ts
+ * @purpose Intercepts API calls in demo mode and returns mock data
+ * @usedBy lib/api/client (apiFetch)
+ * @deps mock-data
+ * @exports getDemoResponse, isDemoMode
+ * @sideEffects Reads demo cookie
+ */
+
 // frontend/lib/demo/api-interceptor.ts
 // Maps API paths to mock data for demo mode.
 

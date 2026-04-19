@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose Warehouse detail dashboard — areas with system status overview
+ * @usedBy Next.js app router (/[warehouseId]/dashboard)
+ * @deps WarehouseSummaryStats, lib/api, supabase/server
+ * @exports WarehouseDashboardPage (default)
+ * @sideEffects API calls (getWarehouseDetails, getActiveAlerts)
+ */
+
 // frontend/app/(main)/[warehouseId]/dashboard/page.tsx
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';

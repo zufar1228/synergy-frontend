@@ -1,3 +1,12 @@
+/**
+ * @file use-mobile.ts
+ * @purpose Hook to detect mobile viewport (< 768px)
+ * @usedBy Layout components for responsive behavior
+ * @deps None (uses window.matchMedia)
+ * @exports useIsMobile
+ * @sideEffects Window resize listener
+ */
+
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768

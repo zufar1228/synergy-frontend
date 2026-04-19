@@ -1,3 +1,12 @@
+/**
+ * @file app-navigation.tsx
+ * @purpose Desktop navigation menu with system-type grouped area links
+ * @usedBy MainLayout
+ * @deps useNavAreas, useWarehouse, navigation-menu UI
+ * @exports AppNavigation (default)
+ * @sideEffects None
+ */
+
 // frontend/components/app-navigation.tsx
 'use client';
 

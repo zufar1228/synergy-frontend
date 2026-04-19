@@ -1,3 +1,12 @@
+/**
+ * @file WarehouseCard.tsx
+ * @purpose Warehouse summary card with device/area counts for dashboard
+ * @usedBy DashboardPage
+ * @deps Card UI, Link
+ * @exports WarehouseCard (default)
+ * @sideEffects None
+ */
+
 "use client";
 import React, { useState } from "react";
 import {

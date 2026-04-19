@@ -1,3 +1,12 @@
+/**
+ * @file error.tsx
+ * @purpose Error boundary for main authenticated section
+ * @usedBy Next.js app router (main group error)
+ * @deps None
+ * @exports MainError (default)
+ * @sideEffects None
+ */
+
 'use client';
 
 import { useEffect } from 'react';

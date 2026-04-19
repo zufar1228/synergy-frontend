@@ -1,3 +1,12 @@
+/**
+ * @file analytics.ts
+ * @purpose API functions for analytics data retrieval
+ * @usedBy Analytics components
+ * @deps client (apiFetch)
+ * @exports getAnalytics, getAnalyticsDataForSystem
+ * @sideEffects HTTP calls (GET)
+ */
+
 // frontend/lib/api/analytics.ts
 import { apiFetchSafe } from './client';
 import type { AnalyticsParams } from './types';

@@ -1,3 +1,12 @@
+/**
+ * @file actions.ts
+ * @purpose Server actions for login/logout via Supabase Auth
+ * @usedBy LoginForm component
+ * @deps supabase/server
+ * @exports login, logout
+ * @sideEffects Supabase auth sign-in/sign-out, redirect
+ */
+
 // frontend/app/login/actions.ts
 "use server";
 

@@ -1,3 +1,12 @@
+/**
+ * @file DeviceActions.tsx
+ * @purpose Add/Edit/Delete action buttons + dialogs for device management
+ * @usedBy DevicesPage
+ * @deps lib/api/devices, useApiMutation, Dialog UI
+ * @exports AddDeviceButton, DeviceActionButtons
+ * @sideEffects API calls (createDevice, updateDevice, deleteDevice)
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';

@@ -1,3 +1,12 @@
+/**
+ * @file use-nav-areas.ts
+ * @purpose Hook to fetch navigation areas grouped by system type
+ * @usedBy AppSidebar, AppNavigation, MobileSidebar
+ * @deps useApiQuery, lib/api/navigation
+ * @exports useNavAreas
+ * @sideEffects API call (getNavAreasBySystem)
+ */
+
 'use client';
 
 import { useCallback } from 'react';

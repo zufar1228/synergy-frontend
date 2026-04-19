@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose User profile page — update profile, password, preferences, push notifications
+ * @usedBy Next.js app router (/profile)
+ * @deps UpdateProfileForm, UpdatePasswordForm, UpdatePreferencesForm, PushNotificationManager
+ * @exports ProfilePage (default)
+ * @sideEffects API calls (getMyProfile, getMyPreferences)
+ */
+
 // frontend/app/(main)/profile/page.tsx
 "use client";
 

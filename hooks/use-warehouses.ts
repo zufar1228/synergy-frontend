@@ -1,3 +1,12 @@
+/**
+ * @file use-warehouses.ts
+ * @purpose Hook to fetch all warehouses list
+ * @usedBy WarehouseContext, WarehouseSelector
+ * @deps useApiQuery, lib/api/warehouses
+ * @exports useWarehouses
+ * @sideEffects API call (getWarehouses)
+ */
+
 'use client';
 
 import { useCallback } from 'react';

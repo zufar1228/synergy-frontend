@@ -1,3 +1,12 @@
+/**
+ * @file use-telegram-members.ts
+ * @purpose Hook to fetch and manage Telegram group subscribers
+ * @usedBy TelegramManager
+ * @deps useApiQuery, lib/api/telegram
+ * @exports useTelegramMembers
+ * @sideEffects API call (getTelegramMembers)
+ */
+
 'use client';
 
 import { useCallback } from 'react';

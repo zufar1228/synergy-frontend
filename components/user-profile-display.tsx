@@ -1,3 +1,12 @@
+/**
+ * @file user-profile-display.tsx
+ * @purpose Displays user profile info (name, role, avatar)
+ * @usedBy NavUser, ProfilePage
+ * @deps Avatar UI
+ * @exports UserProfileDisplay
+ * @sideEffects None
+ */
+
 // frontend/components/user-profile-display.tsx
 "use client";
 

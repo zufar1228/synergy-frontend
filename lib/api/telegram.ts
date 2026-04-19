@@ -1,3 +1,12 @@
+/**
+ * @file telegram.ts
+ * @purpose API functions for Telegram bot management (members, invite, kick, test)
+ * @usedBy useTelegramMembers hook, TelegramManager
+ * @deps client (apiFetch)
+ * @exports getTelegramMembers, generateTelegramInvite, kickTelegramMember, sendTelegramTestAlert
+ * @sideEffects HTTP calls (GET/POST/DELETE)
+ */
+
 // frontend/lib/api/telegram.ts
 import { apiFetch } from './client';
 import type {

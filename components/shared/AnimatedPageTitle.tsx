@@ -1,3 +1,12 @@
+/**
+ * @file AnimatedPageTitle.tsx
+ * @purpose Animated page title with system type icon and device name
+ * @usedBy SystemPage
+ * @deps framer-motion
+ * @exports AnimatedPageTitle
+ * @sideEffects None
+ */
+
 'use client';
 
 import React, { useMemo } from 'react';

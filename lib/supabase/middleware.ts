@@ -1,3 +1,12 @@
+/**
+ * @file middleware.ts
+ * @purpose Supabase session update helper for Next.js middleware
+ * @usedBy middleware.ts (root)
+ * @deps @supabase/ssr, lib/env
+ * @exports updateSession
+ * @sideEffects Refreshes auth cookies on request/response
+ */
+
 // frontend/lib/supabase/middleware.ts
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';

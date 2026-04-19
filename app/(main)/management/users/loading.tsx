@@ -1,3 +1,12 @@
+/**
+ * @file loading.tsx
+ * @purpose Loading skeleton for users management page
+ * @usedBy Next.js app router (/management/users loading)
+ * @deps Skeleton
+ * @exports Loading (default)
+ * @sideEffects None
+ */
+
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,

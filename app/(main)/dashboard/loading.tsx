@@ -1,3 +1,12 @@
+/**
+ * @file loading.tsx
+ * @purpose Loading skeleton for dashboard page
+ * @usedBy Next.js app router (/dashboard loading)
+ * @deps Skeleton
+ * @exports Loading (default)
+ * @sideEffects None
+ */
+
 // frontend/app/(main)/dashboard/loading.tsx
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";

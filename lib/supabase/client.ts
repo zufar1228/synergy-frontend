@@ -1,3 +1,12 @@
+/**
+ * @file client.ts
+ * @purpose Browser-side Supabase client factory
+ * @usedBy Client components needing Supabase (auth, realtime)
+ * @deps @supabase/ssr, lib/env
+ * @exports createClient
+ * @sideEffects None
+ */
+
 // lib/supabase/client.ts
 import { createBrowserClient } from '@supabase/ssr';
 import { env } from '@/lib/env';

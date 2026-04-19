@@ -1,3 +1,12 @@
+/**
+ * @file useCalibrationSSE.ts
+ * @purpose Hook for SSE connection to calibration device status stream
+ * @usedBy CalibrationPage, CalibrationStatusDisplay
+ * @deps EventSource API, lib/env
+ * @exports useCalibrationSSE
+ * @sideEffects SSE connection lifecycle management
+ */
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';

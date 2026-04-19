@@ -1,3 +1,12 @@
+/**
+ * @file theme-toggle.tsx
+ * @purpose Theme switcher button (light/dark/system)
+ * @usedBy SiteHeader
+ * @deps next-themes, DropdownMenu UI
+ * @exports ThemeToggle
+ * @sideEffects Toggles theme preference
+ */
+
 // frontend/components/theme-toggle.tsx
 "use client";
 

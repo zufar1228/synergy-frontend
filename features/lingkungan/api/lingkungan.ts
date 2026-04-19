@@ -1,3 +1,12 @@
+/**
+ * @file lingkungan.ts
+ * @purpose API functions for lingkungan logs, summary, status, chart, control commands
+ * @usedBy LingkunganView components
+ * @deps lib/api/client (apiFetch)
+ * @exports fetchLingkunganLogs, fetchLingkunganSummary, fetchLingkunganStatus, fetchChartData, sendControlCommand + more
+ * @sideEffects HTTP calls to lingkungan endpoints
+ */
+
 // frontend/lib/api/lingkungan.ts
 import { apiFetch, apiFetchSafe } from '@/lib/api/client';
 import type {

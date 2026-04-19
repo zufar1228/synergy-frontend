@@ -1,3 +1,12 @@
+/**
+ * @file middleware.ts
+ * @purpose Next.js middleware — Supabase session refresh on every request
+ * @usedBy Next.js middleware system
+ * @deps supabase/middleware
+ * @exports middleware, config
+ * @sideEffects Refreshes auth cookies
+ */
+
 // frontend/middleware.ts
 import { updateSession } from '@/lib/supabase/middleware';
 import { type NextRequest } from 'next/server';

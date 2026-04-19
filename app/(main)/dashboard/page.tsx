@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose Main dashboard — lists warehouses with stats
+ * @usedBy Next.js app router (/dashboard)
+ * @deps WarehouseCard, lib/api, supabase/server
+ * @exports DashboardPage (default)
+ * @sideEffects API call (getWarehouses)
+ */
+
 // frontend/app/(main)/dashboard/page.tsx
 'use client';
 

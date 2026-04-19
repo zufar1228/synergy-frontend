@@ -1,3 +1,12 @@
+/**
+ * @file areas.ts
+ * @purpose API functions for area CRUD operations
+ * @usedBy AreaActions, management page
+ * @deps client (apiFetch)
+ * @exports getAreas, createArea, updateArea, deleteArea, getAreasByWarehouse
+ * @sideEffects HTTP calls (GET/POST/PUT/DELETE)
+ */
+
 // frontend/lib/api/areas.ts
 import { apiFetch } from './client';
 import type { Area } from './types';

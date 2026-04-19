@@ -1,3 +1,12 @@
+/**
+ * @file LingkunganChart.tsx
+ * @purpose Time-series chart for temperature and humidity sensor data
+ * @usedBy LingkunganView
+ * @deps recharts, Chart UI
+ * @exports LingkunganChart
+ * @sideEffects None (data via props)
+ */
+
 'use client';
 
 import React, { useMemo } from 'react';

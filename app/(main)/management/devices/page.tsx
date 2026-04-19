@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose Management page for devices — list, create, edit, delete
+ * @usedBy Next.js app router (/management/devices)
+ * @deps DevicesActions, lib/api, supabase/server
+ * @exports DevicesPage (default)
+ * @sideEffects API calls (getDevices)
+ */
+
 // frontend/app/(main)/management/devices/page.tsx
 
 import { cookies } from "next/headers";

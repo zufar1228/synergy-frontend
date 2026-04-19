@@ -1,3 +1,12 @@
+/**
+ * @file AreaActions.tsx
+ * @purpose Add/Edit/Delete action buttons + dialogs for area management
+ * @usedBy AreasPage
+ * @deps lib/api/areas, useApiMutation, Dialog UI
+ * @exports AddAreaButton, AreaActionButtons
+ * @sideEffects API calls (createArea, updateArea, deleteArea)
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";

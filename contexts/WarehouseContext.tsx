@@ -1,3 +1,12 @@
+/**
+ * @file WarehouseContext.tsx
+ * @purpose React context for selected warehouse state
+ * @usedBy MainLayout (provider), sidebar/navigation (consumer)
+ * @deps useWarehouses hook
+ * @exports WarehouseProvider, useWarehouse
+ * @sideEffects localStorage persistence of selected warehouse
+ */
+
 // frontend/contexts/WarehouseContext.tsx
 "use client";
 

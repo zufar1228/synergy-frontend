@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose Account setup page for newly invited users
+ * @usedBy Next.js app router (/setup-account)
+ * @deps supabase client, lib/api/users
+ * @exports SetupAccountPage (default)
+ * @sideEffects Supabase password update, API call (verifyAccess)
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";

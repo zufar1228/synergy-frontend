@@ -1,3 +1,12 @@
+/**
+ * @file flickering-grid/index.tsx
+ * @purpose Animated flickering grid background effect (decorative)
+ * @usedBy Login page background
+ * @deps None (canvas-based)
+ * @exports FlickeringGrid (default)
+ * @sideEffects Canvas animation
+ */
+
 "use client";
 
 import React, {

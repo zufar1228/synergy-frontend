@@ -1,3 +1,12 @@
+/**
+ * @file nav-user.tsx
+ * @purpose User avatar dropdown in sidebar with profile/logout links
+ * @usedBy AppSidebar
+ * @deps LogoutButton, Avatar, DropdownMenu UI
+ * @exports NavUser
+ * @sideEffects None
+ */
+
 // frontend/components/nav-user.tsx
 'use client';
 

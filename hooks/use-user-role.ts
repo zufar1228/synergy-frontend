@@ -1,3 +1,12 @@
+/**
+ * @file use-user-role.ts
+ * @purpose Hook to fetch current user role for RBAC
+ * @usedBy Components needing role-based rendering
+ * @deps useApiQuery, supabase/client
+ * @exports useUserRole
+ * @sideEffects API call (verifyAccess)
+ */
+
 'use client';
 
 import { useUserProfile } from './use-user-profile';

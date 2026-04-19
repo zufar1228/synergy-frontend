@@ -1,3 +1,12 @@
+/**
+ * @file warehouses.ts
+ * @purpose API functions for warehouse CRUD and detail retrieval
+ * @usedBy WarehouseActions, dashboard, useWarehouses hook
+ * @deps client (apiFetch)
+ * @exports getWarehouses, createWarehouse, updateWarehouse, deleteWarehouse, getWarehouseDetails
+ * @sideEffects HTTP calls (GET/POST/PUT/DELETE)
+ */
+
 // frontend/lib/api/warehouses.ts
 import { apiFetch } from './client';
 import type { Warehouse, WarehouseDetails } from './types';

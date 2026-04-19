@@ -1,3 +1,12 @@
+/**
+ * @file UserActions.tsx
+ * @purpose Invite/role/status action buttons + dialogs for user management
+ * @usedBy UsersPage
+ * @deps lib/api/users, useApiMutation, Dialog UI
+ * @exports InviteUserButton, UserActionButtons
+ * @sideEffects API calls (inviteUser, updateUserRole, updateUserStatus, deleteUser)
+ */
+
 "use client";
 
 import { useState } from "react";

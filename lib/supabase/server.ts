@@ -1,3 +1,12 @@
+/**
+ * @file server.ts
+ * @purpose Server-side Supabase client factory (for RSC and server actions)
+ * @usedBy Server components and server actions
+ * @deps @supabase/ssr, next/headers, lib/env
+ * @exports createClient
+ * @sideEffects Reads/writes auth cookies
+ */
+
 // lib/supabase/server.ts
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';

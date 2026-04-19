@@ -1,3 +1,12 @@
+/**
+ * @file use-user-profile.ts
+ * @purpose Hook to fetch current user profile
+ * @usedBy NavUser, profile-related components
+ * @deps useApiQuery, lib/api/users
+ * @exports useUserProfile
+ * @sideEffects API call (getMyProfile)
+ */
+
 // frontend/hooks/use-user-profile.ts
 'use client';
 

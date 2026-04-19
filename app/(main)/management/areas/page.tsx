@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose Management page for areas — list, create, edit, delete
+ * @usedBy Next.js app router (/management/areas)
+ * @deps AreasActions, lib/api, supabase/server
+ * @exports AreasPage (default)
+ * @sideEffects API calls (getAreas)
+ */
+
 // frontend/app/(main)/management/areas/page.tsx
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";

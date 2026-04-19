@@ -1,3 +1,12 @@
+/**
+ * @file WarehouseSummaryStats.tsx
+ * @purpose Summary statistics cards for a warehouse (device counts, system statuses)
+ * @usedBy WarehouseDashboardPage
+ * @deps Card UI
+ * @exports WarehouseSummaryStats
+ * @sideEffects None
+ */
+
 // frontend/components/dashboard/WarehouseSummaryStats.tsx
 'use client';
 import { Card, CardContent } from '@/components/ui/card';

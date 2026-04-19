@@ -1,3 +1,12 @@
+/**
+ * @file KeamananDataTable.tsx
+ * @purpose Data table for keamanan detection logs with image preview and status actions
+ * @usedBy KeamananView
+ * @deps Table UI, Badge, Dialog (image viewer)
+ * @exports KeamananDataTable
+ * @sideEffects None (data via props)
+ */
+
 'use client';
 
 import * as React from 'react';

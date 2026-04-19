@@ -1,3 +1,12 @@
+/**
+ * @file IntrusiEventChart.tsx
+ * @purpose Chart visualization for intrusi event frequency over time
+ * @usedBy IntrusiView
+ * @deps recharts, Chart UI
+ * @exports IntrusiEventChart
+ * @sideEffects None (data via props)
+ */
+
 'use client';
 
 import React, { useMemo } from 'react';

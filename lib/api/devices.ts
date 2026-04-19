@@ -1,3 +1,12 @@
+/**
+ * @file devices.ts
+ * @purpose API functions for device CRUD and area device details
+ * @usedBy DeviceActions, management page, DeviceStatusContext
+ * @deps client (apiFetch)
+ * @exports getDevices, createDevice, updateDevice, deleteDevice, getDeviceDetailsByArea
+ * @sideEffects HTTP calls (GET/POST/PUT/DELETE)
+ */
+
 // frontend/lib/api/devices.ts
 import { apiFetch } from './client';
 import type { Device, CreateDeviceResponse, EnvironmentDeviceStatus } from './types';

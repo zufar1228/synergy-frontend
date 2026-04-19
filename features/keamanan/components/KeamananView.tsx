@@ -1,3 +1,12 @@
+/**
+ * @file KeamananView.tsx
+ * @purpose Main view for keamanan system — data table, chart, incident management
+ * @usedBy SystemPage (systemType=keamanan)
+ * @deps KeamananDataTable, SecurityStatusChart, lib/api
+ * @exports KeamananView
+ * @sideEffects API calls for data loading
+ */
+
 'use client';
 
 import React, {

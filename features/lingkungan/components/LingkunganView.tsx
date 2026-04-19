@@ -1,3 +1,12 @@
+/**
+ * @file LingkunganView.tsx
+ * @purpose Main view for lingkungan system — real-time sensor data, chart, table, controls
+ * @usedBy SystemPage (systemType=lingkungan)
+ * @deps LingkunganChart, LingkunganDataTable, lingkungan API
+ * @exports LingkunganView
+ * @sideEffects API calls, periodic data refresh
+ */
+
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';

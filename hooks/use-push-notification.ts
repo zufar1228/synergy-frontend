@@ -1,3 +1,12 @@
+/**
+ * @file use-push-notification.ts
+ * @purpose Hook for Web Push subscription management
+ * @usedBy PushNotificationManager
+ * @deps useApiQuery, useApiMutation, lib/api/users
+ * @exports usePushNotification
+ * @sideEffects Browser push permission request, API calls
+ */
+
 // frontend/hooks/use-push-notification.ts
 'use client';
 

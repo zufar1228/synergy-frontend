@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose Management page for warehouses — list, create, edit, delete
+ * @usedBy Next.js app router (/management/warehouses)
+ * @deps WarehousesActions, lib/api, supabase/server
+ * @exports WarehousesPage (default)
+ * @sideEffects API calls (getWarehouses)
+ */
+
 // frontend/app/(main)/management/warehouses/page.tsx
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";

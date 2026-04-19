@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose System-specific monitoring page — renders keamanan/intrusi/lingkungan view
+ * @usedBy Next.js app router (/[warehouseId]/[areaId]/[systemType])
+ * @deps KeamananView, IntrusiView, LingkunganView, AnimatedPageTitle
+ * @exports SystemPage (default)
+ * @sideEffects API calls (feature-specific data)
+ */
+
 // frontend/app/(main)/[warehouseId]/[areaId]/[systemType]/page.tsx
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';

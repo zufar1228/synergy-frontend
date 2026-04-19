@@ -1,3 +1,12 @@
+/**
+ * @file login-form.tsx
+ * @purpose Login form component with email/password fields
+ * @usedBy LoginPage
+ * @deps app/login/actions (login server action)
+ * @exports LoginForm
+ * @sideEffects Form submission triggers server action
+ */
+
 "use client";
 
 import { useState } from "react";

@@ -1,3 +1,12 @@
+/**
+ * @file CalibrationControlPanel.tsx
+ * @purpose Control panel UI for calibration session management (start/stop/mark)
+ * @usedBy CalibrationPage
+ * @deps calibration API, Card/Button UI
+ * @exports CalibrationControlPanel (default)
+ * @sideEffects API calls (sendCalibrationCommand)
+ */
+
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';

@@ -1,3 +1,12 @@
+/**
+ * @file app-sidebar.tsx
+ * @purpose Desktop sidebar with warehouse/area navigation tree
+ * @usedBy MainLayout
+ * @deps useNavAreas, useWarehouse, Sidebar UI components
+ * @exports AppSidebar, AppSidebarSkeleton
+ * @sideEffects None
+ */
+
 // frontend/components/app-sidebar.tsx
 'use client';
 

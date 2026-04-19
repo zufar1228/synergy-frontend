@@ -1,3 +1,12 @@
+/**
+ * @file mock-data.ts
+ * @purpose Static mock data for demo mode (warehouses, areas, devices, users, etc.)
+ * @usedBy api-interceptor
+ * @deps None
+ * @exports DEMO_WAREHOUSES, DEMO_AREAS, DEMO_NAV_AREAS, DEMO_DEVICES, DEMO_WAREHOUSE_DETAILS, DEMO_ACTIVE_ALERTS, DEMO_PROFILE, DEMO_USERS
+ * @sideEffects None
+ */
+
 // frontend/lib/demo/mock-data.ts
 // All mock data used in demo mode. Realistic IoT warehouse monitoring data.
 

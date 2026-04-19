@@ -1,3 +1,12 @@
+/**
+ * @file page.tsx
+ * @purpose Management page for users — list, create, edit, delete
+ * @usedBy Next.js app router (/management/users)
+ * @deps UsersActions, lib/api, supabase/server
+ * @exports UsersPage (default)
+ * @sideEffects API calls (getUsers)
+ */
+
 // frontend/app/(main)/management/users/page.tsx
 import { cookies } from "next/headers";
 import { getUsers, User } from "@/lib/api";

@@ -1,3 +1,12 @@
+/**
+ * @file types.ts
+ * @purpose TypeScript interfaces for all API entities (Warehouse, Area, Device, User, etc.)
+ * @usedBy All lib/api modules and components
+ * @deps None
+ * @exports Warehouse, Area, Device, MqttCredentials, CreateDeviceResponse, User, Profile, VerifyAccessResponse
+ * @sideEffects None
+ */
+
 // frontend/lib/api/types.ts
 
 // --- Core Domain Types ---

@@ -1,3 +1,12 @@
+/**
+ * @file CalibrationStatusDisplay.tsx
+ * @purpose Real-time device status display for calibration session
+ * @usedBy CalibrationPage
+ * @deps useCalibrationSSE hook, Card UI
+ * @exports CalibrationStatusDisplay (default)
+ * @sideEffects None (consumes SSE data from hook)
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';

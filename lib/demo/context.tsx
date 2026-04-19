@@ -1,3 +1,12 @@
+/**
+ * @file context.tsx
+ * @purpose React context for demo mode state
+ * @usedBy RootLayout (provider), DemoBanner (consumer)
+ * @deps React
+ * @exports DemoProvider, useDemo
+ * @sideEffects None
+ */
+
 // frontend/lib/demo/context.tsx
 'use client';
 

@@ -1,3 +1,12 @@
+/**
+ * @file index.ts
+ * @purpose Barrel export for all API functions and types
+ * @usedBy Components and hooks
+ * @deps All lib/api modules
+ * @exports All API types and functions
+ * @sideEffects None
+ */
+
 // frontend/lib/api/index.ts
 //
 // Barrel re-export for backward compatibility.

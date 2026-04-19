@@ -1,3 +1,12 @@
+/**
+ * @file alerts.ts
+ * @purpose API functions for active alerts and incident status updates
+ * @usedBy Dashboard, system view components
+ * @deps client (apiFetch)
+ * @exports getActiveAlerts, updateIncidentStatus, updateKeamananLogStatus
+ * @sideEffects HTTP calls (GET/PUT)
+ */
+
 // frontend/lib/api/alerts.ts
 import { apiFetch } from './client';
 import type { ActiveAlert, Incident, UpdateIncidentStatusPayload, KeamananLog } from './types';

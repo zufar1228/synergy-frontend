@@ -1,3 +1,12 @@
+/**
+ * @file WarehouseActions.tsx
+ * @purpose Add/Edit/Delete action buttons + dialogs for warehouse management
+ * @usedBy WarehousesPage
+ * @deps lib/api/warehouses, useApiMutation, Dialog UI
+ * @exports AddWarehouseButton, WarehouseActionButtons
+ * @sideEffects API calls (createWarehouse, updateWarehouse, deleteWarehouse)
+ */
+
 "use client";
 
 import { useState } from "react";

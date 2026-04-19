@@ -1,3 +1,12 @@
+/**
+ * @file route.ts
+ * @purpose Supabase auth callback handler — exchanges code for session
+ * @usedBy Supabase OAuth/magic link redirect
+ * @deps supabase/server
+ * @exports GET
+ * @sideEffects Sets auth cookies, redirects
+ */
+
 // frontend/app/auth/callback/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { verifyUserAccess } from "@/lib/api";

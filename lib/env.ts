@@ -1,3 +1,12 @@
+/**
+ * @file env.ts
+ * @purpose Client + server environment variable validation via @t3-oss/env-nextjs
+ * @usedBy All modules needing env vars
+ * @deps @t3-oss/env-nextjs, zod
+ * @exports env
+ * @sideEffects Throws on missing required env vars
+ */
+
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 

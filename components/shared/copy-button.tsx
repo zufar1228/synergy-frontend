@@ -1,3 +1,12 @@
+/**
+ * @file copy-button.tsx
+ * @purpose Copy-to-clipboard button with visual feedback
+ * @usedBy Various (MQTT credentials display, etc.)
+ * @deps navigator.clipboard
+ * @exports CopyButton
+ * @sideEffects Clipboard write
+ */
+
 // frontend/components/ui/copy-button.tsx
 "use client";
 

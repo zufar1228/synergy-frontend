@@ -1,3 +1,12 @@
+/**
+ * @file intrusi.ts
+ * @purpose API functions for intrusi logs, summary, status, commands
+ * @usedBy IntrusiView components
+ * @deps lib/api/client (apiFetch)
+ * @exports fetchIntrusiLogs, fetchIntrusiSummary, fetchIntrusiStatus, sendIntrusiCommand + more
+ * @sideEffects HTTP calls to intrusi endpoints
+ */
+
 // frontend/lib/api/intrusi.ts
 import { apiFetch } from '@/lib/api/client';
 import type {

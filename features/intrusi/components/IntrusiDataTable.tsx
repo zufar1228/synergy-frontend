@@ -1,3 +1,12 @@
+/**
+ * @file IntrusiDataTable.tsx
+ * @purpose Data table for intrusi event logs with status badges and actions
+ * @usedBy IntrusiView
+ * @deps Table UI, Badge, intrusi API types
+ * @exports IntrusiDataTable
+ * @sideEffects None (data passed via props)
+ */
+
 'use client';
 
 import * as React from 'react';

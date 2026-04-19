@@ -1,3 +1,12 @@
+/**
+ * @file PushNotificationManager.tsx
+ * @purpose Web Push notification subscription management UI
+ * @usedBy ProfilePage
+ * @deps usePushNotification hook
+ * @exports PushNotificationManager
+ * @sideEffects Push subscription API calls, browser notification permission
+ */
+
 // frontend/components/profile/PushNotificationManager.tsx
 'use client';
 

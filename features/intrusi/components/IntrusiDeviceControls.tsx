@@ -1,3 +1,12 @@
+/**
+ * @file IntrusiDeviceControls.tsx
+ * @purpose ARM/DISARM/SILENCE control buttons for intrusi devices
+ * @usedBy IntrusiView
+ * @deps intrusi API (sendIntrusiCommand), Button UI
+ * @exports IntrusiDeviceControls
+ * @sideEffects API call (sendCommand via MQTT)
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';

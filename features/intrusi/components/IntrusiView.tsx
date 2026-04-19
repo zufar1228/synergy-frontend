@@ -1,3 +1,12 @@
+/**
+ * @file IntrusiView.tsx
+ * @purpose Main view component for intrusi system — orchestrates data table, chart, controls
+ * @usedBy SystemPage (systemType=intrusi)
+ * @deps IntrusiDataTable, IntrusiDeviceControls, IntrusiEventChart, intrusi API
+ * @exports IntrusiView
+ * @sideEffects API calls for data loading
+ */
+
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';

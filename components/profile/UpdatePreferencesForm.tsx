@@ -1,3 +1,12 @@
+/**
+ * @file UpdatePreferencesForm.tsx
+ * @purpose Notification preferences toggle form per system type
+ * @usedBy ProfilePage
+ * @deps lib/api/users, useApiMutation
+ * @exports UpdatePreferencesForm
+ * @sideEffects API call (updateMyPreferences)
+ */
+
 // frontend/components/profile/UpdatePreferencesForm.tsx
 'use client';
 
