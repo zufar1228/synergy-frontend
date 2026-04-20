@@ -77,7 +77,7 @@ const AreaCard = ({
                 ) : isOffline ? (
                   <WifiOff className="mr-2 h-4 w-4" />
                 ) : (
-                  <Wifi className="mr-2 h-4 w-4 text-green-500" />
+                  <Wifi className="mr-2 h-4 w-4" />
                 )}
                 <span className="capitalize">{system.system_type}</span>
               </Link>
