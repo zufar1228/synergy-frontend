@@ -325,7 +325,7 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header + Date Picker */}
-      <div className="flex flex-row justify-between items-center gap-2 pb-2 md:pb-3">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between items-start gap-2 pb-2 md:pb-3">
         <AnimatedPageTitle systemType="keamanan" areaId={areaId} />
         <DateRangePicker />
       </div>
