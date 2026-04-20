@@ -1,10 +1,10 @@
 /**
  * @file IntrusiDataTable.tsx
- * @purpose Data table for intrusi event logs with status badges and actions
+ * @purpose Data table for intrusi event logs with filtering, pagination, bulk actions, keyboard nav
  * @usedBy IntrusiView
- * @deps Table UI, Badge, intrusi API types
+ * @deps Table UI, IntrusiStatusBadges, IntrusiReviewForm, intrusi API types
  * @exports IntrusiDataTable
- * @sideEffects None (data passed via props)
+ * @sideEffects API calls (bulk acknowledge via updateIntrusiLogStatus)
  */
 
 'use client';
@@ -73,7 +73,8 @@ import {
   UpdateIncidentStatusPayload,
   updateIntrusiLogStatus
 } from '@/lib/api';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge, EventTypeBadge, getSeverityColor, EVENT_TYPE_LABELS, STATUS_LABELS } from './IntrusiStatusBadges';
+import { ExpandableReviewForm } from './IntrusiReviewForm';
 import {
   Tooltip,
   TooltipContent,
@@ -82,202 +83,10 @@ import {
 } from '@/components/ui/tooltip';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useUserRole } from '@/hooks/use-user-role';
 
-// --- Review Form Schema ---
-const formSchema = z.object({
-  status: z.enum(['acknowledged', 'resolved', 'false_alarm']),
-  notes: z.string().optional()
-});
-
-type FormData = z.infer<typeof formSchema>;
-
-// --- Expandable Review Form ---
-function ExpandableReviewForm({
-  log,
-  onLogUpdate
-}: {
-  log: IntrusiLog;
-  onLogUpdate: (logId: string, updates: Partial<IntrusiLog>) => void;
-}) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      status:
-        log.status === 'unacknowledged' ? 'acknowledged' : (log.status as any),
-      notes: log.notes || ''
-    }
-  });
-
-  async function onSubmit(values: FormData) {
-    setIsSubmitting(true);
-    try {
-      const supabase = createClient();
-      const {
-        data: { session }
-      } = await supabase.auth.getSession();
-      if (!session) throw new Error('Sesi tidak valid');
-
-      await updateIntrusiLogStatus(
-        log.id,
-        values as UpdateIncidentStatusPayload,
-        session.access_token
-      );
-
-      onLogUpdate(log.id, {
-        status: values.status as any,
-        notes: values.notes || null
-      });
-      toast.success('Status log intrusi berhasil diperbarui.');
-    } catch (error) {
-      toast.error('Gagal memperbarui status.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="p-4 space-y-4 bg-muted/50 rounded-md"
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih status..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="acknowledged">Dikonfirmasi</SelectItem>
-                    <SelectItem value="resolved">Teratasi</SelectItem>
-                    <SelectItem value="false_alarm">Alarm Palsu</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Catatan</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Tambahkan catatan..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <Button type="submit" size="sm" disabled={isSubmitting}>
-          {isSubmitting ? 'Menyimpan...' : 'Simpan'}
-        </Button>
-      </form>
-    </Form>
-  );
-}
-
-// --- Status Badge ---
-function StatusBadge({ status }: { status: string }) {
-  const getClass = (s: string) => {
-    switch (s) {
-      case 'resolved':
-        return 'bg-green-600 text-white';
-      case 'acknowledged':
-        return 'bg-blue-600 text-white';
-      case 'false_alarm':
-        return 'bg-gray-600 text-white';
-      default:
-        return 'bg-red-600 text-white'; // unacknowledged
-    }
-  };
-  const labels: Record<string, string> = {
-    unacknowledged: 'Belum Ditinjau',
-    acknowledged: 'Dikonfirmasi',
-    resolved: 'Teratasi',
-    false_alarm: 'Alarm Palsu'
-  };
-  return <Badge className={getClass(status)}>{labels[status] || status}</Badge>;
-}
-
-// --- Event Type Badge ---
-function EventTypeBadge({ eventType }: { eventType: string }) {
-  const getClass = (t: string) => {
-    switch (t) {
-      case 'FORCED_ENTRY_ALARM':
-      case 'UNAUTHORIZED_OPEN':
-        return 'bg-red-600 text-white';
-      case 'IMPACT_WARNING':
-        return 'bg-yellow-600 text-white';
-      case 'ARM':
-        return 'bg-green-600 text-white';
-      case 'BATTERY_LEVEL_CHANGED':
-        return 'bg-orange-600 text-white';
-      default:
-        return 'bg-gray-600 text-white';
-    }
-  };
-  const labels: Record<string, string> = {
-    IMPACT_WARNING: 'Peringatan Benturan',
-    FORCED_ENTRY_ALARM: 'Alarm Paksa Masuk',
-    UNAUTHORIZED_OPEN: 'Buka Tanpa Izin',
-    POWER_SOURCE_CHANGED: 'Ganti Daya',
-    BATTERY_LEVEL_CHANGED: 'Level Baterai',
-    SIREN_SILENCED: 'Sirine Dimatikan',
-    ARM: 'Aktivasi Sistem',
-    DISARM: 'Penonaktifan Sistem'
-  };
-  return (
-    <Badge className={getClass(eventType)}>
-      {labels[eventType] || eventType}
-    </Badge>
-  );
-}
-
-// --- Severity color helper ---
-function getSeverityColor(eventType: string): string {
-  switch (eventType) {
-    case 'FORCED_ENTRY_ALARM':
-    case 'UNAUTHORIZED_OPEN':
-      return 'border-l-[3px] border-l-red-500 bg-red-500/[0.03] dark:bg-red-500/[0.06]';
-    case 'IMPACT_WARNING':
-      return 'border-l-[3px] border-l-amber-500 bg-amber-500/[0.03] dark:bg-amber-500/[0.06]';
-    case 'ARM':
-    case 'DISARM':
-      return 'border-l-[3px] border-l-green-500 bg-green-500/[0.02] dark:bg-green-500/[0.04]';
-    case 'BATTERY_LEVEL_CHANGED':
-    case 'POWER_SOURCE_CHANGED':
-      return 'border-l-[3px] border-l-orange-400 bg-orange-400/[0.02] dark:bg-orange-400/[0.05]';
-    default:
-      return 'border-l-[3px] border-l-border';
-  }
-}
+// Sub-components (StatusBadge, EventTypeBadge, getSeverityColor) imported from ./IntrusiStatusBadges
+// ExpandableReviewForm imported from ./IntrusiReviewForm
 
 // --- Column definitions ---
 function getColumns(
@@ -776,26 +585,10 @@ export function IntrusiDataTable({
       'Peak ΔG',
       'Catatan'
     ];
-    const evtLabels: Record<string, string> = {
-      IMPACT_WARNING: 'Peringatan Benturan',
-      FORCED_ENTRY_ALARM: 'Alarm Paksa Masuk',
-      UNAUTHORIZED_OPEN: 'Buka Tanpa Izin',
-      POWER_SOURCE_CHANGED: 'Ganti Daya',
-      BATTERY_LEVEL_CHANGED: 'Level Baterai',
-      SIREN_SILENCED: 'Sirine Dimatikan',
-      ARM: 'Aktivasi Sistem',
-      DISARM: 'Penonaktifan Sistem'
-    };
-    const statusLabels: Record<string, string> = {
-      unacknowledged: 'Belum Ditinjau',
-      acknowledged: 'Dikonfirmasi',
-      resolved: 'Teratasi',
-      false_alarm: 'Alarm Palsu'
-    };
     const rows = data.map((log) => [
       format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss'),
-      evtLabels[log.event_type] || log.event_type,
-      statusLabels[log.status] || log.status,
+      EVENT_TYPE_LABELS[log.event_type] || log.event_type,
+      STATUS_LABELS[log.status] || log.status,
       log.system_state === 'ARMED' ? 'Aktif' : 'Nonaktif',
       log.door_state === 'CLOSED' ? 'Tertutup' : 'Terbuka',
       log.peak_delta_g?.toFixed(2) ?? '',
