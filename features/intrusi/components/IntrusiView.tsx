@@ -311,7 +311,7 @@ export const IntrusiView = ({ initialData }: { initialData: any }) => {
         ) : (
           <div /> // Placeholder to keep DatePicker aligned right
         )}
-        <DateRangePicker />
+        <DateRangePicker className="self-end md:self-auto" />
       </div>
 
       {/* Latest Incident Alert Banner (Point 2) */}

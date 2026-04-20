@@ -469,7 +469,7 @@ export const LingkunganView = ({ initialData }: { initialData: any }) => {
         ) : (
           <div /> // Placeholder to keep DatePicker aligned right
         )}
-        <DateRangePicker />
+        <DateRangePicker className="self-end md:self-auto" />
       </div>
 
       {/* Real-time Sensor Widgets (3 units) */}
