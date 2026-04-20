@@ -75,6 +75,7 @@ import {
 } from '@/lib/api';
 import { StatusBadge, EventTypeBadge, getSeverityColor, EVENT_TYPE_LABELS, STATUS_LABELS } from './IntrusiStatusBadges';
 import { ExpandableReviewForm } from './IntrusiReviewForm';
+import { Badge } from '@/components/ui/badge';
 import {
   Tooltip,
   TooltipContent,
