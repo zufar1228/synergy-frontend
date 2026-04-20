@@ -11,56 +11,13 @@
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { env } from '@/lib/env';
+import { getAnalytics } from '@/lib/api/analytics';
 import { getDemoAnalytics } from '@/lib/demo/mock-data';
 
 import { KeamananView } from '@/features/keamanan/components/KeamananView';
 import { IntrusiView } from '@/features/intrusi/components/IntrusiView';
 import { LingkunganView } from '@/features/lingkungan/components/LingkunganView';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-
-// Update getAnalytics function definition
-async function getAnalytics(
-  accessToken: string,
-  params: {
-    systemType: string;
-    areaId: string;
-    page?: string;
-    perPage?: string;
-    from?: string;
-    to?: string;
-    status?: string;
-    event_type?: string;
-    system_state?: string;
-    door_state?: string;
-  }
-) {
-  try {
-    const query = new URLSearchParams();
-    query.append('area_id', params.areaId);
-    if (params.page) query.append('page', params.page);
-    if (params.perPage) query.append('per_page', params.perPage);
-    if (params.from) query.append('from', params.from);
-    if (params.to) query.append('to', params.to);
-    if (params.status) query.append('status', params.status);
-    if (params.event_type) query.append('event_type', params.event_type);
-    if (params.system_state) query.append('system_state', params.system_state);
-    if (params.door_state) query.append('door_state', params.door_state);
-
-    const url =
-      env.NEXT_PUBLIC_API_URL +
-      `/api/analytics/${params.systemType}?${query.toString()}`;
-    const res = await fetch(url, {
-      cache: 'no-store',
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
-    if (!res.ok) return null;
-    return res.json();
-  } catch (error) {
-    console.error('Failed to fetch analytics:', error);
-    return null;
-  }
-}
 
 // Komponen Halaman Server yang bertindak sebagai dispatcher
 export default async function AnalyticsPage({
@@ -107,18 +64,17 @@ export default async function AnalyticsPage({
     } = await supabase.auth.getSession();
     if (!session) return redirect('/login');
 
-    // Pass all relevant searchParams to the fetch function
     data = await getAnalytics(session.access_token, {
       systemType,
       areaId,
-      page: page,
-      perPage: perPage,
+      page,
+      perPage,
       from: awaitedSearchParams.from,
       to: awaitedSearchParams.to,
       status: awaitedSearchParams.status,
-      event_type: awaitedSearchParams.event_type,
-      system_state: awaitedSearchParams.system_state,
-      door_state: awaitedSearchParams.door_state
+      eventType: awaitedSearchParams.event_type,
+      systemState: awaitedSearchParams.system_state,
+      doorState: awaitedSearchParams.door_state
     });
   }
 

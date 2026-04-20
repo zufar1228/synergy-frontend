@@ -1,52 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Synergy IoT Frontend
 
-## Getting Started
+Frontend dashboard untuk platform monitoring gudang Synergy IoT.
 
-First, run the development server:
+## Ringkasan
+
+Aplikasi ini dibangun dengan Next.js App Router dan berfungsi sebagai antarmuka untuk:
+
+- Monitoring sistem intrusi, keamanan, dan lingkungan per area gudang
+- Manajemen data master (warehouse, area, device, user) berbasis role
+- Integrasi notifikasi (Web Push dan Telegram management)
+- Tool kalibrasi MPU6050 di halaman terpisah
+- Demo mode untuk presentasi tanpa backend aktif
+
+## Stack Utama
+
+- Next.js 16 + React 19 + TypeScript
+- TanStack React Query untuk data fetching client-side
+- Wrapper API terpusat di `lib/api` dengan timeout default + abort handling per request
+- Supabase SSR untuk session/auth flow
+- Tailwind CSS v4 + shadcn/ui
+- Recharts untuk visualisasi data
+- PWA support (manifest + service worker)
+
+## Prasyarat
+
+- Node.js 20+
+- pnpm
+
+## Setup Lokal
+
+1. Install dependency:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Buat file environment:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.local.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Isi variable yang dibutuhkan:
 
-## Learn More
+- NEXT_PUBLIC_API_URL
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+- NEXT_PUBLIC_SUPABASE_PROJECT_REF (opsional)
+- NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
-To learn more about Next.js, take a look at the following resources:
+4. Jalankan development server:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. Buka aplikasi di browser:
 
-## Deploy on Vercel
+http://localhost:3000
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## NPM Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- pnpm run dev: Jalankan Next.js dev server (Turbopack)
+- pnpm run build: Build production
+- pnpm run start: Jalankan build production
+- pnpm run lint: Jalankan ESLint
 
-## Progressive Web App
+## Struktur Folder Inti
 
-This project ships with basic Progressive Web App (PWA) support so it can be installed on desktop or mobile browsers:
+- app: Route tree (login, main app shell, calibration, dll)
+- features: Modul domain (intrusi, keamanan, lingkungan, calibration)
+- components: Komponen shared dan UI
+- lib/api: API client dan endpoint wrappers
+- lib/supabase: Setup client/server/middleware auth
+- lib/demo: Mock data + interceptor demo mode
+- contexts: Context global (warehouse, device status)
 
-- Web App Manifest served from `/manifest.webmanifest` with start URL `/dashboard`
-- Client-side service worker registered from `public/sw.js` for simple offline caching
-- Offline fallback screen (`public/offline.html`) shown when no connection is available
-- Works over HTTPS (required for service workers); local development can use `pnpm dev --experimental-https`
+## Catatan PWA
 
-### Testing the PWA
+- Manifest: /manifest.webmanifest
+- Service worker: public/sw.js
+- Offline fallback: public/offline.html
 
-1. Run `pnpm run build && pnpm start` or `pnpm dev --experimental-https`
-2. Open the app in Chrome/Edge/Safari
-3. Use the browser's install prompt (or Add to Home Screen) to install the app
-4. Launch the installed app to verify it opens directly to `/dashboard`
+Untuk validasi PWA, jalankan:
+
+```bash
+pnpm run build && pnpm run start
+```
+
+## Dokumentasi Lanjutan
+
+- APP_DOCUMENTATION.md
+- CODEBASE_SPECIFICATION.md
+- DEVELOPER_SOP.md
+- PANDUAN_HALAMAN_KALIBRASI.md

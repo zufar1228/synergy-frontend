@@ -21,11 +21,18 @@ export const getAnalytics = async (
   if (params.perPage) url.set('per_page', params.perPage);
   if (params.from) url.set('from', params.from);
   if (params.to) url.set('to', params.to);
+  if (params.status) url.set('status', params.status);
+  if (params.eventType) url.set('event_type', params.eventType);
+  if (params.systemState) url.set('system_state', params.systemState);
+  if (params.doorState) url.set('door_state', params.doorState);
 
   return apiFetchSafe(
     `/analytics/${params.systemType}?${url.toString()}`,
     accessToken,
-    { cache: 'no-store' }
+    {
+      cache: 'no-store',
+      timeoutMs: 45_000
+    }
   );
 };
 
@@ -36,15 +43,11 @@ export const getAnalyticsDataForSystem = async (
   accessToken: string,
   dateParams: { from: string; to: string }
 ) => {
-  const url = new URLSearchParams();
-  url.set('area_id', areaId);
-  url.set('page', page);
-  url.set('from', dateParams.from);
-  url.set('to', dateParams.to);
-
-  return apiFetchSafe(
-    `/analytics/${systemType}?${url.toString()}`,
-    accessToken,
-    { cache: 'no-store' }
-  );
+  return getAnalytics(accessToken, {
+    systemType,
+    areaId,
+    page,
+    from: dateParams.from,
+    to: dateParams.to
+  });
 };

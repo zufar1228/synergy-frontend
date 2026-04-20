@@ -9,7 +9,6 @@
 
 // frontend/lib/api/users.ts
 import { apiFetch } from './client';
-import { env } from '@/lib/env';
 import type {
   User,
   Profile,
@@ -21,13 +20,8 @@ import type {
 
 export const verifyUserAccess = async (
   token: string
-): Promise<VerifyAccessResponse> => {
-  const res = await fetch(
-    `${env.NEXT_PUBLIC_API_URL}/api/users/verify-access`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  return res.json();
-};
+): Promise<VerifyAccessResponse> =>
+  apiFetch('/users/verify-access', token, { timeoutMs: 10_000 });
 
 // --- User Management ---
 
@@ -110,7 +104,7 @@ export const subscribeToPush = (
 ): Promise<{ message: string }> =>
   apiFetch('/users/push/subscribe', token, {
     method: 'POST',
-    body: JSON.stringify({ subscription })
+    body: JSON.stringify(subscription)
   });
 
 export const testPushNotification = (

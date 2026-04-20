@@ -115,6 +115,10 @@ export interface AnalyticsParams {
   perPage?: string;
   from?: string;
   to?: string;
+  status?: string;
+  eventType?: string;
+  systemState?: string;
+  doorState?: string;
 }
 
 // --- Incidents & Alerts ---

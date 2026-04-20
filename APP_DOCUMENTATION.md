@@ -49,7 +49,9 @@ In practical use, users:
 - Next.js App Router application
 - Supabase auth session on server and client
 - Role-aware navigation and page access
-- SWR-based API data fetching with shared API client layer
+- TanStack React Query for client-side fetching with shared API client wrappers
+- Shared API wrappers apply default timeout/abort behavior with per-endpoint overrides
+- App Router server pages consume typed API wrappers for initial page data
 - Context providers for selected warehouse and device online state
 
 ## 3.2 Backend
@@ -58,14 +60,15 @@ In practical use, users:
 - JWT auth middleware (Supabase token verification)
 - Role-based authorization middleware
 - Modular route/controller/service architecture
-- Sequelize ORM for DB access
+- Drizzle ORM as the primary DB access layer
+- Sequelize runtime artifacts have been removed; legacy JS migrations are archived under `backend/legacy/sequelize-migrations`
 - MQTT consumer for device heartbeat and sensor events
 - Background jobs for health and alert-related processing
 
 ## 3.3 Data/Integration Dependencies
 
 - Supabase Auth for identity and session
-- Relational database via Sequelize models
+- Relational database (PostgreSQL) with Drizzle schema and query layer
 - MQTT broker for realtime device data
 - Telegram bot integration for group management and alert delivery
 - Browser Push API (VAPID) for web push notifications
@@ -366,6 +369,7 @@ Backend subscribes to MQTT topics for:
 
 - Device heartbeat/status updates
 - System sensor/events for supported monitoring domains
+- Processing path is modularized (`mqtt/client.ts` orchestrator + `mqtt/messageRouter.ts` handlers + utility modules)
 
 Within this document scope:
 

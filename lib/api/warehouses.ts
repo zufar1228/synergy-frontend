@@ -20,7 +20,7 @@ export const createWarehouse = (
 ): Promise<Warehouse> =>
   apiFetch('/warehouses', token, {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
 export const updateWarehouse = (
@@ -30,7 +30,7 @@ export const updateWarehouse = (
 ): Promise<Warehouse> =>
   apiFetch(`/warehouses/${id}`, token, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify(data)
   });
 
 export const deleteWarehouse = (id: string, token: string): Promise<void> =>
@@ -41,5 +41,6 @@ export const getWarehouseDetails = (
   token: string
 ): Promise<WarehouseDetails> =>
   apiFetch(`/warehouses/${id}/areas-with-systems`, token, {
-    cache: 'no-store',
+    timeoutMs: 20_000,
+    cache: 'no-store'
   });

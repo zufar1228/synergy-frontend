@@ -8,21 +8,139 @@
  */
 
 import { env } from '@/lib/env';
+import {
+  DEFAULT_API_TIMEOUT_MS,
+  type ApiError,
+  type ApiErrorCode
+} from '@/lib/api/client';
 
 const CAL_BASE_URL = env.NEXT_PUBLIC_API_URL + '/api-cal';
+const CALIBRATION_TIMEOUT_MS = DEFAULT_API_TIMEOUT_MS;
 
-async function calFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${CAL_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers
+type CalFetchOptions = RequestInit & {
+  timeoutMs?: number;
+};
+
+const createAbortSignalController = (
+  timeoutMs: number,
+  externalSignal?: AbortSignal
+): {
+  signal: AbortSignal;
+  cleanup: () => void;
+  didTimeout: () => boolean;
+} => {
+  const controller = new AbortController();
+  let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+  let timedOut = false;
+
+  const abortFrom = (reason: unknown) => {
+    if (!controller.signal.aborted) {
+      controller.abort(reason);
     }
-  });
+  };
+
+  const onExternalAbort = () => {
+    abortFrom(externalSignal?.reason ?? 'aborted');
+  };
+
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      onExternalAbort();
+    } else {
+      externalSignal.addEventListener('abort', onExternalAbort, { once: true });
+    }
+  }
+
+  if (timeoutMs > 0) {
+    timeoutHandle = setTimeout(() => {
+      timedOut = true;
+      abortFrom('timeout');
+    }, timeoutMs);
+  }
+
+  const cleanup = () => {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+      timeoutHandle = null;
+    }
+    if (externalSignal) {
+      externalSignal.removeEventListener('abort', onExternalAbort);
+    }
+  };
+
+  return {
+    signal: controller.signal,
+    cleanup,
+    didTimeout: () => timedOut
+  };
+};
+
+async function calFetch<T>(
+  path: string,
+  options?: CalFetchOptions
+): Promise<T> {
+  const headers = new Headers(options?.headers);
+  if (options?.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const timeoutMs =
+    options?.timeoutMs !== undefined &&
+    Number.isFinite(options.timeoutMs) &&
+    options.timeoutMs >= 0
+      ? options.timeoutMs
+      : CALIBRATION_TIMEOUT_MS;
+
+  const { signal, cleanup, didTimeout } = createAbortSignalController(
+    timeoutMs,
+    options?.signal ?? undefined
+  );
+
+  let res: Response;
+
+  try {
+    res = await fetch(`${CAL_BASE_URL}${path}`, {
+      ...options,
+      headers,
+      signal
+    });
+  } catch (error) {
+    cleanup();
+
+    if (error instanceof Error && error.name === 'AbortError') {
+      const timeoutReached = didTimeout();
+      const abortError = new Error(
+        timeoutReached
+          ? `Calibration request timed out after ${timeoutMs}ms`
+          : 'Calibration request was aborted'
+      ) as ApiError;
+      abortError.code = (
+        timeoutReached ? 'TIMEOUT' : 'ABORTED'
+      ) as ApiErrorCode;
+      abortError.isRetryable = timeoutReached;
+      throw abortError;
+    }
+
+    const networkError = new Error(
+      error instanceof Error
+        ? error.message
+        : 'Calibration request failed due to network error'
+    ) as ApiError;
+    networkError.code = 'NETWORK';
+    networkError.isRetryable = true;
+    throw networkError;
+  }
+
+  cleanup();
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(body.error || body.message || `HTTP ${res.status}`);
+    const message = body.error || body.message || `HTTP ${res.status}`;
+    const apiError = new Error(message) as ApiError;
+    apiError.status = res.status;
+    apiError.code = 'HTTP';
+    apiError.isRetryable = [408, 429, 502, 503, 504].includes(res.status);
+    throw apiError;
   }
 
   return res.json();

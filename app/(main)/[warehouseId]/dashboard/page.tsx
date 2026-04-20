@@ -10,53 +10,10 @@
 // frontend/app/(main)/[warehouseId]/dashboard/page.tsx
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { env } from '@/lib/env';
+import { getWarehouseDetails } from '@/lib/api/warehouses';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin } from 'lucide-react';
 import Link from 'next/link';
-
-// Tipe data (bisa diimpor dari file lain)
-interface ActiveSystem {
-  system_type: string;
-  device_count: number;
-}
-interface AreaDetail {
-  id: string;
-  name: string;
-  active_systems: ActiveSystem[];
-}
-interface WarehouseDetails {
-  id: string;
-  name: string;
-  location: string | null;
-  areas: AreaDetail[];
-}
-
-// PERUBAHAN 1: Fungsi untuk mengambil data sekarang menerima access token
-async function getWarehouseDetails(
-  id: string,
-  accessToken: string // <-- Token ditambahkan sebagai parameter
-): Promise<WarehouseDetails | null> {
-  try {
-    const res = await fetch(
-      env.NEXT_PUBLIC_API_URL + `/api/warehouses/${id}/areas-with-systems`,
-      {
-        cache: 'no-store',
-        headers: {
-          // <-- Header Authorization ditambahkan
-          Authorization: `Bearer ${accessToken}`
-        }
-      }
-    );
-    if (!res.ok) {
-      return null;
-    }
-    return res.json();
-  } catch (error) {
-    console.error('Failed to fetch warehouse details:', error);
-    return null;
-  }
-}
 
 // Komponen Halaman
 export default async function WarehouseDashboardPage({
@@ -83,11 +40,13 @@ export default async function WarehouseDashboardPage({
   }
 
   const { warehouseId } = await params;
-  // PERUBAHAN 3: Kirim token saat memanggil fungsi
-  const warehouse = await getWarehouseDetails(
-    warehouseId,
-    session.access_token
-  );
+  let warehouse = null;
+
+  try {
+    warehouse = await getWarehouseDetails(warehouseId, session.access_token);
+  } catch (error) {
+    console.error('Failed to fetch warehouse details:', error);
+  }
 
   // Menangani state jika gudang tidak ditemukan
   if (!warehouse) {

@@ -13,8 +13,81 @@ import { env } from '@/lib/env';
 import { getDemoResponse, isDemoMode } from '@/lib/demo/api-interceptor';
 
 export const API_BASE_URL = env.NEXT_PUBLIC_API_URL + '/api';
+export const DEFAULT_API_TIMEOUT_MS = 30_000;
+const RETRYABLE_STATUS_CODES = new Set([408, 429, 502, 503, 504]);
 
-export type ApiError = Error & { status?: number };
+export type ApiErrorCode = 'HTTP' | 'NETWORK' | 'TIMEOUT' | 'ABORTED';
+export type ApiError = Error & {
+  status?: number;
+  code?: ApiErrorCode;
+  isRetryable?: boolean;
+};
+
+export type ApiFetchOptions = RequestInit & {
+  timeoutMs?: number;
+};
+
+const normalizeTimeout = (timeoutMs?: number): number => {
+  if (timeoutMs === undefined) return DEFAULT_API_TIMEOUT_MS;
+  if (!Number.isFinite(timeoutMs) || timeoutMs < 0) {
+    return DEFAULT_API_TIMEOUT_MS;
+  }
+  return timeoutMs;
+};
+
+const createAbortSignalController = (
+  timeoutMs: number,
+  externalSignal?: AbortSignal
+): {
+  signal: AbortSignal;
+  cleanup: () => void;
+  didTimeout: () => boolean;
+} => {
+  const controller = new AbortController();
+  let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+  let timedOut = false;
+
+  const abortFrom = (reason: unknown) => {
+    if (!controller.signal.aborted) {
+      controller.abort(reason);
+    }
+  };
+
+  const onExternalAbort = () => {
+    abortFrom(externalSignal?.reason ?? 'aborted');
+  };
+
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      onExternalAbort();
+    } else {
+      externalSignal.addEventListener('abort', onExternalAbort, { once: true });
+    }
+  }
+
+  if (timeoutMs > 0) {
+    timeoutHandle = setTimeout(() => {
+      timedOut = true;
+      abortFrom('timeout');
+    }, timeoutMs);
+  }
+
+  const cleanup = () => {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+      timeoutHandle = null;
+    }
+    if (externalSignal) {
+      externalSignal.removeEventListener('abort', onExternalAbort);
+    }
+  };
+
+  return {
+    signal: controller.signal,
+    cleanup,
+    didTimeout: () => timedOut
+  };
+};
 
 export const buildApiError = async (
   res: Response,
@@ -29,6 +102,8 @@ export const buildApiError = async (
       : fallbackMessage;
   const apiError = new Error(message) as ApiError;
   apiError.status = res.status;
+  apiError.code = 'HTTP';
+  apiError.isRetryable = RETRYABLE_STATUS_CODES.has(res.status);
   return apiError;
 };
 
@@ -39,7 +114,7 @@ export const buildApiError = async (
 export async function apiFetch<T>(
   path: string,
   token: string,
-  options?: RequestInit
+  options?: ApiFetchOptions
 ): Promise<T> {
   // --- Demo Mode Interception ---
   if (isDemoMode()) {
@@ -48,19 +123,52 @@ export async function apiFetch<T>(
     if (mockData !== null) return mockData as T;
   }
 
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${token}`
-  };
+  const headers = new Headers(options?.headers);
+  headers.set('Authorization', `Bearer ${token}`);
 
   // Add Content-Type for requests with body
-  if (options?.body) {
-    headers['Content-Type'] = 'application/json';
+  if (options?.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
   }
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: { ...headers, ...(options?.headers as Record<string, string>) }
-  });
+  const timeoutMs = normalizeTimeout(options?.timeoutMs);
+  const { signal, cleanup, didTimeout } = createAbortSignalController(
+    timeoutMs,
+    options?.signal ?? undefined
+  );
+
+  let res: Response;
+
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+      signal
+    });
+  } catch (error) {
+    cleanup();
+
+    if (error instanceof Error && error.name === 'AbortError') {
+      const timeoutReached = didTimeout();
+      const abortError = new Error(
+        timeoutReached
+          ? `Request timed out after ${timeoutMs}ms`
+          : 'Request was aborted'
+      ) as ApiError;
+      abortError.code = timeoutReached ? 'TIMEOUT' : 'ABORTED';
+      abortError.isRetryable = timeoutReached;
+      throw abortError;
+    }
+
+    const networkError = new Error(
+      error instanceof Error ? error.message : 'Network request failed'
+    ) as ApiError;
+    networkError.code = 'NETWORK';
+    networkError.isRetryable = true;
+    throw networkError;
+  }
+
+  cleanup();
 
   if (!res.ok) {
     if (res.status === 401 && typeof window !== 'undefined') {
@@ -86,7 +194,7 @@ export async function apiFetch<T>(
 export async function apiFetchSafe<T>(
   path: string,
   token: string,
-  options?: RequestInit
+  options?: ApiFetchOptions
 ): Promise<T | null> {
   try {
     return await apiFetch<T>(path, token, options);

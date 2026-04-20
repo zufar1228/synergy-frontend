@@ -22,9 +22,8 @@ import {
 import { Bell, BellOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { subscribeToPush } from '@/lib/api/users';
 import { env } from '@/lib/env';
-
-const API_BASE_URL = env.NEXT_PUBLIC_API_URL + '/api';
 
 // Helper untuk konversi VAPID key
 function urlBase64ToUint8Array(base64String: string) {
@@ -90,16 +89,7 @@ export const PushNotificationManager = () => {
 
       if (!session) throw new Error('User tidak login');
 
-      const res = await fetch(`${API_BASE_URL}/users/push/subscribe`, {
-        method: 'POST',
-        body: JSON.stringify(subscription),
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`
-        }
-      });
-
-      if (!res.ok) throw new Error('Gagal menyimpan subscription di server');
+      await subscribeToPush(session.access_token, subscription.toJSON());
 
       setIsSubscribed(true);
       toast.success('Notifikasi perangkat ini diaktifkan!');
