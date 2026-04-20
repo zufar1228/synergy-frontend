@@ -61,7 +61,7 @@ export function DateRangePicker({ className }: DateRangePickerProps) {
             id="date"
             variant={'default'}
             className={cn(
-              'w-full max-w-[160px] sm:max-w-none sm:w-[300px] justify-start text-left font-normal text-xs sm:text-sm h-auto py-2.5 sm:py-2 px-3 sm:px-4 shrink',
+              'w-full md:w-[300px] justify-start text-left font-normal text-xs sm:text-sm h-auto py-2.5 sm:py-2 px-3 sm:px-4 shrink',
               !date && 'text-muted-foreground'
             )}
             style={{ maxWidth: '100%' }}
