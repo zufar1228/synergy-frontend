@@ -785,44 +785,44 @@ export function IntrusiDataTable({
                       </div>
                     ))}
                   </div>
-                  {/* Buttons */}
-                  <div className="flex gap-2 pt-3 mt-1 border-t border-black/10">
-                    <Button
-                      variant="neutral"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => {
-                        setSelectedStatuses([]);
-                        setSelectedEvents([]);
-                        setSelectedSystemStates([]);
-                        setSelectedDoorStates([]);
-
-                        const params = new URLSearchParams(
-                          searchParams.toString()
-                        );
-                        params.set('page', '1');
-                        params.delete('status');
-                        params.delete('event_type');
-                        params.delete('system_state');
-                        params.delete('door_state');
-                        router.push(`${pathname}?${params.toString()}`);
-                        setIsFilterOpen(false);
-                      }}
-                    >
-                      Reset
-                    </Button>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="w-full"
-                      onClick={applyFilters}
-                    >
-                      Terapkan
-                    </Button>
-                  </div>
                 </div>
               </div>
             </ScrollArea>
+            {/* Buttons */}
+            <div className="flex gap-2 p-4 border-t-2 border-border bg-secondary/90 rounded-b-md">
+              <Button
+                variant="neutral"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setSelectedStatuses([]);
+                  setSelectedEvents([]);
+                  setSelectedSystemStates([]);
+                  setSelectedDoorStates([]);
+
+                  const params = new URLSearchParams(
+                    searchParams.toString()
+                  );
+                  params.set('page', '1');
+                  params.delete('status');
+                  params.delete('event_type');
+                  params.delete('system_state');
+                  params.delete('door_state');
+                  router.push(`${pathname}?${params.toString()}`);
+                  setIsFilterOpen(false);
+                }}
+              >
+                Reset
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                className="w-full"
+                onClick={applyFilters}
+              >
+                Terapkan
+              </Button>
+            </div>
           </PopoverContent>
         </Popover>
 
