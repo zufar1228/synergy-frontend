@@ -1,6 +1,6 @@
 /**
  * @file layout.tsx
- * @purpose Main authenticated shell — sidebar, header, and scroll container for protected pages
+ * @purpose Main authenticated shell — sidebar, viewport-pinned mobile header, and scroll container for protected pages
  * @usedBy All authenticated pages
  * @deps AppSidebar, SiteHeader, SessionRefresh, WarehouseProvider, DeviceStatusProvider, QueryProvider
  * @exports MainAppLayout (default)
@@ -94,7 +94,7 @@ export default async function MainAppLayout({
                 {/* Main Content Area */}
                 <SidebarInset>
                   <main className="flex-1 relative bg-grid-pattern overflow-visible lg:overflow-hidden flex flex-col w-full">
-                    <div className="absolute top-0 inset-x-0 z-50">
+                    <div className="fixed top-0 inset-x-0 z-50 lg:absolute">
                       <SiteHeader userRole={userRole} user={userData} />
                     </div>
                     <div className="flex-1 overflow-visible pt-[72px] px-2.5 pb-4 md:pt-[88px] md:px-8 md:pb-8 w-full max-w-full lg:overflow-y-auto">
