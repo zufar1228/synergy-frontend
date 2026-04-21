@@ -1,6 +1,6 @@
 /**
  * @file global-error.tsx
- * @purpose Global error boundary for unhandled errors
+ * @purpose Global error boundary for unhandled errors with mobile-safe full-height centering
  * @usedBy Next.js app router
  * @deps None
  * @exports GlobalError (default)
@@ -31,7 +31,7 @@ export default function GlobalError({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: '100vh',
+            minHeight: '100dvh',
             gap: '1rem',
             fontFamily: 'system-ui, sans-serif'
           }}

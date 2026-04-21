@@ -1,6 +1,6 @@
 /**
  * @file page.tsx
- * @purpose Calibration dashboard page — MPU6050 sensor data collection UI
+ * @purpose Calibration dashboard page — MPU6050 sensor data collection UI with mobile-safe viewport sizing
  * @usedBy Next.js app router (/calibration)
  * @deps CalibrationControlPanel, CalibrationStatusDisplay, CalibrationDataTable, useCalibrationSSE
  * @exports CalibrationPage (default)
@@ -21,17 +21,24 @@ const DEFAULT_DEVICE_ID = '8e819e4a-9710-491f-9fbc-741892ae6195';
 
 export default function CalibrationPage() {
   const [deviceId, setDeviceId] = useState(DEFAULT_DEVICE_ID);
-  const { calState, status: sseStatus, connected: sseConnected } = useCalibrationSSE(deviceId);
+  const {
+    calState,
+    status: sseStatus,
+    connected: sseConnected
+  } = useCalibrationSSE(deviceId);
 
   return (
-    <div className="h-screen overflow-y-auto container mx-auto px-3 py-4 space-y-4 max-w-5xl sm:px-4 sm:space-y-6 pb-8">
+    <div className="min-h-dvh container mx-auto px-3 py-4 space-y-4 max-w-5xl sm:px-4 sm:space-y-6 pb-8">
       <div>
         <h1 className="text-xl sm:text-2xl font-bold">Calibration Control</h1>
         <div className="flex items-center gap-2">
           <p className="text-xs sm:text-sm text-muted-foreground">
             Remote control — Sessions A (ambient), B (ramming), C (chisel)
           </p>
-          <Badge variant={sseConnected ? 'success' : 'neutral'} className="text-[10px] h-5">
+          <Badge
+            variant={sseConnected ? 'success' : 'neutral'}
+            className="text-[10px] h-5"
+          >
             {sseConnected ? '● Live' : '○ Polling'}
           </Badge>
         </div>
@@ -51,10 +58,7 @@ export default function CalibrationPage() {
       </details>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_auto] sm:gap-6">
-        <CalibrationControlPanel
-          deviceId={deviceId}
-          calState={calState}
-        />
+        <CalibrationControlPanel deviceId={deviceId} calState={calState} />
         <CalibrationStatusDisplay
           deviceId={deviceId}
           sseStatus={sseStatus}

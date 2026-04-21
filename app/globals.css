@@ -1,3 +1,11 @@
+/**
+ * File Purpose: Global design tokens, base styles, and shared utility animations.
+ * Used By: Root layout and all frontend pages/components.
+ * Main Dependencies: Tailwind CSS v4, tw-animate-css, CSS custom properties.
+ * Public/Main Functions: Theme variables, base typography, global utility classes.
+ * Important Side Effects: Controls document-level scrolling and touch interaction defaults.
+ */
+
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -120,7 +128,8 @@
 @layer base {
   body {
     @apply text-foreground font-base bg-background;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }

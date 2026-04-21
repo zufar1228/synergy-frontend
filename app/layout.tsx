@@ -1,44 +1,50 @@
 /**
  * @file layout.tsx
- * @purpose Root layout — metadata, fonts, theme provider, global providers
+ * @purpose Root layout — global metadata, viewport, fonts, theme, and app-wide UI providers
  * @usedBy Next.js app router (root)
- * @deps ThemeProvider, QueryProvider, DemoProvider, ServiceWorkerRegister
- * @exports metadata, RootLayout (default)
- * @sideEffects None
+ * @deps next/font/google, ThemeProvider, Toaster, ServiceWorkerRegister
+ * @exports metadata, viewport, RootLayout (default)
+ * @sideEffects Registers service worker on client
  */
 
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
-import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/theme-provider";
-import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import type { Metadata, Viewport } from 'next';
+import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google';
+import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
+import { ThemeProvider } from '@/components/theme-provider';
+import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin']
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin']
 });
 
 const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
+  variable: '--font-space-grotesk',
+  subsets: ['latin']
 });
 
 export const metadata: Metadata = {
-  title: "IoT Warehouse Monitoring System",
+  title: 'IoT Warehouse Monitoring System',
   description:
-    "Real-time IoT monitoring system that surfaces incidents, analytics, and device status for warehouse operations.",
-  applicationName: "IoT Warehouse Monitoring System",
-  manifest: "/manifest.webmanifest",
+    'Real-time IoT monitoring system that surfaces incidents, analytics, and device status for warehouse operations.',
+  applicationName: 'IoT Warehouse Monitoring System',
+  manifest: '/manifest.webmanifest'
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover'
 };
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {

@@ -1,43 +1,43 @@
 /**
  * @file page.tsx
- * @purpose Account setup page for newly invited users
+ * @purpose Account setup page for newly invited users with mobile-safe viewport spacing
  * @usedBy Next.js app router (/setup-account)
  * @deps supabase client, lib/api/users
  * @exports SetupAccountPage (default)
  * @sideEffects Supabase password update, API call (verifyAccess)
  */
 
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { toast } from 'sonner';
+import { createClient } from '@/lib/supabase/client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  CardTitle
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  FormMessage
+} from '@/components/ui/form';
 
 const formSchema = z.object({
-  password: z.string().min(8, { message: "Password minimal 8 karakter." }),
+  password: z.string().min(8, { message: 'Password minimal 8 karakter.' })
 });
 
 export default function SetupAccountPage() {
@@ -50,23 +50,23 @@ export default function SetupAccountPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { password: "" },
+    defaultValues: { password: '' }
   });
 
   useEffect(() => {
     // Initialize Supabase client only after component mounts
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       setSupabase(createClient());
     }
   }, []);
 
   useEffect(() => {
     const hash = window.location.hash;
-    if (hash.includes("access_token") && hash.includes("refresh_token")) {
+    if (hash.includes('access_token') && hash.includes('refresh_token')) {
       setLoading(false);
     } else {
       const timer = setTimeout(() => {
-        setError("Token undangan tidak valid atau sudah kedaluwarsa.");
+        setError('Token undangan tidak valid atau sudah kedaluwarsa.');
         setLoading(false);
       }, 1000);
       return () => clearTimeout(timer);
@@ -75,25 +75,25 @@ export default function SetupAccountPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!supabase) {
-      toast.error("Klien Supabase belum siap. Silakan muat ulang halaman.");
+      toast.error('Klien Supabase belum siap. Silakan muat ulang halaman.');
       return;
     }
 
     // === PERBAIKAN UTAMA DI SINI ===
     // Ambil token dari URL hash secara manual
     const params = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
 
     if (!accessToken || !refreshToken) {
-      toast.error("Sesi tidak ditemukan di URL. Silakan coba lagi.");
+      toast.error('Sesi tidak ditemukan di URL. Silakan coba lagi.');
       return;
     }
 
     // 1. Atur sesi secara eksplisit menggunakan token dari URL
     const { error: sessionError } = await supabase.auth.setSession({
       access_token: accessToken,
-      refresh_token: refreshToken,
+      refresh_token: refreshToken
     });
 
     if (sessionError) {
@@ -103,21 +103,21 @@ export default function SetupAccountPage() {
 
     // 2. Sekarang sesi sudah dijamin aktif, baru update pengguna
     const { error: updateError } = await supabase.auth.updateUser({
-      password: values.password,
+      password: values.password
     });
 
     if (updateError) {
       toast.error(updateError.message);
     } else {
       toast.success(
-        "Password berhasil dibuat! Anda akan diarahkan ke dashboard."
+        'Password berhasil dibuat! Anda akan diarahkan ke dashboard.'
       );
-      router.push("/dashboard");
+      router.push('/dashboard');
     }
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-dvh bg-gray-100">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Atur Akun Anda</CardTitle>
@@ -164,8 +164,8 @@ export default function SetupAccountPage() {
                   disabled={form.formState.isSubmitting}
                 >
                   {form.formState.isSubmitting
-                    ? "Menyimpan..."
-                    : "Simpan dan Masuk"}
+                    ? 'Menyimpan...'
+                    : 'Simpan dan Masuk'}
                 </Button>
               </form>
             </Form>

@@ -1,10 +1,10 @@
 /**
  * @file layout.tsx
- * @purpose Main authenticated layout — sidebar, header, session refresh, device status
+ * @purpose Main authenticated shell — sidebar, header, and scroll container for protected pages
  * @usedBy All authenticated pages
- * @deps AppSidebar, SiteHeader, SessionRefresh, WarehouseProvider, DeviceStatusProvider
- * @exports MainLayout (default)
- * @sideEffects Server-side auth check, redirects unauthenticated
+ * @deps AppSidebar, SiteHeader, SessionRefresh, WarehouseProvider, DeviceStatusProvider, QueryProvider
+ * @exports MainAppLayout (default)
+ * @sideEffects Server-side auth/session checks, unauthenticated redirect, periodic session refresh
  */
 
 // frontend/app/(main)/layout.tsx
@@ -50,7 +50,10 @@ export default async function MainAppLayout({
       {
         data: { session }
       }
-    ] = await Promise.all([supabase.auth.getUser(), supabase.auth.getSession()]);
+    ] = await Promise.all([
+      supabase.auth.getUser(),
+      supabase.auth.getSession()
+    ]);
 
     if (!user || !session) {
       redirect('/login');
@@ -65,13 +68,14 @@ export default async function MainAppLayout({
         userRole = 'user';
       }
       userEmail = user.email || '';
-      userAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
+      userAvatar =
+        user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
     }
   }
 
   const userData = {
     email: userEmail,
-    avatar: userAvatar,
+    avatar: userAvatar
   };
 
   return (
@@ -81,7 +85,7 @@ export default async function MainAppLayout({
           <QueryProvider>
             {!isDemoMode && <SessionRefresh />}
             <SidebarProvider>
-              <div className="flex h-screen w-full bg-secondary">
+              <div className="flex min-h-dvh w-full bg-secondary lg:h-screen">
                 {/* Desktop Sidebar - hidden on mobile */}
                 <div className="hidden lg:block">
                   <AppSidebar userRole={userRole} user={userData} />
@@ -89,11 +93,11 @@ export default async function MainAppLayout({
 
                 {/* Main Content Area */}
                 <SidebarInset>
-                  <main className="flex-1 relative bg-grid-pattern overflow-hidden flex flex-col w-full">
+                  <main className="flex-1 relative bg-grid-pattern overflow-visible lg:overflow-hidden flex flex-col w-full">
                     <div className="absolute top-0 inset-x-0 z-50">
                       <SiteHeader userRole={userRole} user={userData} />
                     </div>
-                    <div className="flex-1 overflow-y-auto pt-[72px] px-2.5 pb-4 md:pt-[88px] md:px-8 md:pb-8 w-full max-w-full">
+                    <div className="flex-1 overflow-visible pt-[72px] px-2.5 pb-4 md:pt-[88px] md:px-8 md:pb-8 w-full max-w-full lg:overflow-y-auto">
                       <div className="mx-auto max-w-full md:max-w-7xl relative z-10">
                         {children}
                       </div>
