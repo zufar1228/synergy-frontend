@@ -73,7 +73,13 @@ import {
   UpdateIncidentStatusPayload,
   updateIntrusiLogStatus
 } from '@/lib/api';
-import { StatusBadge, EventTypeBadge, getSeverityColor, EVENT_TYPE_LABELS, STATUS_LABELS } from './IntrusiStatusBadges';
+import {
+  StatusBadge,
+  EventTypeBadge,
+  getSeverityColor,
+  EVENT_TYPE_LABELS,
+  STATUS_LABELS
+} from './IntrusiStatusBadges';
 import { ExpandableReviewForm } from './IntrusiReviewForm';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -85,6 +91,8 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { useUserRole } from '@/hooks/use-user-role';
+
+const INTRUSI_WINDOW_THRESHOLD_FALLBACK = 2;
 
 // Sub-components (StatusBadge, EventTypeBadge, getSeverityColor) imported from ./IntrusiStatusBadges
 // ExpandableReviewForm imported from ./IntrusiReviewForm
@@ -212,7 +220,8 @@ function getColumns(
         // Windowed threshold: read anomaly_count from payload
         const payload = row.original.payload;
         const anomalyCount = payload?.anomaly_count;
-        const windowThreshold = payload?.window_threshold ?? 3;
+        const windowThreshold =
+          payload?.window_threshold ?? INTRUSI_WINDOW_THRESHOLD_FALLBACK;
         const hitCount = row.original.hit_count;
 
         if (anomalyCount != null) {
@@ -233,7 +242,7 @@ function getColumns(
         if (hitCount != null) {
           return (
             <div className="flex items-center gap-1">
-              {hitCount >= 3 && (
+              {hitCount >= INTRUSI_WINDOW_THRESHOLD_FALLBACK && (
                 <AlertTriangle className="h-3 w-3 text-destructive" />
               )}
               <span>{hitCount}</span>
@@ -800,9 +809,7 @@ export function IntrusiDataTable({
                   setSelectedSystemStates([]);
                   setSelectedDoorStates([]);
 
-                  const params = new URLSearchParams(
-                    searchParams.toString()
-                  );
+                  const params = new URLSearchParams(searchParams.toString());
                   params.set('page', '1');
                   params.delete('status');
                   params.delete('event_type');

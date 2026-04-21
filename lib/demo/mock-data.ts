@@ -37,7 +37,7 @@ export const DEMO_WAREHOUSES = [
     location: 'Jakarta Utara',
     areaCount: '2',
     deviceCount: '3',
-    onlineDeviceCount: '3',
+    onlineDeviceCount: '3'
   },
   {
     id: WH2,
@@ -45,29 +45,64 @@ export const DEMO_WAREHOUSES = [
     location: 'Tangerang',
     areaCount: '1',
     deviceCount: '1',
-    onlineDeviceCount: '1',
-  },
+    onlineDeviceCount: '1'
+  }
 ];
 
 // --- Areas ---
 export const DEMO_AREAS = [
-  { id: AREA1_WH1, name: 'Zona A', warehouse_id: WH1, warehouse: { id: WH1, name: 'Gudang Utama' } },
-  { id: AREA2_WH1, name: 'Zona B', warehouse_id: WH1, warehouse: { id: WH1, name: 'Gudang Utama' } },
-  { id: AREA1_WH2, name: 'Zona Utama', warehouse_id: WH2, warehouse: { id: WH2, name: 'Gudang Cabang' } },
+  {
+    id: AREA1_WH1,
+    name: 'Zona A',
+    warehouse_id: WH1,
+    warehouse: { id: WH1, name: 'Gudang Utama' }
+  },
+  {
+    id: AREA2_WH1,
+    name: 'Zona B',
+    warehouse_id: WH1,
+    warehouse: { id: WH1, name: 'Gudang Utama' }
+  },
+  {
+    id: AREA1_WH2,
+    name: 'Zona Utama',
+    warehouse_id: WH2,
+    warehouse: { id: WH2, name: 'Gudang Cabang' }
+  }
 ];
 
 // --- Nav Areas ---
 export const DEMO_NAV_AREAS = {
   keamanan: [
-    { id: AREA1_WH1, name: 'Zona A', warehouse_id: WH1, warehouse_name: 'Gudang Utama' },
+    {
+      id: AREA1_WH1,
+      name: 'Zona A',
+      warehouse_id: WH1,
+      warehouse_name: 'Gudang Utama'
+    }
   ],
   intrusi: [
-    { id: AREA2_WH1, name: 'Zona B', warehouse_id: WH1, warehouse_name: 'Gudang Utama' },
+    {
+      id: AREA2_WH1,
+      name: 'Zona B',
+      warehouse_id: WH1,
+      warehouse_name: 'Gudang Utama'
+    }
   ],
   lingkungan: [
-    { id: AREA1_WH1, name: 'Zona A', warehouse_id: WH1, warehouse_name: 'Gudang Utama' },
-    { id: AREA1_WH2, name: 'Zona Utama', warehouse_id: WH2, warehouse_name: 'Gudang Cabang' },
-  ],
+    {
+      id: AREA1_WH1,
+      name: 'Zona A',
+      warehouse_id: WH1,
+      warehouse_name: 'Gudang Utama'
+    },
+    {
+      id: AREA1_WH2,
+      name: 'Zona Utama',
+      warehouse_id: WH2,
+      warehouse_name: 'Gudang Cabang'
+    }
+  ]
 };
 
 // --- Devices ---
@@ -77,29 +112,45 @@ export const DEMO_DEVICES = [
     name: 'Sensor Lingkungan A1',
     system_type: 'lingkungan',
     area_id: AREA1_WH1,
-    area: { id: AREA1_WH1, name: 'Zona A', warehouse: { id: WH1, name: 'Gudang Utama' } },
+    area: {
+      id: AREA1_WH1,
+      name: 'Zona A',
+      warehouse: { id: WH1, name: 'Gudang Utama' }
+    }
   },
   {
     id: DEV_INTRUSI_1,
     name: 'Sensor Pintu B1',
     system_type: 'intrusi',
     area_id: AREA2_WH1,
-    area: { id: AREA2_WH1, name: 'Zona B', warehouse: { id: WH1, name: 'Gudang Utama' } },
+    area: {
+      id: AREA2_WH1,
+      name: 'Zona B',
+      warehouse: { id: WH1, name: 'Gudang Utama' }
+    }
   },
   {
     id: DEV_KEAMANAN_1,
     name: 'Kamera CCTV A1',
     system_type: 'keamanan',
     area_id: AREA1_WH1,
-    area: { id: AREA1_WH1, name: 'Zona A', warehouse: { id: WH1, name: 'Gudang Utama' } },
+    area: {
+      id: AREA1_WH1,
+      name: 'Zona A',
+      warehouse: { id: WH1, name: 'Gudang Utama' }
+    }
   },
   {
     id: DEV_LINGKUNGAN_2,
     name: 'Sensor Lingkungan C1',
     system_type: 'lingkungan',
     area_id: AREA1_WH2,
-    area: { id: AREA1_WH2, name: 'Zona Utama', warehouse: { id: WH2, name: 'Gudang Cabang' } },
-  },
+    area: {
+      id: AREA1_WH2,
+      name: 'Zona Utama',
+      warehouse: { id: WH2, name: 'Gudang Cabang' }
+    }
+  }
 ];
 
 // --- Warehouse Details ---
@@ -114,17 +165,17 @@ export const DEMO_WAREHOUSE_DETAILS: Record<string, any> = {
         name: 'Zona A',
         active_systems: [
           { system_type: 'lingkungan', device_count: 1, status: 'Online' },
-          { system_type: 'keamanan', device_count: 1, status: 'Online' },
-        ],
+          { system_type: 'keamanan', device_count: 1, status: 'Online' }
+        ]
       },
       {
         id: AREA2_WH1,
         name: 'Zona B',
         active_systems: [
-          { system_type: 'intrusi', device_count: 1, status: 'Online' },
-        ],
-      },
-    ],
+          { system_type: 'intrusi', device_count: 1, status: 'Online' }
+        ]
+      }
+    ]
   },
   [WH2]: {
     id: WH2,
@@ -135,11 +186,11 @@ export const DEMO_WAREHOUSE_DETAILS: Record<string, any> = {
         id: AREA1_WH2,
         name: 'Zona Utama',
         active_systems: [
-          { system_type: 'lingkungan', device_count: 1, status: 'Online' },
-        ],
-      },
-    ],
-  },
+          { system_type: 'lingkungan', device_count: 1, status: 'Online' }
+        ]
+      }
+    ]
+  }
 };
 
 // --- Active Alerts ---
@@ -152,7 +203,7 @@ export const DEMO_PROFILE = {
   email: 'demo@synergy-iot.id',
   role: 'super_admin',
   avatar_url: null,
-  full_name: 'Demo User',
+  full_name: 'Demo User'
 };
 
 // --- Users List ---
@@ -162,29 +213,29 @@ export const DEMO_USERS = [
     email: 'demo@synergy-iot.id',
     role: 'super_admin',
     created_at: '2025-01-01T00:00:00Z',
-    last_sign_in_at: new Date().toISOString(),
+    last_sign_in_at: new Date().toISOString()
   },
   {
     id: 'demo-user-002',
     email: 'operator@synergy-iot.id',
     role: 'admin',
     created_at: '2025-02-15T00:00:00Z',
-    last_sign_in_at: hoursAgo(2),
+    last_sign_in_at: hoursAgo(2)
   },
   {
     id: 'demo-user-003',
     email: 'viewer@synergy-iot.id',
     role: 'user',
     created_at: '2025-03-10T00:00:00Z',
-    last_sign_in_at: hoursAgo(48),
-  },
+    last_sign_in_at: hoursAgo(48)
+  }
 ];
 
 // --- Notification Preferences ---
 export const DEMO_PREFERENCES = [
   { system_type: 'lingkungan', is_enabled: true },
   { system_type: 'intrusi', is_enabled: true },
-  { system_type: 'keamanan', is_enabled: true },
+  { system_type: 'keamanan', is_enabled: true }
 ];
 
 // --- Telegram ---
@@ -199,7 +250,7 @@ export const DEMO_TELEGRAM_MEMBERS = {
       status: 'active',
       joined_at: '2025-01-10T00:00:00Z',
       left_at: null,
-      kicked_at: null,
+      kicked_at: null
     },
     {
       user_id: '100002',
@@ -208,9 +259,9 @@ export const DEMO_TELEGRAM_MEMBERS = {
       status: 'active',
       joined_at: '2025-02-20T00:00:00Z',
       left_at: null,
-      kicked_at: null,
-    },
-  ],
+      kicked_at: null
+    }
+  ]
 };
 
 // --- Lingkungan ---
@@ -224,14 +275,14 @@ export const DEMO_LINGKUNGAN_STATUS = {
     temperature: 26.4,
     humidity: 62.1,
     co2: 420,
-    timestamp: minutesAgo(1),
+    timestamp: minutesAgo(1)
   },
   latest_prediction: {
     predicted_temperature: 26.8,
     predicted_humidity: 63.0,
     predicted_co2: 425,
-    timestamp: minutesAgo(1),
-  },
+    timestamp: minutesAgo(1)
+  }
 };
 
 function generateLingkunganChartData() {
@@ -247,14 +298,14 @@ function generateLingkunganChartData() {
       timestamp: ts,
       temperature: parseFloat(temp.toFixed(1)),
       humidity: parseFloat(hum.toFixed(1)),
-      co2: parseFloat(co2.toFixed(0)),
+      co2: parseFloat(co2.toFixed(0))
     });
     if (i < 15) {
       predictions.push({
         timestamp: new Date(now + (15 - i) * 60_000).toISOString(),
         predicted_temperature: parseFloat((temp + 0.3).toFixed(1)),
         predicted_humidity: parseFloat((hum + 0.5).toFixed(1)),
-        predicted_co2: parseFloat((co2 + 5).toFixed(0)),
+        predicted_co2: parseFloat((co2 + 5).toFixed(0))
       });
     }
   }
@@ -275,7 +326,7 @@ export const DEMO_LINGKUNGAN_LOGS = [
     acknowledged_by: null,
     acknowledged_at: null,
     notes: null,
-    notification_sent_at: null,
+    notification_sent_at: null
   },
   {
     id: 'demo-llog-002',
@@ -288,8 +339,8 @@ export const DEMO_LINGKUNGAN_LOGS = [
     acknowledged_by: 'demo-user-001',
     acknowledged_at: minutesAgo(10),
     notes: 'Humidity tinggi, fan dinyalakan',
-    notification_sent_at: minutesAgo(15),
-  },
+    notification_sent_at: minutesAgo(15)
+  }
 ];
 
 // --- Device Details (for getDeviceDetailsByArea) ---
@@ -298,7 +349,7 @@ export const DEMO_DEVICE_DETAILS: Record<string, any> = {
     id: DEV_LINGKUNGAN_1,
     name: 'Sensor Lingkungan A1',
     status: 'Online',
-    fan_state: 'OFF',
+    fan_state: 'OFF'
   },
   [`${AREA2_WH1}-intrusi`]: {
     id: DEV_INTRUSI_1,
@@ -309,19 +360,19 @@ export const DEMO_DEVICE_DETAILS: Record<string, any> = {
     siren_state: 'OFF',
     power_source: 'MAINS',
     vbat_voltage: 4.12,
-    vbat_pct: 95,
+    vbat_pct: 95
   },
   [`${AREA1_WH1}-keamanan`]: {
     id: DEV_KEAMANAN_1,
     name: 'Kamera CCTV A1',
-    status: 'Online',
+    status: 'Online'
   },
   [`${AREA1_WH2}-lingkungan`]: {
     id: DEV_LINGKUNGAN_2,
     name: 'Sensor Lingkungan C1',
     status: 'Online',
-    fan_state: 'ON',
-  },
+    fan_state: 'ON'
+  }
 };
 
 // --- Intrusi ---
@@ -344,9 +395,9 @@ export const DEMO_INTRUSI_STATUS = {
     acknowledged_at: minutesAgo(25),
     notes: null,
     notification_sent_at: null,
-    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' },
+    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' }
   },
-  latest_alarm: null,
+  latest_alarm: null
 };
 
 export const DEMO_INTRUSI_LOGS = [
@@ -365,7 +416,7 @@ export const DEMO_INTRUSI_LOGS = [
     acknowledged_at: minutesAgo(25),
     notes: null,
     notification_sent_at: null,
-    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' },
+    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' }
   },
   {
     id: 'demo-ilog-002',
@@ -375,14 +426,14 @@ export const DEMO_INTRUSI_LOGS = [
     system_state: 'ARMED',
     door_state: 'CLOSED',
     peak_delta_g: 1.82,
-    hit_count: 3,
+    hit_count: 1,
     payload: { magnitude: 1.82 },
     status: 'acknowledged',
     acknowledged_by: 'demo-user-002',
     acknowledged_at: hoursAgo(1),
     notes: 'Getaran kecil, bukan ancaman',
     notification_sent_at: hoursAgo(2),
-    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' },
+    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' }
   },
   {
     id: 'demo-ilog-003',
@@ -399,7 +450,7 @@ export const DEMO_INTRUSI_LOGS = [
     acknowledged_at: null,
     notes: null,
     notification_sent_at: null,
-    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' },
+    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' }
   },
   {
     id: 'demo-ilog-004',
@@ -416,8 +467,8 @@ export const DEMO_INTRUSI_LOGS = [
     acknowledged_at: hoursAgo(7),
     notes: 'False alarm — petugas mengonfirmasi.',
     notification_sent_at: hoursAgo(8),
-    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' },
-  },
+    device: { id: DEV_INTRUSI_1, name: 'Sensor Pintu B1' }
+  }
 ];
 
 export const DEMO_INTRUSI_SUMMARY = {
@@ -425,7 +476,7 @@ export const DEMO_INTRUSI_SUMMARY = {
   alarm_events: 1,
   impact_warnings: 1,
   unacknowledged: 0,
-  latest_event: DEMO_INTRUSI_LOGS[0],
+  latest_event: DEMO_INTRUSI_LOGS[0]
 };
 
 // --- Keamanan ---
@@ -441,7 +492,7 @@ export const DEMO_KEAMANAN_LOGS = [
     attributes: { type: 'person' },
     status: 'unacknowledged',
     notes: null,
-    device: { name: 'Kamera CCTV A1' },
+    device: { name: 'Kamera CCTV A1' }
   },
   {
     id: 'demo-klog-002',
@@ -454,7 +505,7 @@ export const DEMO_KEAMANAN_LOGS = [
     attributes: { type: 'person' },
     status: 'acknowledged',
     notes: 'Petugas kebersihan',
-    device: { name: 'Kamera CCTV A1' },
+    device: { name: 'Kamera CCTV A1' }
   },
   {
     id: 'demo-klog-003',
@@ -467,7 +518,7 @@ export const DEMO_KEAMANAN_LOGS = [
     attributes: { type: 'person' },
     status: 'false_alarm',
     notes: 'Bayangan terdeteksi sebagai orang',
-    device: { name: 'Kamera CCTV A1' },
+    device: { name: 'Kamera CCTV A1' }
   },
   {
     id: 'demo-klog-004',
@@ -480,8 +531,8 @@ export const DEMO_KEAMANAN_LOGS = [
     attributes: { type: 'person' },
     status: 'resolved',
     notes: 'Teridentifikasi: kurir pengiriman.',
-    device: { name: 'Kamera CCTV A1' },
-  },
+    device: { name: 'Kamera CCTV A1' }
+  }
 ];
 
 // --- Analytics (initial data passed to feature views) ---
@@ -494,13 +545,14 @@ export function getDemoAnalytics(systemType: string, areaId: string) {
           total_detections: 4,
           avg_confidence: 0.85,
           unreviewed_count: 1,
-          review_rate: 75,
+          review_rate: 75
         },
         area: DEMO_AREAS.find((a) => a.id === areaId) || DEMO_AREAS[0],
-        device: DEMO_DEVICES.find(
-          (d) => d.area_id === areaId && d.system_type === 'keamanan'
-        ) || DEMO_DEVICES[2],
-        pagination: { page: 1, per_page: 25, total: 4, total_pages: 1 },
+        device:
+          DEMO_DEVICES.find(
+            (d) => d.area_id === areaId && d.system_type === 'keamanan'
+          ) || DEMO_DEVICES[2],
+        pagination: { page: 1, per_page: 25, total: 4, total_pages: 1 }
       };
 
     case 'intrusi':
@@ -508,20 +560,22 @@ export function getDemoAnalytics(systemType: string, areaId: string) {
         logs: DEMO_INTRUSI_LOGS,
         summary: DEMO_INTRUSI_SUMMARY,
         area: DEMO_AREAS.find((a) => a.id === areaId) || DEMO_AREAS[1],
-        device: DEMO_DEVICES.find(
-          (d) => d.area_id === areaId && d.system_type === 'intrusi'
-        ) || DEMO_DEVICES[1],
-        pagination: { page: 1, per_page: 25, total: 4, total_pages: 1 },
+        device:
+          DEMO_DEVICES.find(
+            (d) => d.area_id === areaId && d.system_type === 'intrusi'
+          ) || DEMO_DEVICES[1],
+        pagination: { page: 1, per_page: 25, total: 4, total_pages: 1 }
       };
 
     case 'lingkungan':
       return {
         logs: DEMO_LINGKUNGAN_LOGS,
         area: DEMO_AREAS.find((a) => a.id === areaId) || DEMO_AREAS[0],
-        device: DEMO_DEVICES.find(
-          (d) => d.area_id === areaId && d.system_type === 'lingkungan'
-        ) || DEMO_DEVICES[0],
-        pagination: { page: 1, per_page: 25, total: 2, total_pages: 1 },
+        device:
+          DEMO_DEVICES.find(
+            (d) => d.area_id === areaId && d.system_type === 'lingkungan'
+          ) || DEMO_DEVICES[0],
+        pagination: { page: 1, per_page: 25, total: 2, total_pages: 1 }
       };
 
     default:
@@ -532,10 +586,10 @@ export function getDemoAnalytics(systemType: string, areaId: string) {
 // --- Verify Access ---
 export const DEMO_VERIFY_ACCESS = {
   authorized: true,
-  message: 'Demo mode',
+  message: 'Demo mode'
 };
 
 // --- VAPID ---
 export const DEMO_VAPID = {
-  publicKey: 'demo-vapid-public-key',
+  publicKey: 'demo-vapid-public-key'
 };
