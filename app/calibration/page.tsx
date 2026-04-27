@@ -2,7 +2,7 @@
  * @file page.tsx
  * @purpose Calibration dashboard page — MPU6050 sensor data collection UI with mobile-safe viewport sizing
  * @usedBy Next.js app router (/calibration)
- * @deps CalibrationControlPanel, CalibrationStatusDisplay, CalibrationDataTable, useCalibrationSSE
+ * @deps CalibrationControlPanel, CalibrationStatusDisplay, CalibrationInsightPanel, CalibrationDataTable, useCalibrationSSE
  * @exports CalibrationPage (default)
  * @sideEffects SSE connection, API calls
  */
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import CalibrationControlPanel from '@/features/calibration/components/CalibrationControlPanel';
 import CalibrationStatusDisplay from '@/features/calibration/components/CalibrationStatusDisplay';
+import CalibrationInsightPanel from '@/features/calibration/components/CalibrationInsightPanel';
 import CalibrationDataTable from '@/features/calibration/components/CalibrationDataTable';
 import { useCalibrationSSE } from '@/features/calibration/hooks/useCalibrationSSE';
 
@@ -65,6 +66,8 @@ export default function CalibrationPage() {
           sseConnected={sseConnected}
         />
       </div>
+
+      <CalibrationInsightPanel />
 
       <CalibrationDataTable />
     </div>

@@ -66,7 +66,7 @@ git add .
 git commit -m "feat(lingkungan): add sensor chart
 
 - Implement time-series chart visualization
-- Add real-time data subscription with React Query
+- Add real-time data subscription with SWR
 - Add responsive mobile layout"
 
 git push origin feat/your-feature-name
@@ -173,7 +173,7 @@ import { lingkunganAPI } from '../api/lingkungan';
 // In /features/lingkungan/components/LingkunganView.tsx
 import { AnimatedPageTitle } from '@/components/shared/AnimatedPageTitle';
 import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
+import useSWR from 'swr';
 ```
 
 ### **Import Core API** ✅

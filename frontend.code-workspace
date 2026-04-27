@@ -1,16 +1,11 @@
 {
-  "folders": [
-    {
-      "name": "frontend",
-      "path": "."
-    },
-    {
-      "name": "backend",
-      "path": "../backend"
-    },
-    {
-      "path": "../bismillah-final"
-    }
-  ],
-  "settings": {}
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../backend"
+		}
+	],
+	"settings": {}
 }
