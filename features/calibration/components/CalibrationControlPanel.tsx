@@ -17,112 +17,110 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// ── Trial presets from test plan (FASE 2) ──────────────────────────
+// ── Trial presets aligned with April 18-20 calibration execution ─────
 
 interface TrialPreset {
   trial: number;
   note: string;
   label: string;
   desc: string;
+  range: string;
+  cadence: string;
 }
 
 const TRIAL_PRESETS: Record<string, TrialPreset[]> = {
   A: [
     {
       trial: 1,
-      note: 'ambient_baseline_5min',
-      label: '1. Baseline',
-      desc: 'Rekam derau lingkungan tanpa gangguan'
+      note: 'BASELINE_NON_SENYAP_18_20_APRIL',
+      label: '1. Baseline Non-Senyap',
+      desc: 'Baseline periodik untuk validasi noise referensi',
+      range: 'Target: 0.004 - 0.035 g',
+      cadence: 'Window periodik 5 detik'
     }
   ],
   B: [
     {
       trial: 1,
-      note: 'pukulan_tangan_tengah',
-      label: '1. Pukulan Tengah',
-      desc: 'Pukulan tangan tengah pintu'
+      note: 'FLOOR_STOMP',
+      label: '1. Hentakan Lantai Sekitar',
+      desc: 'Impak ±1 meter dari pintu (noise floor)',
+      range: 'Δg: 0.006 - 0.012 g',
+      cadence: 'Lakukan 10 repetisi beruntun'
     },
     {
       trial: 2,
-      note: 'pukulan_tangan_pinggir',
-      label: '2. Pukulan Pinggir',
-      desc: 'Pukulan tangan pinggir pintu'
-    },
-    {
-      trial: 3,
-      note: 'senggolan_bahu',
-      label: '3. Senggolan Bahu',
-      desc: 'Senggolan bahu seperti orang lewat'
-    },
-    {
-      trial: 4,
-      note: 'tendangan_kuat',
-      label: '4. Tendangan Kuat',
-      desc: 'Tendangan kuat pada pintu'
-    },
-    {
-      trial: 5,
-      note: 'tendangan_ringan',
-      label: '5. Tendangan Ringan',
-      desc: 'Tendangan ringan bawah pintu'
-    },
-    {
-      trial: 6,
-      note: 'pukulan_keras',
-      label: '6. Pukulan Keras',
-      desc: 'Pukulan tangan keras 1x'
-    },
-    {
-      trial: 7,
-      note: 'ketukan_jari',
-      label: '7. Ketukan Jari',
-      desc: 'Ketukan jari keras 1x'
+      note: 'WALL_IMPACT',
+      label: '2. Benturan Dinding Penyangga',
+      desc: 'Impak pada dinding ±1 meter samping kusen',
+      range: 'Δg: 0.015 - 0.035 g',
+      cadence: 'Lakukan 10 repetisi beruntun'
     }
   ],
   C: [
     {
       trial: 1,
-      note: 'sela_kusen_kanan',
-      label: '1. Sela Kusen Kanan',
-      desc: 'Pemahatan sela kusen kanan'
+      note: 'PRY_LOCK_TOP',
+      label: '1. Prying Celah Kunci Atas',
+      desc: 'Pemahatan pada titik kunci bagian atas',
+      range: 'Δg: 0.225 - 0.387 g',
+      cadence: 'Lakukan 10 repetisi beruntun'
     },
     {
       trial: 2,
-      note: 'sela_bawah_pintu',
-      label: '2. Sela Bawah Pintu',
-      desc: 'Pemahatan sela bawah pintu'
+      note: 'PRY_LOCK_MID',
+      label: '2. Prying Celah Kunci Tengah',
+      desc: 'Pemahatan pada titik kunci bagian tengah',
+      range: 'Δg: 0.196 - 0.320 g',
+      cadence: 'Lakukan 10 repetisi beruntun'
     },
     {
       trial: 3,
-      note: 'sela_kusen_kiri',
-      label: '3. Sela Kusen Kiri',
-      desc: 'Pemahatan sela kusen kiri'
+      note: 'PRY_LOCK_BOTTOM',
+      label: '3. Prying Celah Kunci Bawah',
+      desc: 'Pemahatan pada titik kunci bagian bawah',
+      range: 'Δg: 0.217 - 0.354 g',
+      cadence: 'Lakukan 10 repetisi beruntun'
     },
     {
       trial: 4,
-      note: 'sela_kusen_atas',
-      label: '4. Sela Kusen Atas',
-      desc: 'Pemahatan sela kusen atas'
+      note: 'PRY_HINGE_TOP',
+      label: '4. Prying Celah Engsel Atas',
+      desc: 'Pemahatan pada titik engsel bagian atas',
+      range: 'Δg: 0.250 - 0.426 g',
+      cadence: 'Lakukan 10 repetisi beruntun'
     },
     {
       trial: 5,
-      note: 'kusen_kanan',
-      label: '5. Kusen Kanan',
-      desc: 'Pemahatan kusen kanan'
+      note: 'PRY_HINGE_BOTTOM',
+      label: '5. Prying Celah Engsel Bawah',
+      desc: 'Pemahatan pada titik engsel bagian bawah',
+      range: 'Δg: 0.231 - 0.398 g',
+      cadence: 'Lakukan 10 repetisi beruntun'
     },
     {
       trial: 6,
-      note: 'kusen_kiri',
-      label: '6. Kusen Kiri',
-      desc: 'Pemahatan kusen kiri'
+      note: 'SHOULDER_RAM',
+      label: '6. Pendobrakan Bahu Beruntun',
+      desc: 'Impak bahu pada tengah daun pintu',
+      range: 'Δg: 1.204 - 2.859 g',
+      cadence: 'Lakukan 10 repetisi beruntun'
+    },
+    {
+      trial: 7,
+      note: 'HARD_KICK',
+      label: '7. Tendangan Keras Beruntun',
+      desc: 'Impak tendangan kuat pada tengah daun pintu',
+      range: 'Δg: 1.550 - 3.503 g',
+      cadence: 'Lakukan 10 repetisi beruntun'
     }
   ]
 };
 
 const SESSION_DESCRIPTIONS: Record<string, string> = {
-  A: 'Ambient Noise — Derau lingkungan, pintu tertutup',
-  B: 'Ramming — Pendobrakan (hantaman kuat berulang)',
-  C: 'Chiseling — Pemahatan repetitif (obeng/pahat)'
+  A: 'Baseline periodik (non-senyap) untuk referensi noise 18-20 April',
+  B: 'Noise floor impact (hentakan lantai + benturan dinding) — 18 April',
+  C: 'Intrusi destruktif (prying, pendobrakan bahu, tendangan keras) — 19-20 April'
 };
 
 // ── Audio cue system (#7) ──────────────────────────────────────────
@@ -413,6 +411,12 @@ export default function CalibrationControlPanel({
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
                         {preset.desc}
+                      </div>
+                      <div className="text-[11px] mt-1.5 font-medium text-foreground/80">
+                        {preset.range}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {preset.cadence}
                       </div>
                       {isCompleted && (
                         <Badge
