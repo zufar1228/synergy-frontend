@@ -14,9 +14,14 @@ import { sendCommand } from '../api/calibration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// placeholder to keep TS happy — unused below but avoids import churn
-const _unused = { useState, useCallback, useRef, useEffect }; void _unused;
+const SESSION_DESCRIPTIONS: Record<string, string> = {
+  A: 'Ambient Noise — Derau lingkungan, pintu tertutup',
+  B: 'Ramming — Pendobrakan (hantaman kuat berulang)',
+  C: 'Chiseling — Pemahatan repetitif (obeng/pahat)'
+};
+
 // ── Audio cue system ──────────────────────────────────────────────
 
 function useAudioCues() {
@@ -167,8 +172,6 @@ export default function CalibrationControlPanel({
     }
   };
 
-  // keep activeSession in sync to avoid lint warning
-  void activeSession; void setActiveSession;
 
   return (
     <Card>
@@ -249,9 +252,30 @@ export default function CalibrationControlPanel({
           </div>
         )}
 
+        {/* Session tabs for manual control */}
+        <Tabs value={activeSession} onValueChange={setActiveSession}>
+          <TabsList className="w-full">
+            <TabsTrigger value="A" className="flex-1">
+              <span className="sm:hidden">A</span>
+              <span className="hidden sm:inline">A — Ambient</span>
+            </TabsTrigger>
+            <TabsTrigger value="B" className="flex-1">
+              <span className="sm:hidden">B</span>
+              <span className="hidden sm:inline">B — Ramming</span>
+            </TabsTrigger>
+            <TabsTrigger value="C" className="flex-1">
+              <span className="sm:hidden">C</span>
+              <span className="hidden sm:inline">C — Chisel</span>
+            </TabsTrigger>
+          </TabsList>
+          <p className="text-xs text-muted-foreground mt-1 mb-3">
+            {SESSION_DESCRIPTIONS[activeSession]}
+          </p>
+        </Tabs>
+
         {/* Manual Control & Markers */}
         <div className="border rounded-lg p-3 space-y-3">
-          <p className="text-sm font-medium">Manual Control &amp; Markers</p>
+          <p className="text-sm font-medium">Manual Control &amp; Markers ({activeSession})</p>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium">Trial #</label>
