@@ -34,7 +34,7 @@ export default function CalibrationPage() {
         <h1 className="text-xl sm:text-2xl font-bold">Calibration Control</h1>
         <div className="flex items-center gap-2">
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Remote control — Sessions A (ambient), B (ramming), C (chisel)
+            Remote control — Sessions A (ambient), B (extreme noise), C (intrusion)
           </p>
           <Badge
             variant={sseConnected ? 'success' : 'neutral'}

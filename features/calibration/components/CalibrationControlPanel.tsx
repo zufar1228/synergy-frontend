@@ -18,8 +18,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const SESSION_DESCRIPTIONS: Record<string, string> = {
   A: 'Ambient Noise — Derau lingkungan, pintu tertutup',
-  B: 'Ramming — Pendobrakan (hantaman kuat berulang)',
-  C: 'Chiseling — Pemahatan repetitif (obeng/pahat)'
+  B: 'Extreme Noise — Gangguan getaran/suara ekstrem (non-intrusi)',
+  C: 'Intrusion — Simulasi intrusi atau pembongkaran paksa'
 };
 
 // ── Audio cue system ──────────────────────────────────────────────
@@ -261,11 +261,11 @@ export default function CalibrationControlPanel({
             </TabsTrigger>
             <TabsTrigger value="B" className="flex-1">
               <span className="sm:hidden">B</span>
-              <span className="hidden sm:inline">B — Ramming</span>
+              <span className="hidden sm:inline">B — Extreme Noise</span>
             </TabsTrigger>
             <TabsTrigger value="C" className="flex-1">
               <span className="sm:hidden">C</span>
-              <span className="hidden sm:inline">C — Chisel</span>
+              <span className="hidden sm:inline">C — Intrusion</span>
             </TabsTrigger>
           </TabsList>
           <p className="text-xs text-muted-foreground mt-1 mb-3">
