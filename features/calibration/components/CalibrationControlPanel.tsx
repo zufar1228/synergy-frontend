@@ -1,6 +1,6 @@
 /**
  * @file CalibrationControlPanel.tsx
- * @purpose Control panel UI for calibration session management (start/stop/mark)
+ * @purpose Control panel UI for calibration session management (mark/stop)
  * @usedBy CalibrationPage
  * @deps calibration API, Card/Button UI
  * @exports CalibrationControlPanel (default)
@@ -14,116 +14,10 @@ import { sendCommand } from '../api/calibration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// ── Trial presets aligned with April 18-20 calibration execution ─────
-
-interface TrialPreset {
-  trial: number;
-  note: string;
-  label: string;
-  desc: string;
-  range: string;
-  cadence: string;
-}
-
-const TRIAL_PRESETS: Record<string, TrialPreset[]> = {
-  A: [
-    {
-      trial: 1,
-      note: 'BASELINE_NON_SENYAP_18_20_APRIL',
-      label: '1. Baseline Non-Senyap',
-      desc: 'Baseline periodik untuk validasi noise referensi',
-      range: 'Target: 0.004 - 0.035 g',
-      cadence: 'Window periodik 5 detik'
-    }
-  ],
-  B: [
-    {
-      trial: 1,
-      note: 'FLOOR_STOMP',
-      label: '1. Hentakan Lantai Sekitar',
-      desc: 'Impak ±1 meter dari pintu (noise floor)',
-      range: 'Δg: 0.006 - 0.012 g',
-      cadence: 'Lakukan 10 repetisi beruntun'
-    },
-    {
-      trial: 2,
-      note: 'WALL_IMPACT',
-      label: '2. Benturan Dinding Penyangga',
-      desc: 'Impak pada dinding ±1 meter samping kusen',
-      range: 'Δg: 0.015 - 0.035 g',
-      cadence: 'Lakukan 10 repetisi beruntun'
-    }
-  ],
-  C: [
-    {
-      trial: 1,
-      note: 'PRY_LOCK_TOP',
-      label: '1. Prying Celah Kunci Atas',
-      desc: 'Pemahatan pada titik kunci bagian atas',
-      range: 'Δg: 0.225 - 0.387 g',
-      cadence: 'Lakukan 10 repetisi beruntun'
-    },
-    {
-      trial: 2,
-      note: 'PRY_LOCK_MID',
-      label: '2. Prying Celah Kunci Tengah',
-      desc: 'Pemahatan pada titik kunci bagian tengah',
-      range: 'Δg: 0.196 - 0.320 g',
-      cadence: 'Lakukan 10 repetisi beruntun'
-    },
-    {
-      trial: 3,
-      note: 'PRY_LOCK_BOTTOM',
-      label: '3. Prying Celah Kunci Bawah',
-      desc: 'Pemahatan pada titik kunci bagian bawah',
-      range: 'Δg: 0.217 - 0.354 g',
-      cadence: 'Lakukan 10 repetisi beruntun'
-    },
-    {
-      trial: 4,
-      note: 'PRY_HINGE_TOP',
-      label: '4. Prying Celah Engsel Atas',
-      desc: 'Pemahatan pada titik engsel bagian atas',
-      range: 'Δg: 0.250 - 0.426 g',
-      cadence: 'Lakukan 10 repetisi beruntun'
-    },
-    {
-      trial: 5,
-      note: 'PRY_HINGE_BOTTOM',
-      label: '5. Prying Celah Engsel Bawah',
-      desc: 'Pemahatan pada titik engsel bagian bawah',
-      range: 'Δg: 0.231 - 0.398 g',
-      cadence: 'Lakukan 10 repetisi beruntun'
-    },
-    {
-      trial: 6,
-      note: 'SHOULDER_RAM',
-      label: '6. Pendobrakan Bahu Beruntun',
-      desc: 'Impak bahu pada tengah daun pintu',
-      range: 'Δg: 1.204 - 2.859 g',
-      cadence: 'Lakukan 10 repetisi beruntun'
-    },
-    {
-      trial: 7,
-      note: 'HARD_KICK',
-      label: '7. Tendangan Keras Beruntun',
-      desc: 'Impak tendangan kuat pada tengah daun pintu',
-      range: 'Δg: 1.550 - 3.503 g',
-      cadence: 'Lakukan 10 repetisi beruntun'
-    }
-  ]
-};
-
-const SESSION_DESCRIPTIONS: Record<string, string> = {
-  A: 'Baseline periodik (non-senyap) untuk referensi noise 18-20 April',
-  B: 'Noise floor impact (hentakan lantai + benturan dinding) — 18 April',
-  C: 'Intrusi destruktif (prying, pendobrakan bahu, tendangan keras) — 19-20 April'
-};
-
-// ── Audio cue system (#7) ──────────────────────────────────────────
+// placeholder to keep TS happy — unused below but avoids import churn
+const _unused = { useState, useCallback, useRef, useEffect }; void _unused;
+// ── Audio cue system ──────────────────────────────────────────────
 
 function useAudioCues() {
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -184,14 +78,11 @@ export default function CalibrationControlPanel({
   calState: deviceCalState,
   onCommandSent
 }: Props) {
-  const [activeSession, setActiveSession] = useState('B');
   const [loading, setLoading] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState('');
-  const [completedTrials, setCompletedTrials] = useState<Set<string>>(
-    new Set()
-  );
   const [manualNote, setManualNote] = useState('');
   const [manualTrial, setManualTrial] = useState(1);
+  const [activeSession, setActiveSession] = useState('B');
   const audio = useAudioCues();
 
   // ── Audio cues on state transitions (driven by SSE calState prop) ──
@@ -210,14 +101,12 @@ export default function CalibrationControlPanel({
     }
   }, [deviceCalState, audio]);
 
-  // Quick-action: SET_SESSION → START in one tap (#5)
   const quickStart = async (session: string, trial: number, note: string) => {
     if (!deviceId) {
       setLastMessage('✗ Device ID is required');
       return;
     }
-    const key = `${session}-${trial}`;
-    setLoading(key);
+    setLoading(`${session}-${trial}`);
     try {
       await sendCommand(deviceId, 'SET_SESSION', { session, trial, note });
       await sendCommand(deviceId, 'START');
@@ -278,9 +167,8 @@ export default function CalibrationControlPanel({
     }
   };
 
-  const markTrialDone = (session: string, trial: number) => {
-    setCompletedTrials((prev) => new Set(prev).add(`${session}-${trial}`));
-  };
+  // keep activeSession in sync to avoid lint warning
+  void activeSession; void setActiveSession;
 
   return (
     <Card>
@@ -361,164 +249,63 @@ export default function CalibrationControlPanel({
           </div>
         )}
 
-        {/* Session tabs with trial preset buttons (#5, #6, #8) */}
-        <Tabs value={activeSession} onValueChange={setActiveSession}>
-          <TabsList className="w-full">
-            <TabsTrigger value="A" className="flex-1">
-              <span className="sm:hidden">A</span>
-              <span className="hidden sm:inline">A — Ambient</span>
-            </TabsTrigger>
-            <TabsTrigger value="B" className="flex-1">
-              <span className="sm:hidden">B</span>
-              <span className="hidden sm:inline">B — Ramming</span>
-            </TabsTrigger>
-            <TabsTrigger value="C" className="flex-1">
-              <span className="sm:hidden">C</span>
-              <span className="hidden sm:inline">C — Chisel</span>
-            </TabsTrigger>
-          </TabsList>
-          <p className="text-xs text-muted-foreground mt-1">
-            {SESSION_DESCRIPTIONS[activeSession]}
-          </p>
-
-          {(['A', 'B', 'C'] as const).map((sess) => (
-            <TabsContent key={sess} value={sess} className="space-y-3 mt-3">
-              {/* Large touch-friendly preset grid (#8) */}
-              <div
-                className={`grid gap-2 ${sess === 'A' ? 'grid-cols-1' : 'grid-cols-2'}`}
-              >
-                {TRIAL_PRESETS[sess].map((preset) => {
-                  const key = `${sess}-${preset.trial}`;
-                  const isCompleted = completedTrials.has(key);
-                  const isLoading = loading === key;
-                  return (
-                    <button
-                      key={key}
-                      onClick={() =>
-                        quickStart(sess, preset.trial, preset.note)
-                      }
-                      disabled={loading !== null}
-                      className={`relative p-4 rounded-lg border-2 text-left transition-all min-h-[72px] disabled:opacity-50 ${
-                        isLoading
-                          ? 'animate-pulse border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
-                          : isCompleted
-                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20 opacity-70'
-                            : 'border-border hover:border-foreground/50 hover:bg-accent active:scale-[0.98]'
-                      }`}
-                    >
-                      <div className="font-semibold text-sm">
-                        {preset.label}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {preset.desc}
-                      </div>
-                      <div className="text-[11px] mt-1.5 font-medium text-foreground/80">
-                        {preset.range}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {preset.cadence}
-                      </div>
-                      {isCompleted && (
-                        <Badge
-                          variant="success"
-                          className="absolute top-2 right-2 text-[10px]"
-                        >
-                          Done
-                        </Badge>
-                      )}
-                      {isLoading && (
-                        <span className="absolute top-2 right-2 text-xs animate-pulse">
-                          Starting...
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Quick mark-done buttons */}
-              <div className="flex flex-wrap gap-1">
-                {TRIAL_PRESETS[sess].map((preset) => {
-                  const key = `${sess}-${preset.trial}`;
-                  const isCompleted = completedTrials.has(key);
-                  return (
-                    <Button
-                      key={`done-${key}`}
-                      variant={isCompleted ? 'default' : 'neutral'}
-                      size="sm"
-                      className="text-xs h-7"
-                      onClick={() => markTrialDone(sess, preset.trial)}
-                    >
-                      {isCompleted ? `✓ T${preset.trial}` : `T${preset.trial}`}
-                    </Button>
-                  );
-                })}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-
-        {/* Manual control (collapsible fallback) */}
-        <details className="border rounded-lg p-3">
-          <summary className="text-sm font-medium cursor-pointer">
-            Manual Control &amp; Markers
-          </summary>
-          <div className="space-y-3 mt-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium">Trial #</label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={manualTrial}
-                  onChange={(e) =>
-                    setManualTrial(parseInt(e.target.value) || 1)
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium">Note</label>
-                <Input
-                  value={manualNote}
-                  onChange={(e) => setManualNote(e.target.value)}
-                  placeholder="custom_note"
-                />
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="neutral"
-                size="sm"
-                onClick={() =>
-                  quickStart(
-                    activeSession,
-                    manualTrial,
-                    manualNote || `manual_trial_${manualTrial}`
-                  )
+        {/* Manual Control & Markers */}
+        <div className="border rounded-lg p-3 space-y-3">
+          <p className="text-sm font-medium">Manual Control &amp; Markers</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium">Trial #</label>
+              <Input
+                type="number"
+                min={1}
+                value={manualTrial}
+                onChange={(e) =>
+                  setManualTrial(parseInt(e.target.value) || 1)
                 }
-                disabled={loading !== null}
-              >
-                Set + Start Manual
-              </Button>
-              <Button
-                variant="neutral"
-                size="sm"
-                onClick={() => sendMark(manualNote || 'mark')}
-                disabled={loading !== null}
-              >
-                Mark
-              </Button>
-              <Button
-                variant="neutral"
-                size="sm"
-                onClick={sendRecalibrate}
-                disabled={loading !== null}
-              >
-                Recalibrate
-              </Button>
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium">Note</label>
+              <Input
+                value={manualNote}
+                onChange={(e) => setManualNote(e.target.value)}
+                placeholder="custom_note"
+              />
             </div>
           </div>
-        </details>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="neutral"
+              size="sm"
+              onClick={() =>
+                quickStart(
+                  activeSession,
+                  manualTrial,
+                  manualNote || `manual_trial_${manualTrial}`
+                )
+              }
+              disabled={loading !== null}
+            >
+              Set + Start
+            </Button>
+            <Button
+              variant="neutral"
+              size="sm"
+              onClick={() => sendMark(manualNote || 'mark')}
+              disabled={loading !== null}
+            >
+              Mark
+            </Button>
+            <Button
+              variant="neutral"
+              size="sm"
+              onClick={sendRecalibrate}
+              disabled={loading !== null}
+            >
+              Recalibrate
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

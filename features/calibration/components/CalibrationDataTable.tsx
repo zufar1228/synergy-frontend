@@ -15,13 +15,11 @@ import {
   getSessionStats,
   getRawData,
   getSessions,
-  getSummaryData,
   getTrialPeaks,
   getPeakSummary,
   type CalibrationStatistic,
   type CalibrationSessionStat,
   type CalibrationRaw,
-  type CalibrationSummary,
   type CalibrationTrialPeak,
   type CalibrationPeakSummary
 } from '../api/calibration';
@@ -35,7 +33,6 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -45,74 +42,9 @@ import {
   TableRow
 } from '@/components/ui/table';
 
-type ParsedRawNote = {
-  scenarioCode: string;
-  repetition: string;
-  point: string;
-};
-
-function metric(value: number | null | undefined, digits = 4): string {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
-    return '-';
-  }
-  return Number(value).toFixed(digits);
-}
-
-function parseRawNote(note: string | null): ParsedRawNote {
-  if (!note) {
-    return {
-      scenarioCode: '-',
-      repetition: '-',
-      point: '-'
-    };
-  }
-
-  const parts = note.split('|');
-  const scenarioCode = parts[1] || '-';
-  const repetition = (parts[2] || '').replace('rep:', '') || '-';
-  const point = (parts[3] || '').replace('point:', '') || '-';
-
-  return {
-    scenarioCode,
-    repetition,
-    point
-  };
-}
-
-function localDateTime(value: string): string {
-  const dt = new Date(value);
-  if (Number.isNaN(dt.getTime())) return value;
-  return dt.toLocaleString('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-}
-
-function sessionBandLabel(session: string): string {
-  if (session === 'A') return 'Baseline';
-  if (session === 'B') return 'Noise Floor';
-  if (session === 'C') return 'Intrusi';
-  return 'Lainnya';
-}
-
-function sessionBandVariant(
-  session: string
-): 'neutral' | 'warning' | 'destructive' | 'success' {
-  if (session === 'A') return 'neutral';
-  if (session === 'B') return 'warning';
-  if (session === 'C') return 'destructive';
-  return 'success';
-}
-
 export default function CalibrationDataTable() {
   const [tab, setTab] = useState<
-    'stats' | 'session-stats' | 'raw' | 'summary' | 'peaks' | 'peak-summary'
+    'stats' | 'session-stats' | 'raw' | 'peaks' | 'peak-summary'
   >('session-stats');
 
   return (
@@ -127,13 +59,7 @@ export default function CalibrationDataTable() {
           >
             Session Stats
           </Button>
-          <Button
-            size="sm"
-            variant={tab === 'summary' ? 'default' : 'neutral'}
-            onClick={() => setTab('summary')}
-          >
-            Summary (A)
-          </Button>
+
           <Button
             size="sm"
             variant={tab === 'stats' ? 'default' : 'neutral'}
@@ -166,7 +92,6 @@ export default function CalibrationDataTable() {
       </CardHeader>
       <CardContent className="px-4 sm:px-6">
         {tab === 'session-stats' && <SessionStatsView />}
-        {tab === 'summary' && <SummaryDataView />}
         {tab === 'stats' && <TrialStatsView />}
         {tab === 'peaks' && <TrialPeaksView />}
         {tab === 'peak-summary' && <PeakSummaryView />}
@@ -176,108 +101,6 @@ export default function CalibrationDataTable() {
   );
 }
 
-// ---- Summary Data View (Session A periodic summaries) ----
-function SummaryDataView() {
-  const [data, setData] = useState<CalibrationSummary[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({
-    total: 0,
-    limit: 50,
-    offset: 0
-  });
-
-  const fetchData = (offset = 0) => {
-    setLoading(true);
-    getSummaryData({ limit: 50, offset })
-      .then((r) => {
-        setData(r.data);
-        setPagination(r.pagination);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchData(0);
-  }, []);
-
-  return (
-    <div className="space-y-3">
-      <div className="flex gap-2 items-center">
-        <Button size="sm" variant="neutral" onClick={() => fetchData(0)}>
-          Refresh
-        </Button>
-        <p className="text-xs text-muted-foreground">
-          Showing {data.length} of {pagination.total} summaries (offset:{' '}
-          {pagination.offset})
-        </p>
-      </div>
-
-      {loading ? (
-        <p className="text-muted-foreground">Loading...</p>
-      ) : data.length === 0 ? (
-        <p className="text-muted-foreground">
-          No summary data yet — Session A generates periodic 5-second summaries
-        </p>
-      ) : (
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Session</TableHead>
-                <TableHead>Trial</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Samples</TableHead>
-                <TableHead>Max Δg</TableHead>
-                <TableHead>Window</TableHead>
-                <TableHead>Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="font-medium">{row.session}</TableCell>
-                  <TableCell>{row.trial}</TableCell>
-                  <TableCell className="text-xs">{row.summary_type}</TableCell>
-                  <TableCell>{row.n_samples}</TableCell>
-                  <TableCell className="font-mono">
-                    {Number(row.dg_max).toFixed(4)}
-                  </TableCell>
-                  <TableCell className="text-xs">{row.window_ms}ms</TableCell>
-                  <TableCell className="text-xs">
-                    {new Date(row.created_at).toLocaleTimeString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-
-      {/* Pagination */}
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant="neutral"
-          disabled={pagination.offset === 0}
-          onClick={() =>
-            fetchData(Math.max(0, pagination.offset - pagination.limit))
-          }
-        >
-          ← Prev
-        </Button>
-        <Button
-          size="sm"
-          variant="neutral"
-          disabled={pagination.offset + pagination.limit >= pagination.total}
-          onClick={() => fetchData(pagination.offset + pagination.limit)}
-        >
-          Next →
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 // ---- Session Stats View ----
 function SessionStatsView() {
@@ -303,11 +126,7 @@ function SessionStatsView() {
             <TableHead>Session</TableHead>
             <TableHead>Trials</TableHead>
             <TableHead>Samples</TableHead>
-            <TableHead>Min Δg</TableHead>
-            <TableHead>Mean Δg</TableHead>
             <TableHead>Max Δg</TableHead>
-            <TableHead>P95</TableHead>
-            <TableHead>P99</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -316,11 +135,7 @@ function SessionStatsView() {
               <TableCell className="font-medium">{row.session}</TableCell>
               <TableCell>{row.n_trials}</TableCell>
               <TableCell>{row.total_samples}</TableCell>
-              <TableCell className="font-mono">{metric(row.dg_min)}</TableCell>
-              <TableCell className="font-mono">{metric(row.dg_mean)}</TableCell>
-              <TableCell className="font-mono">{metric(row.dg_max)}</TableCell>
-              <TableCell className="font-mono">{metric(row.dg_p95)}</TableCell>
-              <TableCell className="font-mono">{metric(row.dg_p99)}</TableCell>
+              <TableCell>{row.dg_max}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -373,10 +188,7 @@ function TrialStatsView() {
                 <TableHead>Session</TableHead>
                 <TableHead>Trial</TableHead>
                 <TableHead>Samples</TableHead>
-                <TableHead>Min Δg</TableHead>
-                <TableHead>Mean Δg</TableHead>
                 <TableHead>Max Δg</TableHead>
-                <TableHead>StdDev</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -385,10 +197,7 @@ function TrialStatsView() {
                   <TableCell className="font-medium">{row.session}</TableCell>
                   <TableCell>{row.trial}</TableCell>
                   <TableCell>{row.n_samples}</TableCell>
-                  <TableCell className="font-mono">{metric(row.dg_min)}</TableCell>
-                  <TableCell className="font-mono">{metric(row.dg_mean)}</TableCell>
-                  <TableCell className="font-mono">{metric(row.dg_max)}</TableCell>
-                  <TableCell className="font-mono">{metric(row.dg_stddev)}</TableCell>
+                  <TableCell>{row.dg_max}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -465,35 +274,17 @@ function PeakSummaryView() {
         <TableHeader>
           <TableRow>
             <TableHead>Session</TableHead>
-            <TableHead>Band</TableHead>
             <TableHead>Trials</TableHead>
-            <TableHead>Peak Min</TableHead>
-            <TableHead>Peak Mean</TableHead>
             <TableHead>Peak Max</TableHead>
-            <TableHead>Peak StdDev</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.map((row) => (
             <TableRow key={row.session}>
               <TableCell className="font-medium">{row.session}</TableCell>
-              <TableCell>
-                <Badge variant={sessionBandVariant(row.session)}>
-                  {sessionBandLabel(row.session)}
-                </Badge>
-              </TableCell>
               <TableCell>{row.n_trials}</TableCell>
               <TableCell className="font-mono">
-                {Number(row.peak_min).toFixed(4)}
-              </TableCell>
-              <TableCell className="font-mono">
-                {Number(row.peak_mean).toFixed(4)}
-              </TableCell>
-              <TableCell className="font-mono">
                 {Number(row.peak_max).toFixed(4)}
-              </TableCell>
-              <TableCell className="font-mono">
-                {Number(row.peak_stddev).toFixed(4)}
               </TableCell>
             </TableRow>
           ))}
@@ -578,10 +369,6 @@ function RawDataView() {
         Showing {data.length} of {pagination.total} records (offset:{' '}
         {pagination.offset})
       </p>
-      <p className="text-xs text-muted-foreground">
-        Waktu ditampilkan dalam zona Asia/Jakarta untuk memudahkan audit urutan
-        pengujian lapangan.
-      </p>
 
       {loading ? (
         <p className="text-muted-foreground">Loading...</p>
@@ -594,53 +381,38 @@ function RawDataView() {
               <TableRow>
                 <TableHead>Session</TableHead>
                 <TableHead>Trial</TableHead>
-                <TableHead>Scenario</TableHead>
-                <TableHead>Rep</TableHead>
                 <TableHead>Δg</TableHead>
                 <TableHead>Marker</TableHead>
-                <TableHead>Impact Point</TableHead>
-                <TableHead>Waktu Lokal</TableHead>
-                <TableHead>Catatan Asli</TableHead>
+                <TableHead>Note</TableHead>
+                <TableHead>Time</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((row) => {
-                const parsed = parseRawNote(row.note);
-                return (
-                  <TableRow
-                    key={row.id}
-                    className={
-                      row.marker ? 'bg-yellow-50 dark:bg-yellow-950' : ''
-                    }
-                  >
-                    <TableCell className="text-xs">{row.session}</TableCell>
-                    <TableCell>{row.trial}</TableCell>
-                    <TableCell className="text-xs font-medium">
-                      {parsed.scenarioCode}
-                    </TableCell>
-                    <TableCell>{parsed.repetition}</TableCell>
-                    <TableCell className="font-mono">
-                      {Number(row.delta_g).toFixed(4)}
-                    </TableCell>
-                    <TableCell>
-                      {row.marker ? (
-                        <span className="text-yellow-600 font-medium">
-                          📌 {row.marker}
-                        </span>
-                      ) : (
-                        '-'
-                      )}
-                    </TableCell>
-                    <TableCell className="text-xs">{parsed.point}</TableCell>
-                    <TableCell className="text-xs">
-                      {localDateTime(row.created_at)}
-                    </TableCell>
-                    <TableCell className="text-[11px] text-muted-foreground max-w-72 truncate">
-                      {row.note || '-'}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {data.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className={
+                    row.marker ? 'bg-yellow-50 dark:bg-yellow-950' : ''
+                  }
+                >
+                  <TableCell className="text-xs">{row.session}</TableCell>
+                  <TableCell>{row.trial}</TableCell>
+                  <TableCell className="font-mono">
+                    {Number(row.delta_g).toFixed(4)}
+                  </TableCell>
+                  <TableCell>
+                    {row.marker && (
+                      <span className="text-yellow-600 font-medium">
+                        📌 {row.marker}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-xs">{row.note}</TableCell>
+                  <TableCell className="text-xs">
+                    {row.ts_iso || row.ts_device}
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

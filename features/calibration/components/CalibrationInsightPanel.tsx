@@ -298,20 +298,6 @@ export default function CalibrationInsightPanel() {
                 helper={`Rasio pemisah: ${formatX(computed.separationRatio)}`}
                 tone={computed.overlapRisk ? 'danger' : 'success'}
               />
-              <InsightMetricCard
-                label="Suggested Threshold"
-                value={
-                  computed.thresholdBand
-                    ? `${computed.thresholdBand.lower.toFixed(4)} - ${computed.thresholdBand.upper.toFixed(4)} g`
-                    : formatG(computed.thresholdMidpoint)
-                }
-                helper={
-                  computed.thresholdBand
-                    ? 'Band aman (antara noise dan intrusi)'
-                    : 'Gunakan nilai tengah, perlu data tambahan bila overlap'
-                }
-                tone={computed.thresholdBand ? 'success' : 'warning'}
-              />
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">

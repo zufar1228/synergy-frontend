@@ -13,7 +13,6 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import CalibrationControlPanel from '@/features/calibration/components/CalibrationControlPanel';
-import CalibrationStatusDisplay from '@/features/calibration/components/CalibrationStatusDisplay';
 import CalibrationInsightPanel from '@/features/calibration/components/CalibrationInsightPanel';
 import CalibrationDataTable from '@/features/calibration/components/CalibrationDataTable';
 import { useCalibrationSSE } from '@/features/calibration/hooks/useCalibrationSSE';
@@ -58,13 +57,8 @@ export default function CalibrationPage() {
         />
       </details>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_auto] sm:gap-6">
+      <div className="w-full">
         <CalibrationControlPanel deviceId={deviceId} calState={calState} />
-        <CalibrationStatusDisplay
-          deviceId={deviceId}
-          sseStatus={sseStatus}
-          sseConnected={sseConnected}
-        />
       </div>
 
       <CalibrationInsightPanel />
