@@ -207,7 +207,7 @@ export const TelegramManager = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground text-center">
-                  ⚠️ Link ini hanya bisa dipakai oleh 1 orang dan berlaku 10
+                  Link ini hanya bisa dipakai oleh 1 orang dan berlaku 10
                   menit.
                 </p>
               </div>

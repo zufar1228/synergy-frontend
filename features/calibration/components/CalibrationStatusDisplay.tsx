@@ -130,9 +130,9 @@ export default function CalibrationStatusDisplay({
                   }
                 >
                   {status.door_state === 'CLOSED'
-                    ? '🔒 CLOSED'
+                    ? 'CLOSED'
                     : status.door_state === 'OPEN'
-                      ? '🔓 OPEN'
+                      ? 'OPEN'
                       : 'Unknown'}
                 </Badge>
               }

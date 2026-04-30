@@ -60,10 +60,10 @@ const AreaCard = ({
               key={system.system_type}
               variant={
                 hasAlert
-                  ? 'alert' // 🔴 Red with pulse animation
+                  ? 'alert' // Red with pulse animation
                   : isOffline
-                    ? 'muted' // ⚪ Grey for offline
-                    : 'default' // 🟢 Primary color for online
+                    ? 'muted' // Grey for offline
+                    : 'default' // Primary color for online
               }
               className="w-full justify-center items-center"
             >

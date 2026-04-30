@@ -165,7 +165,7 @@ export const KeamananView = ({ initialData }: { initialData: any }) => {
         typeof log.confidence === 'number' && log.confidence > 0
           ? `${Math.round(log.confidence * 100)}%`
           : '';
-      new Notification('🚨 Deteksi Orang!', {
+      new Notification('Deteksi Orang!', {
         body: `Confidence: ${conf} — ${format(new Date(log.created_at), 'HH:mm:ss')}`,
         icon: '/icon-192x192.png',
         tag: `keamanan-${log.id}`,

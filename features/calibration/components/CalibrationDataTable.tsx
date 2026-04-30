@@ -403,7 +403,7 @@ function RawDataView() {
                   <TableCell>
                     {row.marker && (
                       <span className="text-yellow-600 font-medium">
-                        📌 {row.marker}
+                        <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1.5" />{row.marker}
                       </span>
                     )}
                   </TableCell>

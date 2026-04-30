@@ -11,7 +11,7 @@
 'use client';
 
 import { useDemo } from '@/lib/demo/context';
-import { X } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 
 export function DemoBanner() {
   const { isDemo, exitDemo } = useDemo();
@@ -21,7 +21,8 @@ export function DemoBanner() {
   return (
     <div className="relative z-[100] flex items-center justify-center gap-3 bg-amber-400 px-4 py-2 text-sm font-medium text-amber-950">
       <span>
-        🔍 Mode Demo — Data yang ditampilkan adalah simulasi
+        <Search className="h-4 w-4 inline mr-1" />
+        Mode Demo — Data yang ditampilkan adalah simulasi
       </span>
       <button
         onClick={exitDemo}

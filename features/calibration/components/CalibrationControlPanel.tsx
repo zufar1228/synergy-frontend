@@ -108,18 +108,18 @@ export default function CalibrationControlPanel({
 
   const quickStart = async (session: string, trial: number, note: string) => {
     if (!deviceId) {
-      setLastMessage('✗ Device ID is required');
+      setLastMessage('[ERROR] Device ID is required');
       return;
     }
     setLoading(`${session}-${trial}`);
     try {
       await sendCommand(deviceId, 'SET_SESSION', { session, trial, note });
       await sendCommand(deviceId, 'START');
-      setLastMessage(`✓ ${session}/${trial} started — ${note}`);
+      setLastMessage(`[OK] ${session}/${trial} started — ${note}`);
       onCommandSent?.();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      setLastMessage(`✗ ${msg}`);
+      setLastMessage(`[ERROR] ${msg}`);
       audio.playError();
     } finally {
       setLoading(null);
@@ -130,12 +130,12 @@ export default function CalibrationControlPanel({
     setLoading('STOP');
     try {
       await sendCommand(deviceId, 'STOP');
-      setLastMessage('✓ Recording stopped');
+      setLastMessage('[OK] Recording stopped');
       audio.playStop();
       onCommandSent?.();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      setLastMessage(`✗ ${msg}`);
+      setLastMessage(`[ERROR] ${msg}`);
       audio.playError();
     } finally {
       setLoading(null);
@@ -146,11 +146,11 @@ export default function CalibrationControlPanel({
     setLoading('MARK');
     try {
       await sendCommand(deviceId, 'MARK', { label });
-      setLastMessage(`✓ Marker: ${label}`);
+      setLastMessage(`[OK] Marker: ${label}`);
       onCommandSent?.();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      setLastMessage(`✗ ${msg}`);
+      setLastMessage(`[ERROR] ${msg}`);
       audio.playError();
     } finally {
       setLoading(null);
@@ -161,11 +161,11 @@ export default function CalibrationControlPanel({
     setLoading('RECAL');
     try {
       await sendCommand(deviceId, 'RECAL');
-      setLastMessage('✓ Baseline recalibrated');
+      setLastMessage('[OK] Baseline recalibrated');
       onCommandSent?.();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      setLastMessage(`✗ ${msg}`);
+      setLastMessage(`[ERROR] ${msg}`);
       audio.playError();
     } finally {
       setLoading(null);
@@ -184,7 +184,7 @@ export default function CalibrationControlPanel({
             disabled={loading !== null}
             className="h-12 px-8 text-base font-bold"
           >
-            {loading === 'STOP' ? 'Stopping...' : '⏹ STOP'}
+            {loading === 'STOP' ? 'Stopping...' : 'STOP'}
           </Button>
         </CardTitle>
       </CardHeader>
@@ -193,7 +193,7 @@ export default function CalibrationControlPanel({
         {lastMessage && (
           <div
             className={`rounded-md px-3 py-2 text-sm font-medium ${
-              lastMessage.startsWith('✓')
+              lastMessage.startsWith('[OK]')
                 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                 : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
             }`}
@@ -217,7 +217,7 @@ export default function CalibrationControlPanel({
           >
             {deviceCalState === 'COUNTDOWN' && (
               <>
-                <div className="text-4xl sm:text-5xl font-black">⏱</div>
+                <div className="text-4xl sm:text-5xl font-black">--:--</div>
                 <div className="text-sm font-semibold mt-1">
                   Hitung mundur — Jangan sentuh pintu!
                 </div>
@@ -226,7 +226,7 @@ export default function CalibrationControlPanel({
             {deviceCalState === 'CALIBRATING' && (
               <>
                 <div className="text-base sm:text-lg font-bold">
-                  📐 Kalibrasi Baseline...
+                  Kalibrasi Baseline...
                 </div>
                 <div className="text-sm mt-1">
                   Sensor mengukur kondisi diam — Jangan sentuh pintu!
@@ -235,7 +235,7 @@ export default function CalibrationControlPanel({
             )}
             {deviceCalState === 'RECORDING' && (
               <>
-                <div className="text-2xl sm:text-3xl font-black">🟢 MULAI!</div>
+                <div className="text-2xl sm:text-3xl font-black">MULAI!</div>
                 <div className="text-sm font-semibold mt-1">
                   Lakukan simulasi sekarang
                 </div>
@@ -243,7 +243,7 @@ export default function CalibrationControlPanel({
             )}
             {deviceCalState === 'PAUSED' && (
               <>
-                <div className="text-base sm:text-lg font-bold">⏸ PAUSED</div>
+                <div className="text-base sm:text-lg font-bold">PAUSED</div>
                 <div className="text-sm mt-1">
                   Recording dijeda — pintu terbuka
                 </div>
